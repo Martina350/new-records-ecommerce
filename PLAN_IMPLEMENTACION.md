@@ -587,7 +587,7 @@ Resultado de ejecución:
 
 ### Fase 8 - Pedidos, stock y cobro simulado
 
-**Estado:** bloqueada.
+**Estado:** completada; pendiente de aprobación para iniciar la Fase 9.
 
 Tareas previstas:
 
@@ -599,6 +599,19 @@ Tareas previstas:
 - Evitar aprobación duplicada o stock negativo.
 - Vaciar el carrito solamente después de crear correctamente el pedido.
 - Construir historial y detalle de pedidos del cliente.
+
+Resultado de ejecución:
+
+- Se creó el módulo `services.py` con las funciones transaccionales `procesar_checkout()`, `generar_numero_pedido()`, `generar_referencia_pago()`, `obtener_pedidos_cliente()` y `obtener_pedido_por_numero()`.
+- La creación de `Pedido`, `DetallePedido` y `TransaccionPago` se ejecuta dentro de una transacción atómica con `db.session.commit()` y `rollback()` automático ante cualquier error o inconsistencia de stock.
+- Cada línea de `DetallePedido` almacena una copia histórica inmutable de álbum, artista, formato, precio unitario (`disco.precio_final()`) y cantidad.
+- El carrito en sesión solo se vacía una vez confirmado el guardado exitoso en base de datos.
+- Se incorporaron en `app.py` las rutas `/checkout/confirmar` (`POST`), `/pedidos` (`GET`) y `/pedidos/<numero>` (`GET`).
+- Se crearon las plantillas `templates/pedidos/lista.html` y `templates/pedidos/detalle.html`.
+- Se actualizó `templates/checkout_resumen.html` para incluir el selector de método de pago verificado y el botón de confirmación de pedido.
+- Se actualizó `templates/base.html` con enlaces directos a "Mis Pedidos" y "Métodos de Pago" en el menú de navegación.
+- Se añadieron estilos CSS dedicados en `static/css/styles.css` para badges de estado (`PENDIENTE`, `APROBADO`, `RECHAZADO`), tarjetas de detalle de compra e historial.
+- Se agregaron 8 pruebas automatizadas en `tests/test_pedidos.py`, alcanzando un total de **58/58 pruebas pasando exitosamente**.
 
 ### Fase 9 - Comprobantes PDF y notificaciones
 

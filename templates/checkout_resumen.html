@@ -62,40 +62,61 @@
           </div>
         </div>
 
-        <!-- Selección de Método de Pago (Fase 7) -->
+        <!-- Selección de Método de Pago y Confirmación de Pedido (Fase 8) -->
         <div class="checkout-metodo-pago-seccion">
           <h3 class="checkout-subtitulo-bloque">
             <span class="material-symbols-outlined" aria-hidden="true">credit_card</span>
             Método de Pago
           </h3>
           {% if metodos_pago %}
-            <div class="checkout-metodos-lista">
-              {% for metodo in metodos_pago %}
-                <div class="checkout-metodo-item {% if metodo.predeterminado %}seleccionado{% endif %}">
-                  <span class="material-symbols-outlined" aria-hidden="true">credit_card</span>
-                  <div class="checkout-metodo-info">
-                    <span class="checkout-metodo-nombre">{{ metodo.marca }} **** {{ metodo.ultimos4 }}</span>
-                    <span class="checkout-metodo-detalle">{{ metodo.titular }} · Vence {{ "%02d"|format(metodo.mes_vencimiento) }}/{{ metodo.anio_vencimiento }}</span>
-                  </div>
-                  {% if metodo.predeterminado %}
-                    <span class="badge-predeterminado badge-chico">
-                      <span class="material-symbols-outlined" aria-hidden="true">star</span>
-                      Predeterminada
-                    </span>
-                  {% endif %}
-                </div>
-              {% endfor %}
-            </div>
-            <a class="enlace-destacado enlace-pequeño" href="{{ url_for('pago_metodos') }}">
-              <span class="material-symbols-outlined" aria-hidden="true">settings</span>
-              Gestionar mis tarjetas
-            </a>
+            <form action="{{ url_for('confirmar_checkout') }}" method="post" id="form-confirmar-pedido">
+              <div class="checkout-metodos-lista">
+                {% for metodo in metodos_pago %}
+                  <label class="checkout-metodo-label">
+                    <div class="checkout-metodo-item {% if metodo.predeterminado %}seleccionado{% endif %}">
+                      <input 
+                        type="radio" 
+                        name="metodo_pago_id" 
+                        value="{{ metodo.id }}" 
+                        {% if metodo.predeterminado or loop.first %}checked{% endif %} 
+                        class="radio-metodo-pago"
+                      />
+                      <span class="material-symbols-outlined icono-metodo" aria-hidden="true">credit_card</span>
+                      <div class="checkout-metodo-info">
+                        <span class="checkout-metodo-nombre">{{ metodo.marca }} **** {{ metodo.ultimos4 }}</span>
+                        <span class="checkout-metodo-detalle">{{ metodo.titular }} · Vence {{ "%02d"|format(metodo.mes_vencimiento) }}/{{ metodo.anio_vencimiento }}</span>
+                      </div>
+                      {% if metodo.predeterminado %}
+                        <span class="badge-predeterminado badge-chico">
+                          <span class="material-symbols-outlined" aria-hidden="true">star</span>
+                          Predeterminada
+                        </span>
+                      {% endif %}
+                    </div>
+                  </label>
+                {% endfor %}
+              </div>
+
+              <div class="checkout-enlace-gestionar">
+                <a class="enlace-destacado enlace-pequeño" href="{{ url_for('pago_metodos') }}">
+                  <span class="material-symbols-outlined" aria-hidden="true">settings</span>
+                  Gestionar mis tarjetas
+                </a>
+              </div>
+
+              <div class="checkout-acciones-pedido">
+                <button class="boton boton-destacado boton-gran-accion resplandor-neon" type="submit" id="btn-confirmar-pedido">
+                  <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+                  Confirmar y Realizar Pedido (${{ "%.2f"|format(carrito.total_general) }})
+                </button>
+              </div>
+            </form>
           {% else %}
             <div class="aviso-sin-tarjeta">
               <span class="material-symbols-outlined icono-aviso-tarjeta" aria-hidden="true">credit_card_off</span>
               <div>
                 <strong>No tienes métodos de pago registrados.</strong>
-                <p>Agrega y verifica una tarjeta para completar tu compra.</p>
+                <p>Agrega y verifica una tarjeta para poder completar tu compra.</p>
                 <a class="boton boton-principal boton-chico resplandor-neon" href="{{ url_for('pago_agregar') }}">
                   <span class="material-symbols-outlined" aria-hidden="true">add_card</span>
                   Agregar tarjeta ahora

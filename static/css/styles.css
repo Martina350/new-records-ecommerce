@@ -2471,6 +2471,251 @@ img { max-width: 100%; height: auto; display: block; }
   font-size: 0.8125rem;
 }
 
+/* ===== Formulario y Selector de Checkout (Fase 8) ===== */
+.checkout-metodo-label {
+  cursor: pointer;
+  display: block;
+}
+
+.checkout-metodo-label .checkout-metodo-item {
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.checkout-metodo-label:hover .checkout-metodo-item {
+  border-color: var(--primary);
+}
+
+.radio-metodo-pago {
+  accent-color: var(--accent);
+  width: 1.15rem;
+  height: 1.15rem;
+  cursor: pointer;
+}
+
+.icono-metodo {
+  color: var(--primary);
+  font-size: 1.5rem;
+}
+
+.checkout-enlace-gestionar {
+  margin-top: 0.75rem;
+}
+
+.checkout-acciones-pedido {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border-light);
+}
+
+.boton-gran-accion {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+/* ===== Badges de Estado de Pedido ===== */
+.badge-estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.badge-estado.badge-grande {
+  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
+}
+
+.badge-estado-pendiente {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.badge-estado-aprobado {
+  background: rgba(0, 255, 65, 0.15);
+  color: var(--accent);
+  border: 1px solid rgba(0, 255, 65, 0.4);
+}
+
+.badge-estado-rechazado {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--error);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.icono-estado-chico {
+  font-size: 1rem;
+}
+
+/* ===== Historial de Pedidos (Lista) ===== */
+.pedidos-caja {
+  padding: 1.5rem;
+}
+
+.fila-pedido {
+  transition: background 0.15s;
+}
+
+.fila-pedido:hover {
+  background: rgba(138, 44, 226, 0.05);
+}
+
+.col-numero-pedido strong {
+  font-family: monospace;
+  font-size: 0.95rem;
+  color: var(--primary);
+}
+
+.enlace-numero-pedido:hover strong {
+  color: var(--accent);
+}
+
+.metodo-tarjeta-resumen {
+  font-family: monospace;
+  font-size: 0.875rem;
+  color: var(--text-page);
+}
+
+/* ===== Detalle de Pedido ===== */
+.pedido-detalle-caja {
+  max-width: 58rem;
+  margin: 0 auto;
+}
+
+.pedido-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.pedido-cabecera-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.pedido-icono-cabecera {
+  font-size: 2.75rem;
+  color: var(--primary);
+}
+
+.pedido-titulo {
+  font-size: 1.75rem;
+  font-weight: 900;
+  margin: 0 0 0.25rem 0;
+  color: var(--text-heading);
+}
+
+.pedido-fecha {
+  font-size: 0.875rem;
+  color: var(--text-muted-page);
+}
+
+/* ===== Avisos según Estado ===== */
+.aviso-estado {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+  margin-bottom: 2rem;
+  font-size: 0.9375rem;
+}
+
+.aviso-estado .icono-aviso {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.aviso-estado p {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.875rem;
+  opacity: 0.9;
+}
+
+.aviso-estado-pendiente {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fcd34d;
+}
+
+.aviso-estado-aprobado {
+  background: rgba(0, 255, 65, 0.12);
+  border: 1px solid rgba(0, 255, 65, 0.4);
+  color: var(--accent);
+}
+
+.aviso-estado-rechazado {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: var(--error);
+}
+
+/* ===== Detalle de Artículos Comprados ===== */
+.pedido-articulos-seccion {
+  background: rgba(18, 18, 18, 0.6);
+  border: 1px solid var(--border-light);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.cantidad-estatica {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.texto-codigo {
+  font-family: monospace;
+  font-size: 0.8125rem;
+  color: var(--text-muted-page);
+}
+
+.texto-destacado {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.pedido-total-resumen {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-light);
+}
+
+.pedido-total-fila {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.pedido-total-etiqueta {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-muted-page);
+}
+
+.pedido-acciones-pie {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+
 
 
 

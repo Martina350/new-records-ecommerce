@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block titulo %}Pedido {{ pedido.numero }}{% endblock %}
+
+{% block contenido %}
+<main class="contacto-principal checkout-seccion">
+  <div class="contenedor">
+    <div class="caja-formulario checkout-caja pedido-detalle-caja">
+      <section class="contenedor-formulario-contacto" aria-labelledby="titulo-pedido">
+
+        <!-- Cabecera del Pedido -->
+        <div class="pedido-cabecera">
+          <div class="pedido-cabecera-info">
+            <span class="material-symbols-outlined pedido-icono-cabecera" aria-hidden="true">receipt_long</span>
+            <div>
+              <h1 id="titulo-pedido" class="pedido-titulo">
+                Pedido <span class="degradado">{{ pedido.numero }}</span>
+              </h1>
+              <span class="pedido-fecha">
+                Realizado el {{ pedido.fecha_creacion.strftime('%d de %B de %Y a las %H:%M UTC') }}
+              </span>
+            </div>
+          </div>
+
+          <div class="pedido-cabecera-estado">
+            <span class="badge-estado badge-estado-{{ pedido.estado | lower }} badge-grande">
+              {% if pedido.estado == "PENDIENTE" %}
+                <span class="material-symbols-outlined" aria-hidden="true">schedule</span>
+              {% elif pedido.estado == "APROBADO" %}
+                <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+              {% else %}
+                <span class="material-symbols-outlined" aria-hidden="true">cancel</span>
+              {% endif %}
+              {{ pedido.estado }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Mensaje Informativo según Estado -->
+        {% if pedido.estado == "PENDIENTE" %}
+          <div class="aviso-estado aviso-estado-pendiente">
+            <span class="material-symbols-outlined icono-aviso" aria-hidden="true">info</span>
+            <div>
+              <strong>Tu pedido se encuentra pendiente de revisión administrativa.</strong>
+              <p>Nuestro equipo verificará el inventario y procesará tu cobro simulado para su posterior aprobación y emisión de factura final.</p>
+            </div>
+          </div>
+        {% elif pedido.estado == "APROBADO" %}
+          <div class="aviso-estado aviso-estado-aprobado">
+            <span class="material-symbols-outlined icono-aviso" aria-hidden="true">verified</span>
+            <div>
+              <strong>¡Pedido Aprobado y Procesado!</strong>
+              <p>El stock ha sido descontado satisfactoriamente y tu comprobante final se encuentra generado.</p>
+            </div>
+          </div>
+        {% elif pedido.estado == "RECHAZADO" %}
+          <div class="aviso-estado aviso-estado-rechazado">
+            <span class="material-symbols-outlined icono-aviso" aria-hidden="true">error</span>
+            <div>
+              <strong>Pedido Rechazado</strong>
+              <p>Motivo: {{ pedido.motivo_rechazo or 'Sin motivo especificado.' }}</p>
+            </div>
+          </div>
+        {% endif %}
+
+        <!-- Grid de Información: Entrega y Pago -->
+        <div class="checkout-grid">
+          <div class="checkout-bloque">
+            <h3 class="checkout-subtitulo-bloque">
+              <span class="material-symbols-outlined" aria-hidden="true">local_shipping</span>
+              Datos de Envío del Cliente
+            </h3>
+            <div class="checkout-datos-usuario">
+              <p><strong>Cliente:</strong> {{ pedido.cliente.nombre }}</p>
+              <p><strong>Correo:</strong> {{ pedido.cliente.email }}</p>
+              <p><strong>Teléfono:</strong> {{ pedido.cliente.telefono or 'No especificado' }}</p>
+              <p><strong>Ciudad:</strong> {{ pedido.cliente.ciudad or 'No especificada' }}</p>
+              <p><strong>Dirección:</strong> {{ pedido.cliente.direccion or 'No especificada' }}</p>
+            </div>
+          </div>
+
+          <div class="checkout-bloque">
+            <h3 class="checkout-subtitulo-bloque">
+              <span class="material-symbols-outlined" aria-hidden="true">credit_card</span>
+              Método de Pago Utilizado
+            </h3>
+            <div class="checkout-datos-usuario">
+              <p><strong>Tarjeta:</strong> {{ pedido.metodo_pago.marca }} **** {{ pedido.metodo_pago.ultimos4 }}</p>
+              <p><strong>Titular:</strong> {{ pedido.metodo_pago.titular }}</p>
+              <p><strong>Vencimiento:</strong> {{ "%02d"|format(pedido.metodo_pago.mes_vencimiento) }}/{{ pedido.metodo_pago.anio_vencimiento }}</p>
+              {% if pedido.transaccion_pago %}
+                <p><strong>Referencia de Transacción:</strong> <span class="texto-codigo">{{ pedido.transaccion_pago.referencia }}</span></p>
+                <p><strong>Estado de Cobro:</strong> <span class="texto-destacado">{{ pedido.transaccion_pago.estado }}</span></p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabla de Artículos Comprados (Inmutables) -->
+        <div class="pedido-articulos-seccion">
+          <h3 class="checkout-subtitulo-bloque">
+            <span class="material-symbols-outlined" aria-hidden="true">album</span>
+            Discos Comprados (Detalle Histórico)
+          </h3>
+          <div class="tabla-carrito-contenedor">
+            <table class="tabla-carrito">
+              <thead>
+                <tr>
+                  <th>Disco / Álbum</th>
+                  <th>Artista</th>
+                  <th>Formato</th>
+                  <th>Precio Unitario</th>
+                  <th>Cantidad</th>
+                  <th>Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for detalle in pedido.detalles %}
+                  <tr class="fila-item-carrito">
+                    <td class="col-producto">
+                      <strong>{{ detalle.album }}</strong>
+                    </td>
+                    <td>
+                      <span class="artista-disco-carrito">{{ detalle.artista }}</span>
+                    </td>
+                    <td>
+                      <span class="badge-formato-tarjeta badge-formato-{{ detalle.formato | lower }}">
+                        {{ detalle.formato }}
+                      </span>
+                    </td>
+                    <td class="col-precio">
+                      <span class="precio-unitario">${{ "%.2f"|format(detalle.precio_unitario) }}</span>
+                    </td>
+                    <td class="col-cantidad">
+                      <span class="cantidad-estatica">{{ detalle.cantidad }}</span>
+                    </td>
+                    <td class="col-subtotal">
+                      <span class="precio-subtotal">${{ "%.2f"|format(detalle.subtotal) }}</span>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="pedido-total-resumen">
+            <div class="pedido-total-fila">
+              <span class="pedido-total-etiqueta">Total del Pedido (con envío y embalaje):</span>
+              <span class="checkout-monto-total">${{ "%.2f"|format(pedido.total) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pedido-acciones-pie">
+          <a class="boton boton-secundario" href="{{ url_for('lista_pedidos') }}">
+            <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+            Volver a Mis Pedidos
+          </a>
+          <a class="boton boton-principal" href="{{ url_for('productos') }}">
+            <span class="material-symbols-outlined" aria-hidden="true">shopping_bag</span>
+            Seguir Explorando el Catálogo
+          </a>
+        </div>
+
+      </section>
+    </div>
+  </div>
+</main>
+{% endblock %}

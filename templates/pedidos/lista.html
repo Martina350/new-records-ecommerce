@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block titulo %}Mis Pedidos{% endblock %}
+
+{% block contenido %}
+<main class="carrito-principal">
+  <div class="contenedor">
+    <div class="carrito-cabecera">
+      <h1 class="carrito-titulo">
+        Mis <span class="degradado">Pedidos</span>
+      </h1>
+      <p class="carrito-subtitulo">
+        Consulta el estado y detalle histórico de tus compras en New Records.
+      </p>
+    </div>
+
+    {% if pedidos %}
+      <div class="caja-formulario pedidos-caja">
+        <div class="tabla-carrito-contenedor">
+          <table class="tabla-carrito">
+            <thead>
+              <tr>
+                <th>Número de Pedido</th>
+                <th>Fecha de Compra</th>
+                <th>Método de Pago</th>
+                <th>Artículos</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for pedido in pedidos %}
+                <tr class="fila-pedido">
+                  <td class="col-numero-pedido">
+                    <a class="enlace-numero-pedido" href="{{ url_for('ver_pedido', numero=pedido.numero) }}">
+                      <strong>{{ pedido.numero }}</strong>
+                    </a>
+                  </td>
+                  <td class="col-fecha-pedido">
+                    <span>{{ pedido.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}</span>
+                  </td>
+                  <td class="col-metodo-pedido">
+                    <span class="metodo-tarjeta-resumen">
+                      {{ pedido.metodo_pago.marca }} **** {{ pedido.metodo_pago.ultimos4 }}
+                    </span>
+                  </td>
+                  <td class="col-articulos-pedido">
+                    <span>{{ pedido.detalles | length }} producto(s)</span>
+                  </td>
+                  <td class="col-total-pedido">
+                    <span class="precio-subtotal">${{ "%.2f"|format(pedido.total) }}</span>
+                  </td>
+                  <td class="col-estado-pedido">
+                    <span class="badge-estado badge-estado-{{ pedido.estado | lower }}">
+                      {% if pedido.estado == "PENDIENTE" %}
+                        <span class="material-symbols-outlined icono-estado-chico" aria-hidden="true">schedule</span>
+                      {% elif pedido.estado == "APROBADO" %}
+                        <span class="material-symbols-outlined icono-estado-chico" aria-hidden="true">check_circle</span>
+                      {% else %}
+                        <span class="material-symbols-outlined icono-estado-chico" aria-hidden="true">cancel</span>
+                      {% endif %}
+                      {{ pedido.estado }}
+                    </span>
+                  </td>
+                  <td class="col-accion-pedido">
+                    <a class="boton boton-secundario boton-chico" href="{{ url_for('ver_pedido', numero=pedido.numero) }}">
+                      <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
+                      Ver Detalle
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% else %}
+      <div class="estado-vacio">
+        <span class="material-symbols-outlined icono-vacio" aria-hidden="true">receipt_long</span>
+        <h3 class="titulo-vacio">No has realizado ningún pedido todavía</h3>
+        <p class="texto-vacio">Explora nuestro catálogo de CD y Vinilos para realizar tu primera compra.</p>
+        <a class="boton boton-principal resplandor-neon" href="{{ url_for('productos') }}">
+          Ir al Catálogo de Discos
+          <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</main>
+{% endblock %}

@@ -41,6 +41,11 @@ from payments import (
     verificar_pin,
     MARCAS_VALIDAS,
 )
+from services import (
+    obtener_pedido_por_numero,
+    obtener_pedidos_cliente,
+    procesar_checkout,
+)
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -400,6 +405,50 @@ def checkout_resumen():
         usuario=usuario,
         metodos_pago=metodos_pago,
     )
+
+
+@app.route("/checkout/confirmar", methods=["POST"])
+@rol_requerido("cliente")
+def confirmar_checkout():
+    """Procesa el checkout y crea el pedido persistente con cobro simulado."""
+    metodo_pago_id = request.form.get("metodo_pago_id")
+    if not metodo_pago_id:
+        flash("Debes seleccionar un método de pago verificado para continuar.", "error")
+        return redirect(url_for("checkout_resumen"))
+
+    try:
+        metodo_id_int = int(metodo_pago_id)
+    except (ValueError, TypeError):
+        flash("Método de pago inválido.", "error")
+        return redirect(url_for("checkout_resumen"))
+
+    exito, resultado = procesar_checkout(session["usuario_id"], metodo_id_int)
+    if exito:
+        flash(f"¡Tu pedido {resultado.numero} ha sido creado con éxito! Se encuentra pendiente de revisión.", "success")
+        return redirect(url_for("ver_pedido", numero=resultado.numero))
+    else:
+        flash(resultado, "error")
+        return redirect(url_for("checkout_resumen"))
+
+
+@app.route("/pedidos")
+@rol_requerido("cliente")
+def lista_pedidos():
+    """Muestra el historial de pedidos realizados por el cliente autenticado."""
+    pedidos = obtener_pedidos_cliente(session["usuario_id"])
+    return render_template("pedidos/lista.html", pedidos=pedidos)
+
+
+@app.route("/pedidos/<numero>")
+@login_requerido
+def ver_pedido(numero):
+    """Muestra el detalle completo de un pedido específico."""
+    usuario = obtener_usuario_actual()
+    pedido = obtener_pedido_por_numero(numero, usuario)
+    if not pedido:
+        return render_template("errors/404.html"), 404
+
+    return render_template("pedidos/detalle.html", pedido=pedido)
 
 
 @app.route("/pago/metodos")

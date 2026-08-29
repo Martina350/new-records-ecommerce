@@ -58,6 +58,10 @@
                   <span class="badge-contador-carrito">{{ total_items_carrito }}</span>
                 {% endif %}
               </a>
+              <a class="enlace-nav{% if request.endpoint == 'lista_pedidos' %} activo{% endif %}" href="{{ url_for('lista_pedidos') }}" title="Mis compras">
+                <span class="material-symbols-outlined" aria-hidden="true">receipt_long</span>
+                Pedidos
+              </a>
             {% endif %}
             <a class="enlace-nav{% if request.endpoint == 'perfil' %} activo{% endif %}" href="{{ url_for('perfil') }}">
               <span class="material-symbols-outlined" aria-hidden="true">account_circle</span>
@@ -116,6 +120,14 @@
             <a class="enlace-nav{% if request.endpoint == 'ver_carrito' %} activo{% endif %}" href="{{ url_for('ver_carrito') }}">
               <span class="material-symbols-outlined" aria-hidden="true">shopping_cart</span>
               Mi Carrito ({% if total_items_carrito > 0 %}{{ total_items_carrito }}{% else %}0{% endif %})
+            </a>
+            <a class="enlace-nav{% if request.endpoint == 'lista_pedidos' %} activo{% endif %}" href="{{ url_for('lista_pedidos') }}">
+              <span class="material-symbols-outlined" aria-hidden="true">receipt_long</span>
+              Mis Pedidos
+            </a>
+            <a class="enlace-nav{% if request.endpoint == 'pago_metodos' %} activo{% endif %}" href="{{ url_for('pago_metodos') }}">
+              <span class="material-symbols-outlined" aria-hidden="true">credit_card</span>
+              Métodos de Pago
             </a>
           {% endif %}
           <a class="enlace-nav{% if request.endpoint == 'perfil' %} activo{% endif %}" href="{{ url_for('perfil') }}">
