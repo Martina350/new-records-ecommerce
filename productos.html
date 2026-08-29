@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html class="dark" lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Productos - New Records</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <link href="assets/css/styles.css" rel="stylesheet"/>
+</head>
+<body>
+  <header class="cabecera-sitio">
+    <div class="contenedor cabecera-interior">
+      <div class="cabecera-izquierda">
+        <a class="enlace-logo" href="index.html">
+          <span class="material-symbols-outlined icono-logo">album</span>
+          <span class="texto-logo">New Records</span>
+        </a>
+        <nav class="nav-principal">
+          <a class="enlace-nav" href="index.html">Inicio</a>
+          <a class="enlace-nav" href="categorias.html">Categorías</a>
+          <a class="enlace-nav activo" href="productos.html">Productos</a>
+          <a class="enlace-nav" href="contacto.html">Contacto</a>
+        </nav>
+      </div>
+      <button class="alternar-nav" type="button" aria-label="Abrir menú">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+      <nav class="nav-movil" id="navMovil">
+        <a class="enlace-nav" href="index.html">Inicio</a>
+        <a class="enlace-nav" href="categorias.html">Categorías</a>
+        <a class="enlace-nav activo" href="productos.html">Productos</a>
+        <a class="enlace-nav" href="contacto.html">Contacto</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="seccion-productos" aria-labelledby="titulo-productos">
+      <div class="contenedor">
+        <div class="encabezado-productos">
+          <div>
+            <h1 id="titulo-productos" class="titulo-productos">Nuestra amplia colección <span style="color: var(--primary);">Musical</span></h1>
+            <p class="descripcion-productos">Disfruta de tus discos favoritos a los mejores precios.</p>
+          </div>
+          <div class="botones-filtro">
+            <a class="boton boton-secundario" href="productos.html" data-categoria="todos">Todos</a>
+            <a class="boton boton-secundario" href="productos.html?categoria=rock" data-categoria="rock">Rock</a>
+            <a class="boton boton-secundario" href="productos.html?categoria=pop" data-categoria="pop">Pop</a>
+            <a class="boton boton-secundario" href="productos.html?categoria=reggaeton" data-categoria="reggaeton">Reggaeton</a>
+          </div>
+        </div>
+        <div class="grid-productos">
+          <article class="tarjeta-producto" data-categoria="reggaeton">
+            <div class="tarjeta-producto-imagen">
+              <div class="tarjeta-producto-imagen-fondo" style="background-image: url(assets/img/productos/dtmf.png);" alt="Portada DTMF"></div>
+            </div>
+            <div class="tarjeta-producto-encabezado">
+              <h3 class="tarjeta-producto-titulo">Bad Bunny - DTMF</h3>
+              <span class="tarjeta-producto-precio">$35.00</span>
+            </div>
+            <p class="tarjeta-producto-descripcion">Combina estilos urbanos con elementos tradicionales de Puerto Rico, incluyendo toques de salsa y ritmos nostálgicos.</p>
+            <div class="tarjeta-producto-etiquetas">
+              <span class="etiqueta-producto">Reggaeton</span>
+              <span class="etiqueta-producto">Latino</span>
+            </div>
+          </article>
+          <article class="tarjeta-producto" data-categoria="rock">
+            <div class="tarjeta-producto-imagen">
+              <div class="tarjeta-producto-imagen-fondo" style="background-image: url(assets/img/productos/tdsotm.jpg);" alt="Portada The Dark Side of the Moon"></div>
+            </div>
+            <div class="tarjeta-producto-encabezado">
+              <h3 class="tarjeta-producto-titulo">Pink Floyd - The Dark Side of the Moon</h3>
+              <span class="tarjeta-producto-precio">$42.00</span>
+            </div>
+            <p class="tarjeta-producto-descripcion">Uno de los álbumes más vendidos de la historia, considerado una obra maestra del rock progresivo.</p>
+            <div class="tarjeta-producto-etiquetas">
+              <span class="etiqueta-producto">Rock</span>
+              <span class="etiqueta-producto">Progresivo</span>
+            </div>
+          </article>
+          <article class="tarjeta-producto" data-categoria="pop">
+            <div class="tarjeta-producto-imagen">
+              <div class="tarjeta-producto-imagen-fondo" style="background-image: url(assets/img/productos/fn.jpg);" alt="Portada Future Nostalgia"></div>
+            </div>
+            <div class="tarjeta-producto-encabezado">
+              <h3 class="tarjeta-producto-titulo">Dua Lipa - Future Nostalgia</h3>
+              <span class="tarjeta-producto-precio">$29.99</span>
+            </div>
+            <p class="tarjeta-producto-descripcion">Exitoso álbum que combina el pop ochentero con elementos de la música electrónica.</p>
+            <div class="tarjeta-producto-etiquetas">
+              <span class="etiqueta-producto">Pop</span>
+              <span class="etiqueta-producto">Electrónica</span>
+            </div>
+          </article>
+          <article class="tarjeta-producto" data-categoria="pop">
+            <div class="tarjeta-producto-imagen">
+              <div class="tarjeta-producto-imagen-fondo" style="background-image: url(assets/img/productos/ah.png);" alt="Portada After Hours"></div>
+            </div>
+            <div class="tarjeta-producto-encabezado">
+              <h3 class="tarjeta-producto-titulo">The Weeknd - After Hours</h3>
+              <span class="tarjeta-producto-precio">$38.50</span>
+            </div>
+            <p class="tarjeta-producto-descripcion">Álbum de R&B y pop oscuro que fusiona synth-pop, new wave y trap con una estética nocturna y melancólica.</p>
+            <div class="tarjeta-producto-etiquetas">
+              <span class="etiqueta-producto">R&B</span>
+              <span class="etiqueta-producto">Synth-Pop</span>
+            </div>
+          </article>
+          <article class="tarjeta-producto" data-categoria="rock">
+            <div class="tarjeta-producto-imagen">
+              <div class="tarjeta-producto-imagen-fondo" style="background-image: url(assets/img/productos/dd.jpg);" alt="Portada Demon Days"></div>
+            </div>
+            <div class="tarjeta-producto-encabezado">
+              <h3 class="tarjeta-producto-titulo">Gorillaz - Demon Days</h3>
+              <span class="tarjeta-producto-precio">$45.00</span>
+            </div>
+            <p class="tarjeta-producto-descripcion">Fusiona trip-hop, hip-hop, electrónica, pop y rock, con una atmósfera melancólica y futurista.</p>
+            <div class="tarjeta-producto-etiquetas">
+              <span class="etiqueta-producto">Pop - Rock</span>
+              <span class="etiqueta-producto">Futurista</span>
+            </div>
+          </article>
+          <article class="tarjeta-producto" data-categoria="reggaeton">
+            <div class="tarjeta-producto-imagen">
+              <div class="tarjeta-producto-imagen-fondo" style="background-image: url(assets/img/productos/tra.jpg);" alt="Portada Atrevido"></div>
+            </div>
+            <div class="tarjeta-producto-encabezado">
+              <h3 class="tarjeta-producto-titulo">Trueno - Atrevido</h3>
+              <span class="tarjeta-producto-precio">$33.00</span>
+            </div>
+            <p class="tarjeta-producto-descripcion">Álbum debut del rapero argentino Trueno, que marca su transición del freestyle a la música profesional.</p>
+            <div class="tarjeta-producto-etiquetas">
+              <span class="etiqueta-producto">Hip-Hop</span>
+              <span class="etiqueta-producto">Trap</span>
+            </div>
+          </article>
+          <article class="tarjeta-producto" data-categoria="pop">
+            <div class="tarjeta-producto-imagen">
+              <div class="tarjeta-producto-imagen-fondo" style="background-image: url(assets/img/productos/hmhas.jpg);" alt="Portada Hit Me Hard and Soft"></div>
+            </div>
+            <div class="tarjeta-producto-encabezado">
+              <h3 class="tarjeta-producto-titulo">Billie Eilish - Hit Me Hard and Soft</h3>
+              <span class="tarjeta-producto-precio">$39.99</span>
+            </div>
+            <p class="tarjeta-producto-descripcion">Es un trabajo diverso y cohesivo que fusiona géneros, desafiando tendencias con un sonido inmersivo y emocional.</p>
+            <div class="tarjeta-producto-etiquetas">
+              <span class="etiqueta-producto">Pop</span>
+              <span class="etiqueta-producto">Alternativo</span>
+            </div>
+          </article>
+          <article class="tarjeta-producto" data-categoria="rock">
+            <div class="tarjeta-producto-imagen">
+              <div class="tarjeta-producto-imagen-fondo" style="background-image: url(assets/img/productos/nn.jpg);" alt="Portada Nevermind"></div>
+            </div>
+            <div class="tarjeta-producto-encabezado">
+              <h3 class="tarjeta-producto-titulo">Nirvana - Nevermind</h3>
+              <span class="tarjeta-producto-precio">$34.50</span>
+            </div>
+            <p class="tarjeta-producto-descripcion">Grunge por excelencia y uno de los álbumes más influyentes de la historia del rock.</p>
+            <div class="tarjeta-producto-etiquetas">
+              <span class="etiqueta-producto">Rock</span>
+              <span class="etiqueta-producto">Grunge</span>
+            </div>
+          </article>
+          <article class="tarjeta-producto" data-categoria="rock">
+            <div class="tarjeta-producto-imagen">
+              <div class="tarjeta-producto-imagen-fondo" style="background-image: url(assets/img/productos/ar.jpg);" role="img" aria-label="Portada Abbey Road"></div>
+            </div>
+            <div class="tarjeta-producto-encabezado">
+              <h3 class="tarjeta-producto-titulo">The Beatles - Abbey Road</h3>
+              <span class="tarjeta-producto-precio">$39.99</span>
+            </div>
+            <p class="tarjeta-producto-descripcion">Icono del rock. Edición remasterizada con el famoso paso de cebra.</p>
+            <div class="tarjeta-producto-etiquetas">
+              <span class="etiqueta-producto">Rock</span>
+              <span class="etiqueta-producto">Clásico</span>
+            </div>
+          </article>
+          <article class="tarjeta-producto" data-categoria="pop">
+            <div class="tarjeta-producto-imagen">
+              <div class="tarjeta-producto-imagen-fondo" style="background-image: url(assets/img/productos/dw.jpg);" role="img" aria-label="Portada álbum pop"></div>
+            </div>
+            <div class="tarjeta-producto-encabezado">
+              <h3 class="tarjeta-producto-titulo">Ariana Grande - Dangerous Woman</h3>
+              <span class="tarjeta-producto-precio">$36.00</span>
+            </div>
+            <p class="tarjeta-producto-descripcion">Marcando una transición madura hacia sonidos pop, R&B y dance-pop con toques de soul.</p>
+            <div class="tarjeta-producto-etiquetas">
+              <span class="etiqueta-producto">Dance-Pop</span>
+              <span class="etiqueta-producto">Pop</span>
+            </div>
+          </article>
+          <article class="tarjeta-producto" data-categoria="reggaeton">
+            <div class="tarjeta-producto-imagen">
+              <div class="tarjeta-producto-imagen-fondo" style="background-image: url(assets/img/productos/hop.jpg);" alt="Portada House of Pleasure"></div>
+            </div>
+            <div class="tarjeta-producto-encabezado">
+              <h3 class="tarjeta-producto-titulo">Plan B - House of Pleasure</h3>
+              <span class="tarjeta-producto-precio">$32.00</span>
+            </div>
+            <p class="tarjeta-producto-descripcion">Fusionando reguetón clásico con toques electrónicos y destacando por sus éxitos "Es un secreto" y "Si no le contesto".</p>
+            <div class="tarjeta-producto-etiquetas">
+              <span class="etiqueta-producto">Reggaeton</span>
+              <span class="etiqueta-producto">Urbano</span>
+            </div>
+          </article>
+          <article class="tarjeta-producto" data-categoria="reggaeton">
+            <div class="tarjeta-producto-imagen">
+              <div class="tarjeta-producto-imagen-fondo" style="background-image: url(assets/img/productos/fxxrp.jpg);" alt="Portada Ferxxocalipsis"></div>
+            </div>
+            <div class="tarjeta-producto-encabezado">
+              <h3 class="tarjeta-producto-titulo">Feid - FERXXOCALIPSIS</h3>
+              <span class="tarjeta-producto-precio">$37.50</span>
+            </div>
+            <p class="tarjeta-producto-descripcion">Enfocado en ritmos oscuros, profundos y un estilo "perreo" clásico de Medellín.</p>
+            <div class="tarjeta-producto-etiquetas">
+              <span class="etiqueta-producto">Reggaeton - Perreo</span>
+              <span class="etiqueta-producto">Latino</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="pie-sitio">
+    <div class="contenedor">
+      <p class="pie-texto">© 2026 New Records. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <script src="assets/js/script.js"></script>
+</body>
+</html>
