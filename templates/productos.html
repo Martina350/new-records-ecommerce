@@ -1,196 +1,133 @@
 {% extends "base.html" %}
 
-{% block titulo %}Productos{% endblock %}
+{% block titulo %}
+  {% if categoria_actual %}
+    Discos de {{ categoria_actual.nombre }}
+  {% else %}
+    Catálogo de Discos
+  {% endif %}
+{% endblock %}
 
 {% block contenido %}
-
-  <main>
-    <section class="seccion-productos" aria-labelledby="titulo-productos">
-      <div class="contenedor">
-        <div class="encabezado-productos">
-          <div>
-            <h1 id="titulo-productos" class="titulo-productos">Nuestra amplia colección <span style="color: var(--primary);">Musical</span></h1>
-            <p class="descripcion-productos">Disfruta de tus discos favoritos a los mejores precios.</p>
-          </div>
-          <div class="botones-filtro">
-            <a class="boton boton-secundario" href="{{ url_for('productos') }}" data-categoria="todos">Todos</a>
-            <a class="boton boton-secundario" href="{{ url_for('productos', categoria='rock') }}" data-categoria="rock">Rock</a>
-            <a class="boton boton-secundario" href="{{ url_for('productos', categoria='pop') }}" data-categoria="pop">Pop</a>
-            <a class="boton boton-secundario" href="{{ url_for('productos', categoria='reggaeton') }}" data-categoria="reggaeton">Reggaeton</a>
-          </div>
+<main>
+  <section class="seccion-productos" aria-labelledby="titulo-productos">
+    <div class="contenedor">
+      <div class="encabezado-productos">
+        <div>
+          <h1 id="titulo-productos" class="titulo-productos">
+            Colección <span class="degradado">Musical</span>
+          </h1>
+          <p class="descripcion-productos">
+            {% if categoria_actual %}
+              Explorando los mejores lanzamientos de <strong>{{ categoria_actual.nombre }}</strong> en formato físico.
+            {% else %}
+              Encuentra tus álbumes favoritos en CD y Vinilo de colección al mejor precio.
+            {% endif %}
+          </p>
         </div>
-        <div class="grid-productos">
-          <article class="tarjeta-producto" data-categoria="reggaeton">
-            <div class="tarjeta-producto-imagen">
-              <div class="tarjeta-producto-imagen-fondo" style="background-image: url({{ url_for('static', filename='img/productos/dtmf.png') }});" alt="Portada DTMF"></div>
-            </div>
-            <div class="tarjeta-producto-encabezado">
-              <h3 class="tarjeta-producto-titulo">Bad Bunny - DTMF</h3>
-              <span class="tarjeta-producto-precio">$35.00</span>
-            </div>
-            <p class="tarjeta-producto-descripcion">Combina estilos urbanos con elementos tradicionales de Puerto Rico, incluyendo toques de salsa y ritmos nostálgicos.</p>
-            <div class="tarjeta-producto-etiquetas">
-              <span class="etiqueta-producto">Reggaeton</span>
-              <span class="etiqueta-producto">Latino</span>
-            </div>
-          </article>
-          <article class="tarjeta-producto" data-categoria="rock">
-            <div class="tarjeta-producto-imagen">
-              <div class="tarjeta-producto-imagen-fondo" style="background-image: url({{ url_for('static', filename='img/productos/tdsotm.jpg') }});" alt="Portada The Dark Side of the Moon"></div>
-            </div>
-            <div class="tarjeta-producto-encabezado">
-              <h3 class="tarjeta-producto-titulo">Pink Floyd - The Dark Side of the Moon</h3>
-              <span class="tarjeta-producto-precio">$42.00</span>
-            </div>
-            <p class="tarjeta-producto-descripcion">Uno de los álbumes más vendidos de la historia, considerado una obra maestra del rock progresivo.</p>
-            <div class="tarjeta-producto-etiquetas">
-              <span class="etiqueta-producto">Rock</span>
-              <span class="etiqueta-producto">Progresivo</span>
-            </div>
-          </article>
-          <article class="tarjeta-producto" data-categoria="pop">
-            <div class="tarjeta-producto-imagen">
-              <div class="tarjeta-producto-imagen-fondo" style="background-image: url({{ url_for('static', filename='img/productos/fn.jpg') }});" alt="Portada Future Nostalgia"></div>
-            </div>
-            <div class="tarjeta-producto-encabezado">
-              <h3 class="tarjeta-producto-titulo">Dua Lipa - Future Nostalgia</h3>
-              <span class="tarjeta-producto-precio">$29.99</span>
-            </div>
-            <p class="tarjeta-producto-descripcion">Exitoso álbum que combina el pop ochentero con elementos de la música electrónica.</p>
-            <div class="tarjeta-producto-etiquetas">
-              <span class="etiqueta-producto">Pop</span>
-              <span class="etiqueta-producto">Electrónica</span>
-            </div>
-          </article>
-          <article class="tarjeta-producto" data-categoria="pop">
-            <div class="tarjeta-producto-imagen">
-              <div class="tarjeta-producto-imagen-fondo" style="background-image: url({{ url_for('static', filename='img/productos/ah.png') }});" alt="Portada After Hours"></div>
-            </div>
-            <div class="tarjeta-producto-encabezado">
-              <h3 class="tarjeta-producto-titulo">The Weeknd - After Hours</h3>
-              <span class="tarjeta-producto-precio">$38.50</span>
-            </div>
-            <p class="tarjeta-producto-descripcion">Álbum de R&B y pop oscuro que fusiona synth-pop, new wave y trap con una estética nocturna y melancólica.</p>
-            <div class="tarjeta-producto-etiquetas">
-              <span class="etiqueta-producto">R&B</span>
-              <span class="etiqueta-producto">Synth-Pop</span>
-            </div>
-          </article>
-          <article class="tarjeta-producto" data-categoria="rock">
-            <div class="tarjeta-producto-imagen">
-              <div class="tarjeta-producto-imagen-fondo" style="background-image: url({{ url_for('static', filename='img/productos/dd.jpg') }});" alt="Portada Demon Days"></div>
-            </div>
-            <div class="tarjeta-producto-encabezado">
-              <h3 class="tarjeta-producto-titulo">Gorillaz - Demon Days</h3>
-              <span class="tarjeta-producto-precio">$45.00</span>
-            </div>
-            <p class="tarjeta-producto-descripcion">Fusiona trip-hop, hip-hop, electrónica, pop y rock, con una atmósfera melancólica y futurista.</p>
-            <div class="tarjeta-producto-etiquetas">
-              <span class="etiqueta-producto">Pop - Rock</span>
-              <span class="etiqueta-producto">Futurista</span>
-            </div>
-          </article>
-          <article class="tarjeta-producto" data-categoria="reggaeton">
-            <div class="tarjeta-producto-imagen">
-              <div class="tarjeta-producto-imagen-fondo" style="background-image: url({{ url_for('static', filename='img/productos/tra.jpg') }});" alt="Portada Atrevido"></div>
-            </div>
-            <div class="tarjeta-producto-encabezado">
-              <h3 class="tarjeta-producto-titulo">Trueno - Atrevido</h3>
-              <span class="tarjeta-producto-precio">$33.00</span>
-            </div>
-            <p class="tarjeta-producto-descripcion">Álbum debut del rapero argentino Trueno, que marca su transición del freestyle a la música profesional.</p>
-            <div class="tarjeta-producto-etiquetas">
-              <span class="etiqueta-producto">Hip-Hop</span>
-              <span class="etiqueta-producto">Trap</span>
-            </div>
-          </article>
-          <article class="tarjeta-producto" data-categoria="pop">
-            <div class="tarjeta-producto-imagen">
-              <div class="tarjeta-producto-imagen-fondo" style="background-image: url({{ url_for('static', filename='img/productos/hmhas.jpg') }});" alt="Portada Hit Me Hard and Soft"></div>
-            </div>
-            <div class="tarjeta-producto-encabezado">
-              <h3 class="tarjeta-producto-titulo">Billie Eilish - Hit Me Hard and Soft</h3>
-              <span class="tarjeta-producto-precio">$39.99</span>
-            </div>
-            <p class="tarjeta-producto-descripcion">Es un trabajo diverso y cohesivo que fusiona géneros, desafiando tendencias con un sonido inmersivo y emocional.</p>
-            <div class="tarjeta-producto-etiquetas">
-              <span class="etiqueta-producto">Pop</span>
-              <span class="etiqueta-producto">Alternativo</span>
-            </div>
-          </article>
-          <article class="tarjeta-producto" data-categoria="rock">
-            <div class="tarjeta-producto-imagen">
-              <div class="tarjeta-producto-imagen-fondo" style="background-image: url({{ url_for('static', filename='img/productos/nn.jpg') }});" alt="Portada Nevermind"></div>
-            </div>
-            <div class="tarjeta-producto-encabezado">
-              <h3 class="tarjeta-producto-titulo">Nirvana - Nevermind</h3>
-              <span class="tarjeta-producto-precio">$34.50</span>
-            </div>
-            <p class="tarjeta-producto-descripcion">Grunge por excelencia y uno de los álbumes más influyentes de la historia del rock.</p>
-            <div class="tarjeta-producto-etiquetas">
-              <span class="etiqueta-producto">Rock</span>
-              <span class="etiqueta-producto">Grunge</span>
-            </div>
-          </article>
-          <article class="tarjeta-producto" data-categoria="rock">
-            <div class="tarjeta-producto-imagen">
-              <div class="tarjeta-producto-imagen-fondo" style="background-image: url({{ url_for('static', filename='img/productos/ar.jpg') }});" role="img" aria-label="Portada Abbey Road"></div>
-            </div>
-            <div class="tarjeta-producto-encabezado">
-              <h3 class="tarjeta-producto-titulo">The Beatles - Abbey Road</h3>
-              <span class="tarjeta-producto-precio">$39.99</span>
-            </div>
-            <p class="tarjeta-producto-descripcion">Icono del rock. Edición remasterizada con el famoso paso de cebra.</p>
-            <div class="tarjeta-producto-etiquetas">
-              <span class="etiqueta-producto">Rock</span>
-              <span class="etiqueta-producto">Clásico</span>
-            </div>
-          </article>
-          <article class="tarjeta-producto" data-categoria="pop">
-            <div class="tarjeta-producto-imagen">
-              <div class="tarjeta-producto-imagen-fondo" style="background-image: url({{ url_for('static', filename='img/productos/dw.jpg') }});" role="img" aria-label="Portada álbum pop"></div>
-            </div>
-            <div class="tarjeta-producto-encabezado">
-              <h3 class="tarjeta-producto-titulo">Ariana Grande - Dangerous Woman</h3>
-              <span class="tarjeta-producto-precio">$36.00</span>
-            </div>
-            <p class="tarjeta-producto-descripcion">Marcando una transición madura hacia sonidos pop, R&B y dance-pop con toques de soul.</p>
-            <div class="tarjeta-producto-etiquetas">
-              <span class="etiqueta-producto">Dance-Pop</span>
-              <span class="etiqueta-producto">Pop</span>
-            </div>
-          </article>
-          <article class="tarjeta-producto" data-categoria="reggaeton">
-            <div class="tarjeta-producto-imagen">
-              <div class="tarjeta-producto-imagen-fondo" style="background-image: url({{ url_for('static', filename='img/productos/hop.jpg') }});" alt="Portada House of Pleasure"></div>
-            </div>
-            <div class="tarjeta-producto-encabezado">
-              <h3 class="tarjeta-producto-titulo">Plan B - House of Pleasure</h3>
-              <span class="tarjeta-producto-precio">$32.00</span>
-            </div>
-            <p class="tarjeta-producto-descripcion">Fusionando reguetón clásico con toques electrónicos y destacando por sus éxitos "Es un secreto" y "Si no le contesto".</p>
-            <div class="tarjeta-producto-etiquetas">
-              <span class="etiqueta-producto">Reggaeton</span>
-              <span class="etiqueta-producto">Urbano</span>
-            </div>
-          </article>
-          <article class="tarjeta-producto" data-categoria="reggaeton">
-            <div class="tarjeta-producto-imagen">
-              <div class="tarjeta-producto-imagen-fondo" style="background-image: url({{ url_for('static', filename='img/productos/fxxrp.jpg') }});" alt="Portada Ferxxocalipsis"></div>
-            </div>
-            <div class="tarjeta-producto-encabezado">
-              <h3 class="tarjeta-producto-titulo">Feid - FERXXOCALIPSIS</h3>
-              <span class="tarjeta-producto-precio">$37.50</span>
-            </div>
-            <p class="tarjeta-producto-descripcion">Enfocado en ritmos oscuros, profundos y un estilo "perreo" clásico de Medellín.</p>
-            <div class="tarjeta-producto-etiquetas">
-              <span class="etiqueta-producto">Reggaeton - Perreo</span>
-              <span class="etiqueta-producto">Latino</span>
-            </div>
-          </article>
+
+        <div class="botones-filtro">
+          <a 
+            class="boton boton-secundario{% if categoria_slug == 'todos' %} activo{% endif %}" 
+            href="{{ url_for('productos') }}"
+          >
+            Todos
+          </a>
+          {% for cat in categorias %}
+            <a 
+              class="boton boton-secundario{% if categoria_slug == cat.slug %} activo{% endif %}" 
+              href="{{ url_for('productos', categoria=cat.slug) }}"
+            >
+              {{ cat.nombre }}
+            </a>
+          {% endfor %}
         </div>
       </div>
-    </section>
-  </main>
 
+      <div class="barra-busqueda-catalogo">
+        <form class="formulario-busqueda" action="{{ url_for('productos') }}" method="get">
+          {% if categoria_slug != 'todos' %}
+            <input type="hidden" name="categoria" value="{{ categoria_slug }}"/>
+          {% endif %}
+          <div class="contenedor-input-busqueda">
+            <span class="material-symbols-outlined icono-busqueda-input" aria-hidden="true">search</span>
+            <input 
+              class="entrada-busqueda-catalogo" 
+              type="text" 
+              name="q" 
+              placeholder="Buscar por álbum o artista..." 
+              value="{{ busqueda or '' }}"
+            />
+            {% if busqueda %}
+              <a class="limpiar-busqueda" href="{{ url_for('productos', categoria=categoria_slug if categoria_slug != 'todos' else None) }}" title="Limpiar búsqueda">
+                <span class="material-symbols-outlined" aria-hidden="true">close</span>
+              </a>
+            {% endif %}
+          </div>
+          <button class="boton boton-principal boton-chico" type="submit">Buscar</button>
+        </form>
+      </div>
+
+      {% if discos %}
+        <div class="grid-productos">
+          {% for disco in discos %}
+            <article class="tarjeta-producto">
+              <a class="enlace-tarjeta-producto" href="{{ url_for('detalle_producto', codigo=disco.codigo) }}">
+                <div class="tarjeta-producto-imagen">
+                  <div 
+                    class="tarjeta-producto-imagen-fondo" 
+                    style="background-image: url('{{ url_for('static', filename=disco.imagen) }}');" 
+                    role="img" 
+                    aria-label="Portada {{ disco.album }}"
+                  ></div>
+                  <span class="badge-formato-tarjeta badge-formato-{{ disco.formato | lower }}">
+                    {{ disco.formato }}
+                  </span>
+                </div>
+              </a>
+
+              <div class="tarjeta-producto-encabezado">
+                <h3 class="tarjeta-producto-titulo">
+                  <a href="{{ url_for('detalle_producto', codigo=disco.codigo) }}">
+                    {{ disco.artista }} - {{ disco.album }}
+                  </a>
+                </h3>
+                <span class="tarjeta-producto-precio">${{ "%.2f"|format(disco.precio_base) }}</span>
+              </div>
+
+              <p class="tarjeta-producto-descripcion">{{ disco.descripcion }}</p>
+
+              <div class="tarjeta-producto-etiquetas">
+                <span class="etiqueta-producto">{{ disco.categoria.nombre }}</span>
+                <span class="etiqueta-producto etiqueta-stock{% if disco.stock == 0 %} etiqueta-agotado{% endif %}">
+                  {% if disco.stock > 0 %}Stock: {{ disco.stock }}{% else %}Agotado{% endif %}
+                </span>
+              </div>
+
+              <div class="tarjeta-producto-acciones">
+                <a class="boton boton-principal boton-tarjeta resplandor-neon" href="{{ url_for('detalle_producto', codigo=disco.codigo) }}">
+                  Ver detalles
+                  <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
+                </a>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="estado-vacio">
+          <span class="material-symbols-outlined icono-vacio" aria-hidden="true">album</span>
+          <h3 class="titulo-vacio">No se encontraron discos</h3>
+          <p class="texto-vacio">
+            {% if busqueda %}
+              No hay resultados para "{{ busqueda }}". Intenta con otro término o limpia los filtros.
+            {% else %}
+              No hay productos disponibles en esta categoría actualmente.
+            {% endif %}
+          </p>
+          <a class="boton boton-secundario" href="{{ url_for('productos') }}">Ver todos los discos</a>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+</main>
 {% endblock %}

@@ -26,14 +26,85 @@
           <a class="enlace-nav{% if request.endpoint == 'contacto' %} activo{% endif %}" href="{{ url_for('contacto') }}">Contacto</a>
         </nav>
       </div>
-      <button class="alternar-nav" type="button" aria-label="Abrir menú" aria-controls="navMovil" aria-expanded="false">
-        <span class="material-symbols-outlined" aria-hidden="true">menu</span>
-      </button>
+
+      <div class="cabecera-derecha">
+        <nav class="nav-usuario" aria-label="Navegación de usuario">
+          {% if esta_autenticado %}
+            {% if es_admin %}
+              <a class="enlace-nav badge-admin-nav{% if request.endpoint == 'admin_dashboard' %} activo{% endif %}" href="{{ url_for('admin_dashboard') }}">
+                <span class="material-symbols-outlined" aria-hidden="true">admin_panel_settings</span>
+                Admin
+              </a>
+            {% else %}
+              <a class="enlace-nav enlace-carrito-nav{% if request.endpoint == 'ver_carrito' %} activo{% endif %}" href="{{ url_for('ver_carrito') }}" title="Ver mi carrito">
+                <span class="material-symbols-outlined" aria-hidden="true">shopping_cart</span>
+                Carrito
+                {% if total_items_carrito > 0 %}
+                  <span class="badge-contador-carrito">{{ total_items_carrito }}</span>
+                {% endif %}
+              </a>
+            {% endif %}
+            <a class="enlace-nav{% if request.endpoint == 'perfil' %} activo{% endif %}" href="{{ url_for('perfil') }}">
+              <span class="material-symbols-outlined" aria-hidden="true">account_circle</span>
+              {{ session.usuario_nombre.split()[0] }}
+            </a>
+            <a class="boton boton-secundario boton-chico" href="{{ url_for('logout') }}" title="Cerrar sesión">
+              <span class="material-symbols-outlined" aria-hidden="true">logout</span>
+              <span class="texto-boton-nav">Salir</span>
+            </a>
+          {% else %}
+            <a class="enlace-nav{% if request.endpoint == 'login' %} activo{% endif %}" href="{{ url_for('login') }}">
+              <span class="material-symbols-outlined" aria-hidden="true">login</span>
+              Ingresar
+            </a>
+            <a class="boton boton-destacado boton-chico" href="{{ url_for('registro') }}">
+              <span class="material-symbols-outlined" aria-hidden="true">person_add</span>
+              Registrarse
+            </a>
+          {% endif %}
+        </nav>
+
+        <button class="alternar-nav" type="button" aria-label="Abrir menú" aria-controls="navMovil" aria-expanded="false">
+          <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+        </button>
+      </div>
+
       <nav class="nav-movil" id="navMovil" aria-label="Navegación móvil">
         <a class="enlace-nav{% if request.endpoint == 'inicio' %} activo{% endif %}" href="{{ url_for('inicio') }}">Inicio</a>
         <a class="enlace-nav{% if request.endpoint == 'categorias' %} activo{% endif %}" href="{{ url_for('categorias') }}">Categorías</a>
         <a class="enlace-nav{% if request.endpoint == 'productos' %} activo{% endif %}" href="{{ url_for('productos') }}">Productos</a>
         <a class="enlace-nav{% if request.endpoint == 'contacto' %} activo{% endif %}" href="{{ url_for('contacto') }}">Contacto</a>
+        <hr class="separador-nav-movil"/>
+        {% if esta_autenticado %}
+          {% if es_admin %}
+            <a class="enlace-nav badge-admin-nav{% if request.endpoint == 'admin_dashboard' %} activo{% endif %}" href="{{ url_for('admin_dashboard') }}">
+              <span class="material-symbols-outlined" aria-hidden="true">admin_panel_settings</span>
+              Panel de Administración
+            </a>
+          {% else %}
+            <a class="enlace-nav{% if request.endpoint == 'ver_carrito' %} activo{% endif %}" href="{{ url_for('ver_carrito') }}">
+              <span class="material-symbols-outlined" aria-hidden="true">shopping_cart</span>
+              Mi Carrito ({% if total_items_carrito > 0 %}{{ total_items_carrito }}{% else %}0{% endif %})
+            </a>
+          {% endif %}
+          <a class="enlace-nav{% if request.endpoint == 'perfil' %} activo{% endif %}" href="{{ url_for('perfil') }}">
+            <span class="material-symbols-outlined" aria-hidden="true">account_circle</span>
+            Mi Perfil ({{ session.usuario_nombre }})
+          </a>
+          <a class="enlace-nav enlace-salir" href="{{ url_for('logout') }}">
+            <span class="material-symbols-outlined" aria-hidden="true">logout</span>
+            Cerrar Sesión
+          </a>
+        {% else %}
+          <a class="enlace-nav{% if request.endpoint == 'login' %} activo{% endif %}" href="{{ url_for('login') }}">
+            <span class="material-symbols-outlined" aria-hidden="true">login</span>
+            Iniciar Sesión
+          </a>
+          <a class="enlace-nav{% if request.endpoint == 'registro' %} activo{% endif %}" href="{{ url_for('registro') }}">
+            <span class="material-symbols-outlined" aria-hidden="true">person_add</span>
+            Crear Cuenta
+          </a>
+        {% endif %}
       </nav>
     </div>
   </header>
@@ -42,7 +113,15 @@
     {% if mensajes %}
       <div class="contenedor mensajes-flash" aria-live="polite">
         {% for categoria, mensaje in mensajes %}
-          <div class="mensaje-flash mensaje-flash-{{ categoria }}" role="alert">{{ mensaje }}</div>
+          <div class="mensaje-flash mensaje-flash-{{ categoria }}" role="alert">
+            <span class="material-symbols-outlined icono-flash" aria-hidden="true">
+              {% if categoria == 'success' %}check_circle
+              {% elif categoria == 'error' or categoria == 'danger' %}error
+              {% elif categoria == 'warning' %}warning
+              {% else %}info{% endif %}
+            </span>
+            <span class="texto-flash">{{ mensaje }}</span>
+          </div>
         {% endfor %}
       </div>
     {% endif %}
@@ -60,4 +139,3 @@
   {% block scripts %}{% endblock %}
 </body>
 </html>
-

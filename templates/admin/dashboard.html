@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block titulo %}Panel de Administración{% endblock %}
+
+{% block contenido %}
+<main class="contacto-principal admin-seccion">
+  <div class="contenedor">
+    <div class="caja-formulario auth-caja admin-caja">
+      <section class="contenedor-formulario-contacto" aria-labelledby="titulo-admin">
+        <div class="admin-cabecera">
+          <span class="material-symbols-outlined admin-icono" aria-hidden="true">admin_panel_settings</span>
+          <h1 id="titulo-admin" class="titulo-formulario-contacto">
+            Panel de <span class="degradado">Administración</span>
+          </h1>
+          <p class="admin-subtitulo">
+            Bienvenido al centro de control de New Records, <strong>{{ session.usuario_nombre }}</strong>.
+          </p>
+        </div>
+
+        <div class="admin-grid-modulos">
+          <div class="admin-tarjeta-modulo">
+            <span class="material-symbols-outlined admin-modulo-icono" aria-hidden="true">album</span>
+            <h3>Gestión de Catálogo</h3>
+            <p>Control de discos CD, Vinilos y categorías musicales.</p>
+            <span class="badge badge-bloqueado">Disponible en Fase 10</span>
+          </div>
+
+          <div class="admin-tarjeta-modulo">
+            <span class="material-symbols-outlined admin-modulo-icono" aria-hidden="true">shopping_cart_checkout</span>
+            <h3>Pedidos y Aprobaciones</h3>
+            <p>Revisión transaccional y control de existencias.</p>
+            <span class="badge badge-bloqueado">Disponible en Fase 10</span>
+          </div>
+
+          <div class="admin-tarjeta-modulo">
+            <span class="material-symbols-outlined admin-modulo-icono" aria-hidden="true">analytics</span>
+            <h3>Reportes de Ventas</h3>
+            <p>Métricas financieras, discos y géneros más vendidos.</p>
+            <span class="badge badge-bloqueado">Disponible en Fase 11</span>
+          </div>
+        </div>
+
+        <div class="admin-acciones-pie">
+          <a class="boton boton-destacado" href="{{ url_for('perfil') }}">
+            <span class="material-symbols-outlined" aria-hidden="true">person</span>
+            Ir a mi perfil
+          </a>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+{% endblock %}

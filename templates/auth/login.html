@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block titulo %}Iniciar Sesión{% endblock %}
+
+{% block contenido %}
+<main class="contacto-principal auth-seccion">
+  <div class="contenedor">
+    <div class="caja-formulario auth-caja">
+      <section class="contenedor-formulario-contacto" aria-labelledby="titulo-login">
+        <div class="auth-cabecera">
+          <span class="material-symbols-outlined auth-icono" aria-hidden="true">lock_open</span>
+          <h1 id="titulo-login" class="titulo-formulario-contacto">
+            Iniciar <span class="degradado">Sesión</span>
+          </h1>
+          <p class="auth-subtitulo">Accede a tu cuenta de New Records para gestionar tus compras y pedidos.</p>
+        </div>
+
+        <form class="formulario-contacto" action="{{ url_for('login', next=next) }}" method="post">
+          <div class="grupo-formulario">
+            <label class="etiqueta-formulario" for="email">Correo electrónico</label>
+            <input 
+              class="entrada-formulario" 
+              id="email" 
+              name="email" 
+              type="email" 
+              value="{{ email or '' }}" 
+              placeholder="tu@correo.com" 
+              required 
+              autocomplete="email"
+              autofocus
+            />
+          </div>
+
+          <div class="grupo-formulario">
+            <label class="etiqueta-formulario" for="password">Contraseña</label>
+            <input 
+              class="entrada-formulario" 
+              id="password" 
+              name="password" 
+              type="password" 
+              placeholder="••••••••" 
+              required 
+              autocomplete="current-password"
+            />
+          </div>
+
+          <button class="boton boton-principal boton-enviar resplandor-neon" type="submit">
+            Ingresar
+            <span class="material-symbols-outlined" aria-hidden="true">login</span>
+          </button>
+
+          <div class="auth-pie-enlaces">
+            <p class="auth-texto-enlace">
+              ¿Aún no tienes cuenta? 
+              <a class="enlace-destacado" href="{{ url_for('registro') }}">Crear una cuenta nueva</a>
+            </p>
+          </div>
+        </form>
+      </section>
+    </div>
+  </div>
+</main>
+{% endblock %}

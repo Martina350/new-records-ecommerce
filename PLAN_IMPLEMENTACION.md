@@ -1,3 +1,5 @@
+
+
 # Plan de Implementación por Fases - New Records
 
 ## 1. Contexto del proyecto
@@ -376,7 +378,7 @@ Tareas principales:
 
 ### Fase 2 - Base Flask, configuración y conexión con PostgreSQL
 
-**Estado:** bloqueada hasta aprobar y completar la Fase 1.
+**Estado:** completada; pendiente de aprobación para iniciar la Fase 3.
 
 Tareas previstas:
 
@@ -394,9 +396,24 @@ Tareas previstas:
 - Preparar páginas básicas para errores 403, 404 y 500.
 - Verificar que el servidor inicia, sirve los recursos del prototipo y puede detenerse sin errores.
 
+Resultado de ejecución:
+
+- Se crearon `app.py`, `config.py` y `models.py` con inicialización diferida de SQLAlchemy.
+- Se configuraron `.env` y `.env.example` sin versionar ni mostrar credenciales reales.
+- Se creó `base.html` con navegación, bloques Jinja2 y espacio para mensajes flash.
+- Las cuatro páginas del prototipo se convirtieron en plantillas hijas y utilizan `url_for`.
+- Se añadieron páginas propias para errores 403, 404 y 500.
+- Se añadió el comando de lectura `check-db` para verificar usuario, base, codificación y propietario.
+- Se creó la base `new_records_db` con codificación UTF-8.
+- Se creó el usuario exclusivo `new_records_app` y se asignó como propietario de la base.
+- La aplicación se conecta con `new_records_app`, no con el superusuario `postgres`.
+- Las rutas públicas, recursos estáticos y página 404 respondieron correctamente mediante Flask.
+- Las seis pruebas automatizadas de la fase finalizaron correctamente.
+- No se crearon modelos del dominio, tablas ni datos iniciales de la Fase 3.
+
 ### Fase 3 - Modelo relacional, POO e inicialización de datos
 
-**Estado:** bloqueada.
+**Estado:** completada; pendiente de aprobación para iniciar la Fase 4.
 
 Tareas previstas:
 
@@ -421,9 +438,27 @@ Tareas previstas:
 - Comprobar desde PostgreSQL que la columna discriminadora reconstruye correctamente objetos `CD` y `Vinilo`.
 - Documentar el modelo ER y el diccionario de datos antes de avanzar.
 
+Resultado de ejecución:
+
+- Se implementaron nueve tablas normalizadas para usuarios, catálogo, pagos, pedidos y facturas.
+- Se definieron PK, FK, relaciones, índices y políticas de eliminación según el historial del negocio.
+- Se incorporaron restricciones `CHECK`, `DEFAULT`, `UNIQUE` y valores obligatorios en PostgreSQL.
+- `Disco` funciona como clase padre polimórfica abstracta y `CD`/`Vinilo` como clases concretas.
+- La consulta de la clase padre reconstruye correctamente instancias `CD` y `Vinilo` desde la columna `formato`.
+- `precio_final()` presenta comportamiento diferente según el formato físico.
+- Las contraseñas de `Usuario` se encapsulan mediante métodos de hash y verificación.
+- `init_db.py` crea solamente tablas faltantes y no contiene `drop_all()`.
+- Se cargaron 3 categorías, 12 discos del prototipo y 2 cuentas de demostración.
+- Dos ejecuciones consecutivas conservaron los mismos conteos, demostrando idempotencia.
+- Las contraseñas iniciales se obtuvieron del `.env` local y no se incluyeron en archivos versionables.
+- PostgreSQL rechazó correctamente una operación de prueba con stock negativo.
+- Se generó `database/schema_fase3.sql` como referencia del esquema real validado.
+- Se documentaron el modelo entidad-relación y el diccionario de datos.
+- Las once pruebas automatizadas finalizaron correctamente.
+
 ### Fase 4 - Autenticación, perfil, sesiones y roles
 
-**Estado:** bloqueada.
+**Estado:** completada; pendiente de aprobación para iniciar la Fase 5.
 
 Tareas previstas:
 
@@ -444,9 +479,23 @@ Tareas previstas:
 - Incorporar mensajes flash diferenciados para éxito, advertencia y error.
 - Probar acceso directo a URLs protegidas como visitante, cliente y administrador.
 
+Resultado de ejecución:
+
+- Se creó el módulo `auth.py` con los decoradores `@login_requerido` y `@rol_requerido(*roles)`, preservando metadatos mediante `wraps`.
+- Se implementaron las funciones auxiliares `iniciar_sesion()`, `cerrar_sesion()` y `obtener_usuario_actual()`.
+- Se incorporaron en `app.py` las rutas `/registro`, `/login`, `/logout`, `/perfil` y el panel `/admin/dashboard`.
+- El registro asigna de forma forzada el rol `cliente`, normaliza correos a minúsculas y valida contraseñas con longitud mínima de 8 caracteres.
+- El login verifica credenciales contra el hash de contraseñas de PostgreSQL y devuelve mensajes genéricos de error.
+- Se implementó la visualización y edición segura del perfil del usuario autenticado con persistencia en base de datos.
+- Las rutas administrativas quedan restringidas mediante código de estado `403` ante accesos no autorizados.
+- Se crearon las plantillas Jinja2 `templates/auth/login.html`, `templates/auth/registro.html`, `templates/auth/perfil.html` y `templates/admin/dashboard.html`.
+- Se actualizó `base.html` con navegación responsive condicional para visitantes, clientes y administradores, e integración de mensajes flash con estilos (`success`, `warning`, `error`, `info`).
+- Se añadieron estilos CSS dedicados en `static/css/styles.css` respetando el diseño cyberpunk oscuro y acentos neón.
+- Se agregaron 10 pruebas automatizadas en `tests/test_auth.py`, alcanzando un total de **21/21 pruebas pasando exitosamente**.
+
 ### Fase 5 - Catálogo dinámico y detalle de discos
 
-**Estado:** bloqueada.
+**Estado:** completada; pendiente de aprobación para iniciar la Fase 6.
 
 Tareas previstas:
 
@@ -463,9 +512,20 @@ Tareas previstas:
 - Generar enlaces con `url_for` y no con rutas HTML escritas manualmente.
 - Mantener el diseño responsive del prototipo y corregir accesibilidad básica del menú, imágenes y controles.
 
+Resultado de ejecución:
+
+- Se dinamizaron las rutas `/categorias`, `/productos` y la nueva ruta `/productos/<codigo>` en `app.py`.
+- Se eliminaron las listas estáticas de discos y categorías de los archivos HTML, cargándose dinámicamente desde PostgreSQL.
+- Las consultas cargan exclusivamente registros con `activo == True`.
+- Se implementó el filtrado dinámico por categoría (`?categoria=slug`) y búsqueda por texto (`?q=termino`).
+- Se construyó la plantilla `templates/detalle_producto.html` mostrando álbum, artista, género, SKU, tipo `CD` o `Vinilo`, descripción, stock y desglose polimórfico del cálculo de precio final (`precio_base`, costo por peso y embalaje).
+- Se implementó la sección de discos recomendados de la misma categoría (hasta 4 discos excluyendo el actual).
+- Se agregaron estilos dedicados en `static/css/styles.css` para tarjetas, barra de búsqueda, migas de pan, estados vacíos y desglose de precios.
+- Se crearon 8 pruebas automatizadas en `tests/test_catalogo.py`, alcanzando un total de **29/29 pruebas pasando exitosamente**.
+
 ### Fase 6 - Carrito y preparación del checkout
 
-**Estado:** bloqueada.
+**Estado:** completada; pendiente de aprobación para iniciar la Fase 7.
 
 Tareas previstas:
 
@@ -482,6 +542,19 @@ Tareas previstas:
 - Calcular el total en el servidor y no confiar en valores enviados por JavaScript.
 - Mostrar un estado claro cuando el carrito esté vacío.
 - Preparar el resumen de checkout sin crear todavía el pedido definitivo.
+
+Resultado de ejecución:
+
+- Se creó el módulo `cart.py` con las funciones `obtener_carrito_sesion()`, `agregar_disco()`, `actualizar_cantidad()`, `eliminar_disco()`, `vaciar_carrito()` y `obtener_detalle_carrito()`.
+- Los IDs de discos se serializan como texto y la sesión se fuerza como modificada ante cada cambio.
+- Cada consulta revalida existencias en PostgreSQL y ajusta cantidades automáticamente según el stock real.
+- Los subtotales e importe total acumulado se calculan estrictamente en el backend mediante el método polimórfico `disco.precio_final()`.
+- Se incorporaron en `app.py` las rutas `/carrito` (`GET`), `/carrito/agregar/<disco_id>` (`POST`), `/carrito/actualizar/<disco_id>` (`POST`), `/carrito/eliminar/<disco_id>` (`POST`), `/carrito/vaciar` (`POST`) y `/checkout/resumen` (`GET`), todas protegidas con `@login_requerido`.
+- Se actualizaron el context processor de `app.py` y `templates/base.html` para incluir un enlace e ícono con badge contador dinámico (`total_items_carrito`).
+- Se crearon las plantillas `templates/carrito.html` y `templates/checkout_resumen.html`.
+- Se vinculó el botón "Agregar al Carrito" en `templates/detalle_producto.html`.
+- Se añadieron estilos CSS dedicados en `static/css/styles.css` para la grilla de carrito, controles de cantidad, tarjetas de resumen y badge contador.
+- Se agregaron 8 pruebas automatizadas en `tests/test_carrito.py`, alcanzando un total de **37/37 pruebas pasando exitosamente**.
 
 ### Fase 7 - Métodos de pago y verificación por PIN
 

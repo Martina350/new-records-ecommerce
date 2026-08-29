@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block titulo %}Registro de Usuario{% endblock %}
+
+{% block contenido %}
+<main class="contacto-principal auth-seccion">
+  <div class="contenedor">
+    <div class="caja-formulario auth-caja">
+      <section class="contenedor-formulario-contacto" aria-labelledby="titulo-registro">
+        <div class="auth-cabecera">
+          <span class="material-symbols-outlined auth-icono" aria-hidden="true">person_add</span>
+          <h1 id="titulo-registro" class="titulo-formulario-contacto">
+            Crear <span class="degradado">Cuenta</span>
+          </h1>
+          <p class="auth-subtitulo">Únete a la comunidad de New Records para adquirir tus discos y vinilos favoritos.</p>
+        </div>
+
+        <form class="formulario-contacto" action="{{ url_for('registro') }}" method="post">
+          <div class="grupo-formulario">
+            <label class="etiqueta-formulario" for="nombre">Nombre completo *</label>
+            <input 
+              class="entrada-formulario" 
+              id="nombre" 
+              name="nombre" 
+              type="text" 
+              value="{{ nombre or '' }}" 
+              placeholder="Ej. Martina Gómez" 
+              required 
+              autocomplete="name"
+              autofocus
+            />
+          </div>
+
+          <div class="grupo-formulario">
+            <label class="etiqueta-formulario" for="email">Correo electrónico *</label>
+            <input 
+              class="entrada-formulario" 
+              id="email" 
+              name="email" 
+              type="email" 
+              value="{{ email or '' }}" 
+              placeholder="tu@correo.com" 
+              required 
+              autocomplete="email"
+            />
+          </div>
+
+          <div class="fila-formulario">
+            <div class="grupo-formulario">
+              <label class="etiqueta-formulario" for="password">Contraseña *</label>
+              <input 
+                class="entrada-formulario" 
+                id="password" 
+                name="password" 
+                type="password" 
+                placeholder="Mínimo 8 caracteres" 
+                minlength="8" 
+                required 
+                autocomplete="new-password"
+              />
+            </div>
+
+            <div class="grupo-formulario">
+              <label class="etiqueta-formulario" for="confirmar_password">Confirmar contraseña *</label>
+              <input 
+                class="entrada-formulario" 
+                id="confirmar_password" 
+                name="confirmar_password" 
+                type="password" 
+                placeholder="Repite tu contraseña" 
+                minlength="8" 
+                required 
+                autocomplete="new-password"
+              />
+            </div>
+          </div>
+
+          <button class="boton boton-principal boton-enviar resplandor-neon" type="submit">
+            Registrarme
+            <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+          </button>
+
+          <div class="auth-pie-enlaces">
+            <p class="auth-texto-enlace">
+              ¿Ya tienes una cuenta? 
+              <a class="enlace-destacado" href="{{ url_for('login') }}">Inicia sesión aquí</a>
+            </p>
+          </div>
+        </form>
+      </section>
+    </div>
+  </div>
+</main>
+{% endblock %}

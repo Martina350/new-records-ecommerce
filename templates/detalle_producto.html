@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block titulo %}{{ disco.album }} - {{ disco.artista }}{% endblock %}
+
+{% block contenido %}
+<main class="detalle-principal">
+  <div class="contenedor">
+    <!-- Migas de pan / navegación de retorno -->
+    <nav class="migas-pan" aria-label="Ruta de navegación">
+      <a class="enlace-miga" href="{{ url_for('inicio') }}">Inicio</a>
+      <span class="separador-miga">/</span>
+      <a class="enlace-miga" href="{{ url_for('productos') }}">Productos</a>
+      <span class="separador-miga">/</span>
+      <a class="enlace-miga" href="{{ url_for('productos', categoria=disco.categoria.slug) }}">{{ disco.categoria.nombre }}</a>
+      <span class="separador-miga">/</span>
+      <span class="miga-activa">{{ disco.album }}</span>
+    </nav>
+
+    <div class="detalle-grid">
+      <!-- Columna izquierda: Portada del disco -->
+      <div class="detalle-columna-imagen">
+        <div class="detalle-imagen-contenedor">
+          <img 
+            class="detalle-imagen-portada" 
+            src="{{ url_for('static', filename=disco.imagen) }}" 
+            alt="Portada de {{ disco.album }} - {{ disco.artista }}"
+          />
+          <div class="badge-formato-flotante badge-formato-{{ disco.formato | lower }}">
+            <span class="material-symbols-outlined icono-formato" aria-hidden="true">
+              {% if disco.formato == 'VINILO' %}album{% else %}album{% endif %}
+            </span>
+            Formato {{ disco.formato }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna derecha: Ficha técnica y precio polimórfico -->
+      <div class="detalle-columna-info">
+        <div class="detalle-encabezado">
+          <span class="detalle-categoria-tag">
+            <a href="{{ url_for('productos', categoria=disco.categoria.slug) }}">
+              {{ disco.categoria.nombre }}
+            </a>
+          </span>
+          <span class="detalle-codigo">SKU: {{ disco.codigo }}</span>
+        </div>
+
+        <h1 class="detalle-titulo">{{ disco.album }}</h1>
+        <h2 class="detalle-artista">{{ disco.artista }}</h2>
+
+        <div class="detalle-descripcion-bloque">
+          <h3 class="detalle-seccion-subtitulo">Descripción</h3>
+          <p class="detalle-descripcion-texto">{{ disco.descripcion }}</p>
+        </div>
+
+        <!-- Desglose Polimórfico de Costos y Precio Final -->
+        <div class="caja-desglose-precio">
+          <h3 class="desglose-titulo">
+            <span class="material-symbols-outlined" aria-hidden="true">receipt_long</span>
+            Ficha Comercial &amp; Desglose Polimórfico
+          </h3>
+
+          <div class="desglose-filas">
+            <div class="desglose-fila">
+              <span class="desglose-etiqueta">Precio base:</span>
+              <span class="desglose-valor">${{ "%.2f"|format(disco.precio_base) }}</span>
+            </div>
+
+            <div class="desglose-fila">
+              <span class="desglose-etiqueta">
+                Costo de envío físico ({{ disco.peso_kg }} kg @ ${{ "%.2f"|format(disco.costo_envio_por_kg) }}/kg):
+              </span>
+              <span class="desglose-valor">
+                +${{ "%.2f"|format(disco.peso_kg * disco.costo_envio_por_kg) }}
+              </span>
+            </div>
+
+            {% if disco.formato == 'VINILO' %}
+              <div class="desglose-fila">
+                <span class="desglose-etiqueta">
+                  Embalaje protector para vinilo:
+                </span>
+                <span class="desglose-valor">
+                  +${{ "%.2f"|format(disco.costo_embalaje) }}
+                </span>
+              </div>
+            {% endif %}
+
+            <div class="desglose-fila desglose-fila-total">
+              <span class="desglose-total-etiqueta">Precio Final (con entrega):</span>
+              <span class="desglose-total-valor">${{ "%.2f"|format(disco.precio_final()) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Estado de Inventario y Botón de Compra -->
+        <div class="detalle-estado-stock">
+          {% if disco.stock > 0 %}
+            <div class="stock-disponible">
+              <span class="material-symbols-outlined icono-stock" aria-hidden="true">check_circle</span>
+              <span>En stock ({{ disco.stock }} unidades disponibles)</span>
+            </div>
+          {% else %}
+            <div class="stock-agotado">
+              <span class="material-symbols-outlined icono-stock" aria-hidden="true">cancel</span>
+              <span>Agotado temporalmente</span>
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="detalle-acciones-compra">
+          <form action="{{ url_for('agregar_al_carrito', disco_id=disco.id) }}" method="post" class="form-agregar-detalle">
+            <input type="hidden" name="cantidad" value="1"/>
+            <button 
+              class="boton boton-principal boton-agregar-carrito resplandor-neon" 
+              type="submit"
+              {% if disco.stock == 0 %}disabled{% endif %}
+            >
+              <span class="material-symbols-outlined" aria-hidden="true">add_shopping_cart</span>
+              Agregar al Carrito
+            </button>
+          </form>
+          <a class="boton boton-secundario" href="{{ url_for('productos') }}">
+            <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+            Volver al catálogo
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección de Discos Recomendados de la misma Categoría -->
+    {% if recomendados %}
+      <section class="seccion-recomendados" aria-labelledby="titulo-recomendados">
+        <h2 id="titulo-recomendados" class="titulo-seccion-recomendados">
+          Discos recomendados de <span class="degradado">{{ disco.categoria.nombre }}</span>
+        </h2>
+        <div class="grid-productos grid-recomendados">
+          {% for rec in recomendados %}
+            <article class="tarjeta-producto tarjeta-recomendada">
+              <a class="enlace-tarjeta-producto" href="{{ url_for('detalle_producto', codigo=rec.codigo) }}">
+                <div class="tarjeta-producto-imagen">
+                  <div 
+                    class="tarjeta-producto-imagen-fondo" 
+                    style="background-image: url('{{ url_for('static', filename=rec.imagen) }}');" 
+                    role="img" 
+                    aria-label="Portada {{ rec.album }}"
+                  ></div>
+                  <span class="badge-formato-tarjeta badge-formato-{{ rec.formato | lower }}">
+                    {{ rec.formato }}
+                  </span>
+                </div>
+              </a>
+              <div class="tarjeta-producto-encabezado">
+                <h3 class="tarjeta-producto-titulo">
+                  <a href="{{ url_for('detalle_producto', codigo=rec.codigo) }}">
+                    {{ rec.artista }} - {{ rec.album }}
+                  </a>
+                </h3>
+                <span class="tarjeta-producto-precio">${{ "%.2f"|format(rec.precio_base) }}</span>
+              </div>
+              <div class="tarjeta-producto-acciones">
+                <a class="boton boton-secundario boton-tarjeta" href="{{ url_for('detalle_producto', codigo=rec.codigo) }}">
+                  Ver detalles
+                </a>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+  </div>
+</main>
+{% endblock %}

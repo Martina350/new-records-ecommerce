@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block titulo %}Resumen de Checkout{% endblock %}
+
+{% block contenido %}
+<main class="contacto-principal checkout-seccion">
+  <div class="contenedor">
+    <div class="caja-formulario checkout-caja">
+      <section class="contenedor-formulario-contacto" aria-labelledby="titulo-checkout">
+        <div class="checkout-cabecera">
+          <span class="material-symbols-outlined checkout-icono" aria-hidden="true">receipt</span>
+          <h1 id="titulo-checkout" class="titulo-formulario-contacto">
+            Resumen de <span class="degradado">Checkout</span>
+          </h1>
+          <p class="checkout-subtitulo">
+            Verifica el detalle de tu compra y tu dirección de envío antes del registro del método de pago.
+          </p>
+        </div>
+
+        <div class="checkout-grid">
+          <!-- Columna Izquierda: Información de Entrega -->
+          <div class="checkout-bloque">
+            <h3 class="checkout-subtitulo-bloque">
+              <span class="material-symbols-outlined" aria-hidden="true">local_shipping</span>
+              Datos de Envío
+            </h3>
+            <div class="checkout-datos-usuario">
+              <p><strong>Cliente:</strong> {{ usuario.nombre }}</p>
+              <p><strong>Correo:</strong> {{ usuario.email }}</p>
+              <p><strong>Teléfono:</strong> {{ usuario.telefono or 'No registrado (editar en mi perfil)' }}</p>
+              <p><strong>Ciudad:</strong> {{ usuario.ciudad or 'No registrada (editar en mi perfil)' }}</p>
+              <p><strong>Dirección:</strong> {{ usuario.direccion or 'No registrada (editar en mi perfil)' }}</p>
+              <a class="enlace-destacado" href="{{ url_for('perfil') }}">
+                <span class="material-symbols-outlined" aria-hidden="true">edit</span>
+                Editar datos de envío
+              </a>
+            </div>
+          </div>
+
+          <!-- Columna Derecha: Resumen de Productos y Totales -->
+          <div class="checkout-bloque">
+            <h3 class="checkout-subtitulo-bloque">
+              <span class="material-symbols-outlined" aria-hidden="true">album</span>
+              Detalle de Productos ({{ carrito.total_unidades }} discos)
+            </h3>
+            <div class="checkout-lista-items">
+              {% for item in carrito.elementos %}
+                <div class="item-checkout">
+                  <div class="item-checkout-info">
+                    <span class="item-checkout-titulo">{{ item.disco.artista }} - {{ item.disco.album }}</span>
+                    <span class="item-checkout-meta">({{ item.disco.formato }} x {{ item.cantidad }})</span>
+                  </div>
+                  <span class="item-checkout-subtotal">${{ "%.2f"|format(item.subtotal) }}</span>
+                </div>
+              {% endfor %}
+            </div>
+
+            <div class="checkout-total-caja">
+              <span>Total a pagar:</span>
+              <span class="checkout-monto-total">${{ "%.2f"|format(carrito.total_general) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Aviso preparatorio para Fase 7 (Métodos de Pago y Verificación PIN) -->
+        <div class="aviso-fase7">
+          <span class="material-symbols-outlined icono-fase7" aria-hidden="true">lock</span>
+          <div>
+            <strong>Paso posterior - Métodos de Pago (Fase 7):</strong>
+            <p>El registro seguro de tarjetas de crédito y la verificación mediante PIN por correo se habilitarán en la siguiente fase.</p>
+          </div>
+        </div>
+
+        <div class="checkout-acciones">
+          <a class="boton boton-secundario" href="{{ url_for('ver_carrito') }}">
+            <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+            Volver al Carrito
+          </a>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+{% endblock %}
