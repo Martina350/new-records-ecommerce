@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block titulo %}Agregar Tarjeta de Pago{% endblock %}
+
+{% block contenido %}
+<main class="contacto-principal auth-seccion">
+  <div class="contenedor">
+    <div class="caja-formulario auth-caja">
+      <section class="contenedor-formulario-contacto" aria-labelledby="titulo-agregar-tarjeta">
+
+        <div class="auth-cabecera">
+          <span class="material-symbols-outlined auth-icono" aria-hidden="true">add_card</span>
+          <h1 id="titulo-agregar-tarjeta" class="titulo-formulario-contacto">
+            Registrar <span class="degradado">Tarjeta</span> de Pago
+          </h1>
+          <p class="auth-subtitulo">
+            Solo guardamos los últimos 4 dígitos. Tu número completo y CVV nunca se almacenan.
+          </p>
+        </div>
+
+        <!-- Aviso de seguridad -->
+        <div class="aviso-seguridad-tarjeta">
+          <span class="material-symbols-outlined" aria-hidden="true">lock</span>
+          <span>Proceso seguro — verifica tu identidad con un PIN enviado a tu correo.</span>
+        </div>
+
+        <form class="formulario-contacto" action="{{ url_for('pago_agregar') }}" method="post" novalidate>
+          <div class="campo-formulario">
+            <label class="etiqueta-formulario" for="titular">Nombre del titular <span class="requerido">*</span></label>
+            <input
+              class="entrada-formulario"
+              type="text"
+              id="titular"
+              name="titular"
+              value="{{ titular | default('') }}"
+              placeholder="Como aparece en la tarjeta"
+              required
+              minlength="3"
+              maxlength="120"
+              autocomplete="cc-name"
+            />
+          </div>
+
+          <div class="campo-formulario">
+            <label class="etiqueta-formulario" for="marca">Marca de la tarjeta <span class="requerido">*</span></label>
+            <select class="entrada-formulario" id="marca" name="marca" required>
+              <option value="" disabled {% if not marca %}selected{% endif %}>Selecciona una marca...</option>
+              {% for m in marcas %}
+                <option value="{{ m }}" {% if marca == m %}selected{% endif %}>{{ m }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="campo-formulario">
+            <label class="etiqueta-formulario" for="numero">Número de tarjeta <span class="requerido">*</span></label>
+            <input
+              class="entrada-formulario"
+              type="text"
+              id="numero"
+              name="numero"
+              placeholder="0000 0000 0000 0000"
+              required
+              minlength="13"
+              maxlength="19"
+              autocomplete="cc-number"
+              inputmode="numeric"
+            />
+            <span class="nota-campo">
+              <span class="material-symbols-outlined" aria-hidden="true">info</span>
+              Solo usamos los últimos 4 dígitos. El número completo no se guarda.
+            </span>
+          </div>
+
+          <div class="grid-vencimiento">
+            <div class="campo-formulario">
+              <label class="etiqueta-formulario" for="mes_vencimiento">Mes de vencimiento <span class="requerido">*</span></label>
+              <input
+                class="entrada-formulario"
+                type="number"
+                id="mes_vencimiento"
+                name="mes_vencimiento"
+                value="{{ mes | default('') }}"
+                placeholder="MM (1-12)"
+                min="1"
+                max="12"
+                required
+                autocomplete="cc-exp-month"
+              />
+            </div>
+            <div class="campo-formulario">
+              <label class="etiqueta-formulario" for="anio_vencimiento">Año de vencimiento <span class="requerido">*</span></label>
+              <input
+                class="entrada-formulario"
+                type="number"
+                id="anio_vencimiento"
+                name="anio_vencimiento"
+                value="{{ anio | default('') }}"
+                placeholder="AAAA"
+                min="2026"
+                max="2040"
+                required
+                autocomplete="cc-exp-year"
+              />
+            </div>
+          </div>
+
+          <div class="grupo-botones-formulario">
+            <button class="boton boton-principal resplandor-neon" type="submit" id="btn-registrar-tarjeta">
+              <span class="material-symbols-outlined" aria-hidden="true">verified</span>
+              Continuar y verificar por PIN
+            </button>
+            <a class="boton boton-secundario" href="{{ url_for('pago_metodos') }}">
+              <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+              Cancelar
+            </a>
+          </div>
+        </form>
+
+      </section>
+    </div>
+  </div>
+</main>
+{% endblock %}

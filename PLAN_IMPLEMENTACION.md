@@ -559,7 +559,7 @@ Resultado de ejecución:
 
 ### Fase 7 - Métodos de pago y verificación por PIN
 
-**Estado:** bloqueada.
+**Estado:** completada; pendiente de aprobación para iniciar la Fase 8.
 
 Tareas previstas:
 
@@ -570,6 +570,20 @@ Tareas previstas:
 - Enviar el PIN mediante SMTP.
 - Confirmar la tarjeta únicamente después de verificar el PIN.
 - Seleccionar automáticamente el método verificado durante el checkout.
+
+Resultado de ejecución:
+
+- Se instaló `Flask-Mail 0.10.0` y se actualizaron `requirements.txt` y `config.py` con los parámetros SMTP.
+- Se creó `mailer.py` con la función `enviar_pin()` y detección automática de SMTP configurado; en modo desarrollo el PIN se muestra en un mensaje flash.
+- Se creó `payments.py` con las funciones `crear_verificacion()`, `verificar_pin()`, `obtener_metodos_pago_activos()`, `desactivar_metodo_pago()` y `establecer_predeterminado()`.
+- El PIN se genera como 6 dígitos numéricos, se almacena únicamente como hash Werkzeug en `verificaciones_tarjeta.pin_hash` y caduca en 5 minutos con un máximo de 3 intentos.
+- Solo se persisten: marca, últimos 4 dígitos, titular, mes/año de vencimiento y un token UUID simulado. Nunca el número completo ni el CVV.
+- Se incorporaron en `app.py` las rutas `/pago/metodos` (`GET`), `/pago/agregar` (`GET`, `POST`), `/pago/verificar/<token>` (`GET`, `POST`), `/pago/predeterminado/<id>` (`POST`) y `/pago/eliminar/<id>` (`POST`), todas protegidas con `@rol_requerido('cliente')`.
+- Se actualizó `/checkout/resumen` para mostrar los métodos de pago verificados del usuario o un aviso con enlace a registro si no tiene ninguno.
+- Se crearon las plantillas `templates/pago/metodos.html`, `templates/pago/agregar.html` y `templates/pago/verificar_pin.html`.
+- Se eliminó el aviso placeholder de Fase 7 de `templates/checkout_resumen.html`.
+- Se añadieron estilos CSS dedicados en `static/css/styles.css` para tarjetas de crédito, badge predeterminada, campo PIN, indicador de intentos y aviso de caducidad.
+- Se agregaron 8 pruebas automatizadas en `tests/test_pagos.py`, alcanzando un total de **50/50 pruebas pasando exitosamente**.
 
 ### Fase 8 - Pedidos, stock y cobro simulado
 

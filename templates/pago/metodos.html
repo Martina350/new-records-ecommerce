@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block titulo %}Mis Métodos de Pago{% endblock %}
+
+{% block contenido %}
+<main class="carrito-principal">
+  <div class="contenedor">
+    <div class="carrito-cabecera">
+      <h1 class="carrito-titulo">
+        Mis <span class="degradado">Métodos</span> de Pago
+      </h1>
+      <p class="carrito-subtitulo">
+        Administra tus tarjetas verificadas para un checkout rápido y seguro.
+      </p>
+    </div>
+
+    <div class="pago-layout">
+      <!-- Columna de Tarjetas -->
+      <div class="pago-lista-columna">
+        {% if metodos %}
+          <div class="lista-metodos-pago">
+            {% for metodo in metodos %}
+              <div class="tarjeta-credito-item{% if metodo.predeterminado %} predeterminada{% endif %}">
+                <div class="tarjeta-cabecera">
+                  <div class="tarjeta-info-izq">
+                    <div class="icono-marca-tarjeta icono-{{ metodo.marca | lower }}">
+                      {% if metodo.marca == "VISA" %}
+                        <span class="material-symbols-outlined" aria-hidden="true">credit_card</span>
+                        <span class="marca-texto">VISA</span>
+                      {% elif metodo.marca == "MASTERCARD" %}
+                        <span class="material-symbols-outlined" aria-hidden="true">credit_card</span>
+                        <span class="marca-texto">MC</span>
+                      {% else %}
+                        <span class="material-symbols-outlined" aria-hidden="true">credit_card</span>
+                        <span class="marca-texto">AMEX</span>
+                      {% endif %}
+                    </div>
+                    <div class="tarjeta-datos">
+                      <span class="enmascarado">**** **** **** {{ metodo.ultimos4 }}</span>
+                      <span class="tarjeta-titular">{{ metodo.titular }}</span>
+                      <span class="tarjeta-vencimiento">Vence: {{ "%02d"|format(metodo.mes_vencimiento) }}/{{ metodo.anio_vencimiento }}</span>
+                    </div>
+                  </div>
+                  <div class="tarjeta-info-der">
+                    {% if metodo.predeterminado %}
+                      <span class="badge-predeterminado">
+                        <span class="material-symbols-outlined" aria-hidden="true">star</span>
+                        Predeterminada
+                      </span>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <div class="tarjeta-acciones">
+                  {% if not metodo.predeterminado %}
+                    <form action="{{ url_for('pago_predeterminado', metodo_id=metodo.id) }}" method="post">
+                      <button class="boton boton-secundario boton-chico" type="submit">
+                        <span class="material-symbols-outlined" aria-hidden="true">star</span>
+                        Predeterminar
+                      </button>
+                    </form>
+                  {% endif %}
+                  <form action="{{ url_for('pago_eliminar', metodo_id=metodo.id) }}" method="post">
+                    <button class="boton-eliminar-item" type="submit" title="Eliminar tarjeta"
+                      onclick="return confirm('¿Deseas eliminar esta tarjeta?')">
+                      <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+                      Eliminar
+                    </button>
+                  </form>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="estado-vacio">
+            <span class="material-symbols-outlined icono-vacio" aria-hidden="true">credit_card_off</span>
+            <h3 class="titulo-vacio">No tienes métodos de pago registrados</h3>
+            <p class="texto-vacio">Agrega una tarjeta verificada para agilizar el proceso de checkout.</p>
+          </div>
+        {% endif %}
+
+        <div class="pago-acciones-principales">
+          <a class="boton boton-principal resplandor-neon" href="{{ url_for('pago_agregar') }}">
+            <span class="material-symbols-outlined" aria-hidden="true">add_card</span>
+            Agregar nueva tarjeta
+          </a>
+          <a class="boton boton-secundario" href="{{ url_for('checkout_resumen') }}">
+            <span class="material-symbols-outlined" aria-hidden="true">shopping_cart_checkout</span>
+            Ir al Checkout
+          </a>
+        </div>
+      </div>
+
+      <!-- Tarjeta Informativa de Seguridad -->
+      <div class="pago-info-columna">
+        <div class="caja-formulario seguridad-info-card">
+          <h3 class="seguridad-titulo">
+            <span class="material-symbols-outlined" aria-hidden="true">shield</span>
+            Tus datos están protegidos
+          </h3>
+          <ul class="seguridad-lista">
+            <li>
+              <span class="material-symbols-outlined icono-check-seguridad" aria-hidden="true">check_circle</span>
+              Solo guardamos los <strong>últimos 4 dígitos</strong> de tu tarjeta.
+            </li>
+            <li>
+              <span class="material-symbols-outlined icono-check-seguridad" aria-hidden="true">check_circle</span>
+              Nunca almacenamos tu número completo de tarjeta ni el CVV.
+            </li>
+            <li>
+              <span class="material-symbols-outlined icono-check-seguridad" aria-hidden="true">check_circle</span>
+              Cada tarjeta se verifica con un <strong>PIN temporal de 6 dígitos</strong> enviado a tu correo.
+            </li>
+            <li>
+              <span class="material-symbols-outlined icono-check-seguridad" aria-hidden="true">check_circle</span>
+              El PIN caduca en <strong>5 minutos</strong> y tiene un límite de 3 intentos.
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}

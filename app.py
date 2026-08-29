@@ -31,11 +31,21 @@ from cart import (
     vaciar_carrito,
 )
 from config import Config
-from models import Categoria, Disco, Usuario, db
+from mailer import enviar_pin, mail, smtp_configurado
+from models import Categoria, Disco, MetodoPago, VerificacionTarjeta, Usuario, db
+from payments import (
+    crear_verificacion,
+    desactivar_metodo_pago,
+    establecer_predeterminado,
+    obtener_metodos_pago_activos,
+    verificar_pin,
+    MARCAS_VALIDAS,
+)
 
 app = Flask(__name__)
 app.config.from_object(Config)
 db.init_app(app)
+mail.init_app(app)
 
 
 def es_url_segura(destino):
@@ -383,11 +393,150 @@ def checkout_resumen():
         return redirect(url_for("ver_carrito"))
 
     usuario = obtener_usuario_actual()
+    metodos_pago = obtener_metodos_pago_activos(usuario.id)
     return render_template(
         "checkout_resumen.html",
         carrito=detalle_carrito,
         usuario=usuario,
+        metodos_pago=metodos_pago,
     )
+
+
+@app.route("/pago/metodos")
+@rol_requerido("cliente")
+def pago_metodos():
+    """Muestra los métodos de pago verificados del cliente."""
+    metodos = obtener_metodos_pago_activos(session["usuario_id"])
+    return render_template("pago/metodos.html", metodos=metodos)
+
+
+@app.route("/pago/agregar", methods=["GET", "POST"])
+@rol_requerido("cliente")
+def pago_agregar():
+    """Formulario de registro de nueva tarjeta; genera y envía el PIN de verificación."""
+    if request.method == "POST":
+        titular = request.form.get("titular", "").strip()
+        marca = request.form.get("marca", "").upper().strip()
+        numero_completo = request.form.get("numero", "").replace(" ", "").replace("-", "")
+        mes = request.form.get("mes_vencimiento", "").strip()
+        anio = request.form.get("anio_vencimiento", "").strip()
+
+        errores = []
+        if not titular or len(titular) < 3:
+            errores.append("El nombre del titular es obligatorio (mínimo 3 caracteres).")
+        if marca not in MARCAS_VALIDAS:
+            errores.append("Selecciona una marca de tarjeta válida.")
+        if not numero_completo.isdigit() or len(numero_completo) < 13 or len(numero_completo) > 19:
+            errores.append("El número de tarjeta debe tener entre 13 y 19 dígitos.")
+        try:
+            mes_int = int(mes)
+            anio_int = int(anio)
+            if not (1 <= mes_int <= 12):
+                raise ValueError
+            if anio_int < 2026:
+                raise ValueError
+        except (ValueError, TypeError):
+            errores.append("Ingresa un mes (1-12) y año de vencimiento válidos.")
+
+        if errores:
+            for e in errores:
+                flash(e, "error")
+            return render_template(
+                "pago/agregar.html",
+                marcas=MARCAS_VALIDAS,
+                titular=titular,
+                marca=marca,
+                mes=mes,
+                anio=anio,
+            )
+
+        ultimos4 = numero_completo[-4:]
+        datos = {
+            "marca": marca,
+            "ultimos4": ultimos4,
+            "titular": titular,
+            "mes_vencimiento": mes_int,
+            "anio_vencimiento": anio_int,
+        }
+
+        try:
+            verificacion, pin = crear_verificacion(session["usuario_id"], datos)
+        except Exception:
+            db.session.rollback()
+            flash("Error al procesar la tarjeta. Inténtalo de nuevo.", "error")
+            return render_template("pago/agregar.html", marcas=MARCAS_VALIDAS)
+
+        usuario = obtener_usuario_actual()
+        enviado = enviar_pin(usuario.email, usuario.nombre, pin)
+
+        if enviado:
+            flash(
+                f"Se envió un código de 6 dígitos a {usuario.email}. Ingresa el código para confirmar tu tarjeta.",
+                "info",
+            )
+        else:
+            # Modo desarrollo: mostrar PIN en flash si SMTP no está configurado
+            flash(
+                f"[MODO DESARROLLO] El SMTP no está configurado. Tu PIN de verificación es: {pin}",
+                "warning",
+            )
+
+        return redirect(url_for("pago_verificar", token=verificacion.token_verificacion))
+
+    return render_template("pago/agregar.html", marcas=MARCAS_VALIDAS)
+
+
+@app.route("/pago/verificar/<token>", methods=["GET", "POST"])
+@rol_requerido("cliente")
+def pago_verificar(token):
+    """Formulario de ingreso del PIN para confirmar el registro de la tarjeta."""
+    verificacion = VerificacionTarjeta.query.filter_by(
+        token_verificacion=token, usuario_id=session["usuario_id"]
+    ).first_or_404()
+
+    if verificacion.verificada:
+        flash("Esta verificación ya fue completada.", "info")
+        return redirect(url_for("pago_metodos"))
+
+    if request.method == "POST":
+        pin_ingresado = request.form.get("pin", "").strip()
+        exito, resultado = verificar_pin(token, pin_ingresado)
+
+        if exito:
+            flash("¡Tarjeta verificada y agregada correctamente a tus métodos de pago!", "success")
+            return redirect(url_for("pago_metodos"))
+        else:
+            flash(resultado, "error")
+
+    intentos_restantes = max(0, 3 - verificacion.intentos)
+    return render_template(
+        "pago/verificar_pin.html",
+        token=token,
+        verificacion=verificacion,
+        intentos_restantes=intentos_restantes,
+    )
+
+
+@app.route("/pago/predeterminado/<int:metodo_id>", methods=["POST"])
+@rol_requerido("cliente")
+def pago_predeterminado(metodo_id):
+    """Establece un método de pago como predeterminado del cliente."""
+    if establecer_predeterminado(metodo_id, session["usuario_id"]):
+        flash("Método de pago predeterminado actualizado.", "success")
+    else:
+        flash("No se encontró el método de pago indicado.", "error")
+    return redirect(url_for("pago_metodos"))
+
+
+@app.route("/pago/eliminar/<int:metodo_id>", methods=["POST"])
+@rol_requerido("cliente")
+def pago_eliminar(metodo_id):
+    """Desactiva (eliminación lógica) un método de pago del cliente."""
+    if desactivar_metodo_pago(metodo_id, session["usuario_id"]):
+        flash("Método de pago eliminado correctamente.", "info")
+    else:
+        flash("No se encontró el método de pago indicado.", "error")
+    return redirect(url_for("pago_metodos"))
 
 
 @app.route("/admin/dashboard")

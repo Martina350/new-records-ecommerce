@@ -62,13 +62,47 @@
           </div>
         </div>
 
-        <!-- Aviso preparatorio para Fase 7 (Métodos de Pago y Verificación PIN) -->
-        <div class="aviso-fase7">
-          <span class="material-symbols-outlined icono-fase7" aria-hidden="true">lock</span>
-          <div>
-            <strong>Paso posterior - Métodos de Pago (Fase 7):</strong>
-            <p>El registro seguro de tarjetas de crédito y la verificación mediante PIN por correo se habilitarán en la siguiente fase.</p>
-          </div>
+        <!-- Selección de Método de Pago (Fase 7) -->
+        <div class="checkout-metodo-pago-seccion">
+          <h3 class="checkout-subtitulo-bloque">
+            <span class="material-symbols-outlined" aria-hidden="true">credit_card</span>
+            Método de Pago
+          </h3>
+          {% if metodos_pago %}
+            <div class="checkout-metodos-lista">
+              {% for metodo in metodos_pago %}
+                <div class="checkout-metodo-item {% if metodo.predeterminado %}seleccionado{% endif %}">
+                  <span class="material-symbols-outlined" aria-hidden="true">credit_card</span>
+                  <div class="checkout-metodo-info">
+                    <span class="checkout-metodo-nombre">{{ metodo.marca }} **** {{ metodo.ultimos4 }}</span>
+                    <span class="checkout-metodo-detalle">{{ metodo.titular }} · Vence {{ "%02d"|format(metodo.mes_vencimiento) }}/{{ metodo.anio_vencimiento }}</span>
+                  </div>
+                  {% if metodo.predeterminado %}
+                    <span class="badge-predeterminado badge-chico">
+                      <span class="material-symbols-outlined" aria-hidden="true">star</span>
+                      Predeterminada
+                    </span>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            </div>
+            <a class="enlace-destacado enlace-pequeño" href="{{ url_for('pago_metodos') }}">
+              <span class="material-symbols-outlined" aria-hidden="true">settings</span>
+              Gestionar mis tarjetas
+            </a>
+          {% else %}
+            <div class="aviso-sin-tarjeta">
+              <span class="material-symbols-outlined icono-aviso-tarjeta" aria-hidden="true">credit_card_off</span>
+              <div>
+                <strong>No tienes métodos de pago registrados.</strong>
+                <p>Agrega y verifica una tarjeta para completar tu compra.</p>
+                <a class="boton boton-principal boton-chico resplandor-neon" href="{{ url_for('pago_agregar') }}">
+                  <span class="material-symbols-outlined" aria-hidden="true">add_card</span>
+                  Agregar tarjeta ahora
+                </a>
+              </div>
+            </div>
+          {% endif %}
         </div>
 
         <div class="checkout-acciones">
@@ -82,3 +116,4 @@
   </div>
 </main>
 {% endblock %}
+
