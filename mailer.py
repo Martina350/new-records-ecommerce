@@ -36,3 +36,55 @@ def enviar_pin(destinatario, nombre, pin):
         return True
     except Exception:
         return False
+
+
+def notificar_creacion_pedido(pedido):
+    """Envía un correo de confirmación de pedido recibido al cliente."""
+    if not smtp_configurado():
+        return False
+
+    try:
+        cliente = pedido.cliente
+        asunto = f"New Records — Pedido {pedido.numero} recibido con éxito"
+        cuerpo = (
+            f"Hola {cliente.nombre},\n\n"
+            f"Hemos recibido tu pedido {pedido.numero} con un total de ${pedido.total:.2f}.\n\n"
+            f"Tu orden se encuentra actualmente en estado PENDIENTE de revisión administrativa. "
+            f"Te notificaremos en cuanto sea aprobada para proceder al despacho.\n\n"
+            f"Puedes consultar tu comprobante y el detalle de tu compra ingresando a tu cuenta en New Records.\n\n"
+            f"— Equipo New Records"
+        )
+        msg = Message(subject=asunto, recipients=[cliente.email], body=cuerpo)
+        mail.send(msg)
+        return True
+    except Exception:
+        return False
+
+
+def notificar_cambio_estado(pedido):
+    """Envía un correo al cliente notificando la aprobación o rechazo de su pedido."""
+    if not smtp_configurado():
+        return False
+
+    try:
+        cliente = pedido.cliente
+        asunto = f"New Records — Actualización de tu pedido {pedido.numero}"
+        if pedido.estado == "APROBADO":
+            cuerpo = (
+                f"Hola {cliente.nombre},\n\n"
+                f"¡Buenas noticias! Tu pedido {pedido.numero} ha sido APROBADO.\n"
+                f"Ya puedes descargar tu Factura Oficial de venta desde tu panel de pedidos.\n\n"
+                f"— Equipo New Records"
+            )
+        else:
+            cuerpo = (
+                f"Hola {cliente.nombre},\n\n"
+                f"Te informamos que tu pedido {pedido.numero} ha sido RECHAZADO.\n"
+                f"Motivo: {pedido.motivo_rechazo or 'Sin motivo especificado'}.\n\n"
+                f"— Equipo New Records"
+            )
+        msg = Message(subject=asunto, recipients=[cliente.email], body=cuerpo)
+        mail.send(msg)
+        return True
+    except Exception:
+        return False

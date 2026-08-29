@@ -151,6 +151,32 @@
           </div>
         </div>
 
+        <!-- Acciones de Descarga de Documentos PDF (Fase 9) -->
+        <div class="pedido-documentos-descarga">
+          <h3 class="checkout-subtitulo-bloque">
+            <span class="material-symbols-outlined" aria-hidden="true">picture_as_pdf</span>
+            Documentos Disponibles
+          </h3>
+          <div class="pedido-documentos-botones">
+            <a class="boton boton-pdf resplandor-neon" href="{{ url_for('descargar_comprobante', numero=pedido.numero) }}" target="_blank">
+              <span class="material-symbols-outlined icono-pdf" aria-hidden="true">download</span>
+              Descargar Comprobante (PDF)
+            </a>
+
+            {% if pedido.estado == "APROBADO" %}
+              <a class="boton boton-destacado boton-pdf resplandor-neon" href="{{ url_for('descargar_factura', numero=pedido.numero) }}" target="_blank">
+                <span class="material-symbols-outlined icono-pdf" aria-hidden="true">receipt</span>
+                Descargar Factura Oficial (PDF)
+              </a>
+            {% else %}
+              <span class="nota-factura-bloqueada">
+                <span class="material-symbols-outlined" aria-hidden="true">lock</span>
+                Factura Oficial disponible tras aprobación del pedido.
+              </span>
+            {% endif %}
+          </div>
+        </div>
+
         <div class="pedido-acciones-pie">
           <a class="boton boton-secundario" href="{{ url_for('lista_pedidos') }}">
             <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>

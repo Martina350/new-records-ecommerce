@@ -615,7 +615,7 @@ Resultado de ejecución:
 
 ### Fase 9 - Comprobantes PDF y notificaciones
 
-**Estado:** bloqueada.
+**Estado:** completada; pendiente de aprobación para iniciar la Fase 10.
 
 Tareas previstas:
 
@@ -625,6 +625,18 @@ Tareas previstas:
 - Permitir descarga e impresión.
 - Restringir cada documento a su propietario o a un administrador.
 - Enviar notificaciones de creación, aprobación o rechazo.
+
+Resultado de ejecución:
+
+- Se creó el módulo `pdf_generator.py` utilizando ReportLab (`SimpleDocTemplate`, `Table`, `Paragraph`, `TableStyle`, `colors`) para la maquetación estética de documentos imprimibles y descargables.
+- Se implementó la generación de dos tipos de documentos: `COMPROBANTE_PENDIENTE` (emitido tras el checkout) y `FACTURA_FINAL` (emitido tras la aprobación de la orden).
+- Cada emisión registra o actualiza la entidad `Factura` en PostgreSQL con su número único (`COMP-<numero>` o `FAC-<numero>`), tipo, fecha de emisión y ruta del archivo en `docs/comprobantes/`.
+- Se incorporaron en `app.py` los endpoints de descarga `/pedidos/<numero>/comprobante` y `/pedidos/<numero>/factura`, restringiendo el acceso exclusivamente al cliente propietario o a un administrador.
+- La descarga de la Factura Final valida estrictamente que el pedido se encuentre en estado `APROBADO`.
+- Se añadieron en `mailer.py` las funciones `notificar_creacion_pedido()` y `notificar_cambio_estado()`, integradas en el flujo de confirmación de checkout.
+- Se actualizaron las plantillas `templates/pedidos/detalle.html` y `templates/pedidos/lista.html` con botones y accesos rápidos de descarga en formato PDF.
+- Se agregaron estilos CSS en `static/css/styles.css` para los botones y notas de documentos PDF.
+- Se agregaron 6 pruebas automatizadas en `tests/test_pdf_notificaciones.py`, alcanzando un total de **64/64 pruebas pasando exitosamente**.
 
 ### Fase 10 - Administración de catálogo y pedidos
 

@@ -4,6 +4,7 @@ import click
 from email_validator import EmailNotValidError, validate_email
 from flask import (
     Flask,
+    Response,
     flash,
     redirect,
     render_template,
@@ -31,8 +32,8 @@ from cart import (
     vaciar_carrito,
 )
 from config import Config
-from mailer import enviar_pin, mail, smtp_configurado
-from models import Categoria, Disco, MetodoPago, VerificacionTarjeta, Usuario, db
+from mailer import enviar_pin, mail, notificar_creacion_pedido, smtp_configurado
+from models import Categoria, Disco, Factura, MetodoPago, VerificacionTarjeta, Usuario, db
 from payments import (
     crear_verificacion,
     desactivar_metodo_pago,
@@ -41,6 +42,7 @@ from payments import (
     verificar_pin,
     MARCAS_VALIDAS,
 )
+from pdf_generator import generar_pdf_pedido
 from services import (
     obtener_pedido_por_numero,
     obtener_pedidos_cliente,
@@ -424,6 +426,8 @@ def confirmar_checkout():
 
     exito, resultado = procesar_checkout(session["usuario_id"], metodo_id_int)
     if exito:
+        # Enviar notificación por correo (si SMTP está configurado)
+        notificar_creacion_pedido(resultado)
         flash(f"¡Tu pedido {resultado.numero} ha sido creado con éxito! Se encuentra pendiente de revisión.", "success")
         return redirect(url_for("ver_pedido", numero=resultado.numero))
     else:
@@ -449,6 +453,44 @@ def ver_pedido(numero):
         return render_template("errors/404.html"), 404
 
     return render_template("pedidos/detalle.html", pedido=pedido)
+
+
+@app.route("/pedidos/<numero>/comprobante")
+@login_requerido
+def descargar_comprobante(numero):
+    """Genera y transmite el comprobante de pedido en formato PDF."""
+    usuario = obtener_usuario_actual()
+    pedido = obtener_pedido_por_numero(numero, usuario)
+    if not pedido:
+        return render_template("errors/404.html"), 404
+
+    pdf_bytes, nombre_archivo, _ = generar_pdf_pedido(pedido, tipo="COMPROBANTE_PENDIENTE")
+    return Response(
+        pdf_bytes,
+        mimetype="application/pdf",
+        headers={"Content-Disposition": f"inline; filename={nombre_archivo}"},
+    )
+
+
+@app.route("/pedidos/<numero>/factura")
+@login_requerido
+def descargar_factura(numero):
+    """Genera y transmite la factura final de venta en formato PDF tras aprobación."""
+    usuario = obtener_usuario_actual()
+    pedido = obtener_pedido_por_numero(numero, usuario)
+    if not pedido:
+        return render_template("errors/404.html"), 404
+
+    if pedido.estado != "APROBADO":
+        flash("La Factura Oficial de venta solo está disponible una vez que el pedido haya sido APROBADO.", "warning")
+        return redirect(url_for("ver_pedido", numero=numero))
+
+    pdf_bytes, nombre_archivo, _ = generar_pdf_pedido(pedido, tipo="FACTURA_FINAL")
+    return Response(
+        pdf_bytes,
+        mimetype="application/pdf",
+        headers={"Content-Disposition": f"inline; filename={nombre_archivo}"},
+    )
 
 
 @app.route("/pago/metodos")

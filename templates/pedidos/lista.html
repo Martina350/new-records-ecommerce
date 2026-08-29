@@ -64,10 +64,15 @@
                     </span>
                   </td>
                   <td class="col-accion-pedido">
-                    <a class="boton boton-secundario boton-chico" href="{{ url_for('ver_pedido', numero=pedido.numero) }}">
-                      <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
-                      Ver Detalle
-                    </a>
+                    <div class="acciones-pedido-lista">
+                      <a class="boton boton-secundario boton-chico" href="{{ url_for('ver_pedido', numero=pedido.numero) }}">
+                        <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
+                        Detalle
+                      </a>
+                      <a class="boton boton-secundario boton-chico boton-icono-solo" href="{{ url_for('descargar_comprobante', numero=pedido.numero) }}" title="Descargar Comprobante PDF" target="_blank">
+                        <span class="material-symbols-outlined" aria-hidden="true">picture_as_pdf</span>
+                      </a>
+                    </div>
                   </td>
                 </tr>
               {% endfor %}
