@@ -2,7 +2,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const botonMenu = document.querySelector('.alternar-nav');
   const menuMobile = document.getElementById('navMovil');
   if (botonMenu && menuMobile) {
-    botonMenu.addEventListener('click', () => menuMobile.classList.toggle('abierto'));
+    botonMenu.addEventListener('click', () => {
+      const estaAbierto = menuMobile.classList.toggle('abierto');
+      botonMenu.setAttribute('aria-expanded', String(estaAbierto));
+    });
   }
 
   const params = new URLSearchParams(window.location.search);

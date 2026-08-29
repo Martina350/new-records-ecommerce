@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block titulo %}Página no encontrada{% endblock %}
+
+{% block contenido %}
+<main class="pagina-error contenedor">
+  <span class="pagina-error-codigo">404</span>
+  <h1>Este lado del disco está vacío</h1>
+  <p>La página que buscas no existe o cambió de ubicación.</p>
+  <a class="boton boton-principal" href="{{ url_for('inicio') }}">Volver al inicio</a>
+</main>
+{% endblock %}
+

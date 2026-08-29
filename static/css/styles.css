@@ -672,6 +672,11 @@ img { max-width: 100%; height: auto; display: block; }
   padding: 2rem 0 4rem;
 }
 
+.caja-formulario {
+  max-width: 42rem;
+  margin: 0 auto;
+}
+
 .grid-contacto {
   display: grid;
   grid-template-columns: 1fr;
@@ -785,6 +790,51 @@ img { max-width: 100%; height: auto; display: block; }
 
 .mensaje-exito.visible {
   display: flex;
+}
+
+/* ===== Mensajes del servidor ===== */
+.mensajes-flash {
+  padding-top: 1rem;
+}
+
+.mensaje-flash {
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--border-light);
+  border-radius: 0.5rem;
+  background: var(--input-bg);
+}
+
+.mensaje-flash-success { border-color: rgba(0, 255, 65, 0.45); }
+.mensaje-flash-warning { border-color: rgba(245, 158, 11, 0.55); }
+.mensaje-flash-danger { border-color: rgba(239, 68, 68, 0.55); }
+
+/* ===== Páginas de error ===== */
+.pagina-error {
+  min-height: 68vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  text-align: center;
+}
+
+.pagina-error-codigo {
+  color: var(--accent);
+  font-family: monospace;
+  font-size: clamp(3.5rem, 12vw, 7rem);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.pagina-error h1,
+.pagina-error p {
+  margin: 0;
+}
+
+.pagina-error p {
+  max-width: 34rem;
+  color: var(--text-muted-page);
 }
 
 .boton-enviar {

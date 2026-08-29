@@ -4,9 +4,11 @@ New Records es un proyecto académico de comercio electrónico para la venta de 
 
 ## Estado actual
 
-La Fase 1 prepara el repositorio y preserva el prototipo. Todavía no contiene rutas Flask, modelos SQLAlchemy, tablas, autenticación, carrito ni procesos de compra.
+La Fase 1 preservó y organizó el prototipo. La Fase 2 incorporó la base Flask y la conexión PostgreSQL. La Fase 3 incorpora el modelo relacional, la jerarquía `Disco`/`CD`/`Vinilo` y la carga inicial del catálogo.
 
-El alcance completo y la regla de aprobación entre fases están documentados en [PLAN_IMPLEMENTACION.md](PLAN_IMPLEMENTACION.md).
+Todavía no contiene autenticación, carrito, checkout ni interfaces administrativas. Esas funcionalidades pertenecen a fases posteriores.
+
+El alcance completo y la regla de aprobación entre fases están documentados en `PLAN_IMPLEMENTACION.md`, que también puede ser entregado por separado a cada colaborador.
 
 ## Tecnologías previstas
 
@@ -30,29 +32,156 @@ El alcance completo y la regla de aprobación entre fases están documentados en
 - `docs/`: inventario, decisiones y documentación funcional.
 - `backups/`: destino local para respaldos; su contenido no se versiona.
 
-Los módulos Python de la aplicación se crearán únicamente cuando se aprueben sus fases correspondientes.
+Los módulos nuevos de la aplicación se crearán únicamente cuando se aprueben sus fases correspondientes.
 
-## Preparación local
+## Guía para clonar el repositorio y continuar el desarrollo
 
-1. Instalar Python y PostgreSQL.
-2. Confirmar que PostgreSQL está iniciado y que `psql` puede ejecutarse.
-3. Crear un entorno virtual llamado `.venv`.
-4. Activar el entorno virtual.
-5. Instalar las dependencias declaradas en `requirements.txt`.
-6. Copiar `.env.example` como `.env` y reemplazar sus valores localmente.
+El repositorio queda preparado hasta la **Fase 3**. La siguiente persona debe completar estos pasos desde la raíz del proyecto antes de comenzar la Fase 4.
 
-El archivo `.env` contiene secretos y está excluido de Git.
+### 1. Clonar el repositorio
 
-## Vista previa del prototipo
+```bash
+git clone https://github.com/Martina350/new-records-ecommerce.git
+cd new-records-ecommerce
+```
 
-Mientras Flask todavía no está implementado, el prototipo puede revisarse iniciando un servidor HTTP desde la raíz del repositorio y abriendo `/templates/index.html` en el navegador.
+Después debe cambiar a la rama de trabajo acordada con el equipo o crear una rama nueva a partir de la versión estable.
 
-Las páginas disponibles son:
+### 2. Crear y activar el entorno virtual
 
-- `/templates/index.html`
-- `/templates/categorias.html`
-- `/templates/productos.html`
-- `/templates/contacto.html`
+Se recomienda utilizar Python 3.10 o superior.
+
+En Windows PowerShell:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+En Linux o macOS:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+### 3. Instalar las dependencias
+
+Con el entorno virtual activado:
+
+```bash
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+### 4. Configurar PostgreSQL
+
+PostgreSQL debe estar instalado y el servicio debe encontrarse iniciado. Desde pgAdmin o `psql`, crear los siguientes recursos locales:
+
+- Usuario de aplicación: `new_records_app`.
+- Base de datos: `new_records_db`.
+- Propietario de la base: `new_records_app`.
+- Codificación: UTF-8.
+
+La contraseña debe ser elegida por cada colaborador y no debe compartirse ni subirse a Git. La aplicación no debe utilizar normalmente el superusuario `postgres`.
+
+Las instrucciones detalladas se encuentran en [Configuración de PostgreSQL](docs/CONFIGURACION_POSTGRESQL.md).
+
+### 5. Crear y completar el archivo de entorno
+
+Copiar `.env.example` como `.env`.
+
+En Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+En Linux o macOS:
+
+```bash
+cp .env.example .env
+```
+
+Editar únicamente el archivo local `.env` y completar, como mínimo:
+
+- `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT` y `DB_NAME` con la configuración PostgreSQL local.
+- `SECRET_KEY` con un valor aleatorio propio.
+- Las contraseñas de las cuentas iniciales de administrador y cliente.
+
+Puede generarse una clave secreta con:
+
+```bash
+python -c "import secrets; print(secrets.token_hex(32))"
+```
+
+No se debe copiar el archivo `.env` de otro integrante. Este archivo está excluido de Git y cada entorno debe utilizar sus propias credenciales.
+
+### 6. Comprobar la conexión e inicializar la base de datos
+
+Primero verificar que Flask pueda conectarse a PostgreSQL:
+
+```bash
+python -m flask --app app check-db
+```
+
+Después crear las tablas y cargar el catálogo y las cuentas iniciales:
+
+```bash
+python init_db.py
+```
+
+El inicializador puede volver a ejecutarse sin borrar ni duplicar los datos iniciales existentes.
+
+### 7. Ejecutar las pruebas
+
+```bash
+python -m pytest -q
+```
+
+Antes de continuar se espera que todas las pruebas existentes terminen correctamente.
+
+### 8. Iniciar la aplicación
+
+```bash
+python -m flask --app app run --debug
+```
+
+La dirección predeterminada es `http://127.0.0.1:5000`.
+
+### 9. Continuar con las fases restantes
+
+El desarrollo debe continuar desde la **Fase 4**, siguiendo la copia actualizada de `PLAN_IMPLEMENTACION.md` proporcionada por la persona responsable del proyecto. El plan puede entregarse por separado y no contiene credenciales.
+
+Antes de implementar una fase nueva, se debe confirmar que la fase anterior esté aprobada, trabajar en una rama propia y evitar modificar o eliminar las funcionalidades y pruebas ya terminadas.
+
+## Ejecución de Flask
+
+Con el entorno virtual activado y las dependencias instaladas, iniciar la aplicación desde la raíz del proyecto. La portada estará disponible en la dirección local mostrada por Flask.
+
+Rutas disponibles en la Fase 2:
+
+- `/`
+- `/categorias`
+- `/productos`
+- `/contacto`
+
+Una ruta inexistente debe mostrar la página 404 propia de New Records.
+
+## Conexión con PostgreSQL
+
+La preparación del usuario y la base está explicada en [Configuración de PostgreSQL](docs/CONFIGURACION_POSTGRESQL.md).
+
+Después de configurar el archivo local `.env`, el comando Flask `check-db` comprueba la conexión mediante una lectura sin modificar datos.
+
+## Inicialización del modelo y catálogo
+
+Después de configurar las variables de las cuentas iniciales en `.env`, ejecutar `init_db.py`. El proceso crea las tablas faltantes y carga categorías, discos y usuarios de demostración sin borrar ni duplicar datos existentes.
+
+La estructura resultante está descrita en:
+
+- [Modelo entidad-relación](docs/MODELO_ENTIDAD_RELACION.md)
+- [Diccionario de datos](docs/DICCIONARIO_DATOS.md)
 
 ## Flujo de trabajo con Git
 
@@ -64,7 +193,8 @@ Las páginas disponibles son:
 
 ## Documentación
 
-- [Plan de implementación](PLAN_IMPLEMENTACION.md)
 - [Inventario del prototipo](docs/PROTOTIPO_INICIAL.md)
 - [Pendientes del frontend](docs/PENDIENTES_FRONTEND.md)
-
+- [Configuración de PostgreSQL](docs/CONFIGURACION_POSTGRESQL.md)
+- [Modelo entidad-relación](docs/MODELO_ENTIDAD_RELACION.md)
+- [Diccionario de datos](docs/DICCIONARIO_DATOS.md)

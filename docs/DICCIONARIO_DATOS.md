@@ -1,0 +1,122 @@
+# Diccionario de datos de New Records
+
+## `usuarios`
+
+- `id`: PK entera.
+- `nombre`: nombre completo obligatorio, máximo 100 caracteres.
+- `email`: correo normalizado obligatorio, único e indexado.
+- `password_hash`: hash obligatorio; nunca almacena la contraseña original.
+- `rol`: obligatorio, con valor inicial `cliente` y restricción a `cliente` o `administrador`.
+- `telefono`, `direccion`, `ciudad`: información editable del perfil.
+- `activo`: booleano obligatorio, inicialmente verdadero.
+- `fecha_registro`: fecha y hora UTC de creación.
+
+## `categorias`
+
+- `id`: PK entera.
+- `nombre`: nombre del género, obligatorio y único.
+- `slug`: identificador para URL, obligatorio, único e indexado.
+- `descripcion`: explicación del género.
+- `imagen`: ruta relativa dentro de `static`.
+- `activo`: estado para eliminación lógica.
+- `fecha_creacion`, `fecha_actualizacion`: fechas UTC de auditoría básica.
+
+## `discos`
+
+- `id`: PK entera.
+- `categoria_id`: FK obligatoria hacia `categorias`, con eliminación restrictiva.
+- `codigo`: SKU obligatorio, único e indexado.
+- `album`: nombre del álbum obligatorio.
+- `artista`: artista obligatorio e indexado.
+- `descripcion`: información comercial obligatoria.
+- `precio_base`: valor decimal no negativo.
+- `stock`: entero no negativo, inicialmente cero.
+- `formato`: discriminador obligatorio limitado a `CD` o `VINILO`.
+- `peso_kg`: decimal positivo.
+- `costo_envio_por_kg`: decimal no negativo.
+- `costo_embalaje`: decimal no negativo.
+- `imagen`: ruta relativa de la portada.
+- `activo`: estado para eliminación lógica.
+- `fecha_creacion`, `fecha_actualizacion`: fechas UTC.
+
+## `metodos_pago`
+
+- `id`: PK entera.
+- `usuario_id`: FK obligatoria hacia el propietario.
+- `token`: referencia simulada o del proveedor, obligatoria y única.
+- `marca`: marca comercial de la tarjeta.
+- `ultimos4`: exactamente cuatro dígitos; nunca contiene el número completo.
+- `titular`: nombre impreso o asociado a la tarjeta.
+- `mes_vencimiento`: entero entre 1 y 12.
+- `anio_vencimiento`: año válido desde 2026.
+- `predeterminado`: indica si se precarga en checkout.
+- `activo`: permite desactivar el método sin borrar el historial.
+- `fecha_verificacion`: fecha UTC en la que se confirmó el PIN.
+
+## `verificaciones_tarjeta`
+
+- `id`: PK entera.
+- `usuario_id`: FK obligatoria hacia el solicitante.
+- `token_verificacion`: identificador temporal único.
+- `pin_hash`: hash del PIN, nunca el código original.
+- `token_tarjeta`: token temporal; no contiene PAN ni CVV.
+- `marca`, `ultimos4`, `titular`, `mes_vencimiento`, `anio_vencimiento`: datos enmascarados pendientes de verificación.
+- `fecha_creacion`, `fecha_expiracion`: delimitan la vigencia.
+- `intentos`: entero entre 0 y 5, inicialmente cero.
+- `verificada`: confirma que el PIN fue utilizado correctamente.
+
+## `pedidos`
+
+- `id`: PK entera.
+- `numero`: identificador público obligatorio, único e indexado.
+- `cliente_id`: FK obligatoria hacia `usuarios`.
+- `metodo_pago_id`: FK obligatoria hacia un método verificado.
+- `estado`: inicialmente `PENDIENTE`; admite `APROBADO` o `RECHAZADO`.
+- `total`: decimal no negativo.
+- `fecha_creacion`: fecha UTC del checkout.
+- `fecha_revision`: fecha UTC de aprobación o rechazo.
+- `administrador_revisor_id`: FK opcional hacia el administrador.
+- `motivo_rechazo`: obligatorio por restricción cuando el pedido está rechazado.
+
+## `detalles_pedido`
+
+- `id`: PK entera.
+- `pedido_id`: FK obligatoria con eliminación en cascada para pedidos de prueba.
+- `disco_id`: FK obligatoria y restrictiva hacia el disco.
+- `album`, `artista`, `formato`: copia histórica del producto comprado.
+- `precio_unitario`: decimal histórico no negativo.
+- `cantidad`: entero mayor que cero.
+- La combinación `pedido_id` y `disco_id` es única.
+- El subtotal se calcula como precio unitario por cantidad.
+
+## `transacciones_pago`
+
+- `id`: PK entera.
+- `pedido_id`: FK obligatoria y única hacia el pedido.
+- `metodo_pago_id`: FK obligatoria hacia el método utilizado.
+- `monto`: decimal no negativo.
+- `estado`: `PENDIENTE`, `APROBADA` o `RECHAZADA`.
+- `referencia`: identificador simulado obligatorio y único.
+- `fecha_procesamiento`: fecha UTC del resultado.
+
+## `facturas`
+
+- `id`: PK entera.
+- `pedido_id`: FK obligatoria hacia el pedido.
+- `numero`: identificador documental obligatorio, único e indexado.
+- `tipo`: `COMPROBANTE_PENDIENTE` o `FACTURA_FINAL`.
+- `fecha_emision`: fecha UTC.
+- `ruta_pdf`: ubicación controlada del documento generado.
+- La combinación `pedido_id` y `tipo` es única.
+
+## Datos iniciales
+
+`init_db.py` carga de forma idempotente:
+
+- 3 categorías: Rock, Pop y Reggaeton.
+- 12 discos pertenecientes al dominio New Records.
+- 1 cuenta administradora de desarrollo.
+- 1 cuenta cliente de desarrollo.
+
+Las contraseñas iniciales se leen desde `.env` y se almacenan exclusivamente como hash.
+

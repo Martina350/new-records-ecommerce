@@ -1,39 +1,8 @@
-<!DOCTYPE html>
-<html class="dark" lang="es">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>New Records</title>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-  <link href="../static/css/styles.css" rel="stylesheet"/>
-</head>
-<body>
-  <header class="cabecera-sitio">
-    <div class="contenedor cabecera-interior">
-      <div class="cabecera-izquierda">
-        <a class="enlace-logo" href="index.html">
-          <span class="material-symbols-outlined icono-logo">album</span>
-          <span class="texto-logo">New Records</span>
-        </a>
-        <nav class="nav-principal">
-          <a class="enlace-nav activo" href="index.html">Inicio</a>
-          <a class="enlace-nav" href="categorias.html">Categorías</a>
-          <a class="enlace-nav" href="productos.html">Productos</a>
-          <a class="enlace-nav" href="contacto.html">Contacto</a>
-        </nav>
-      </div>
-      <button class="alternar-nav" type="button" aria-label="Abrir menú">
-        <span class="material-symbols-outlined">menu</span>
-      </button>
-      <nav class="nav-movil" id="navMovil">
-        <a class="enlace-nav activo" href="index.html">Inicio</a>
-        <a class="enlace-nav" href="categorias.html">Categorías</a>
-        <a class="enlace-nav" href="productos.html">Productos</a>
-        <a class="enlace-nav" href="contacto.html">Contacto</a>
-      </nav>
-    </div>
-  </header>
+{% extends "base.html" %}
+
+{% block titulo %}Inicio{% endblock %}
+
+{% block contenido %}
 
   <main>
     <section class="inicio" aria-labelledby="titulo-inicio">
@@ -47,18 +16,10 @@
           Nuestra tienda online es el destino definitivo para los amantes de la música. Encuentra los mejores discos de tus géneros favoritos.
         </p>
         <div class="inicio-botones">
-          <a class="boton boton-destacado resplandor-neon" href="categorias.html">Explorar categorías</a>
+          <a class="boton boton-destacado resplandor-neon" href="{{ url_for('categorias') }}">Explorar categorías</a>
         </div>
       </div>
     </section>
   </main>
 
-  <footer class="pie-sitio">
-    <div class="contenedor">
-      <p class="pie-texto">© 2026 New Records. Todos los derechos reservados.</p>
-    </div>
-  </footer>
-
-  <script src="../static/js/script.js"></script>
-</body>
-</html>
+{% endblock %}
