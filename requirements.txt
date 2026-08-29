@@ -1,0 +1,17 @@
+# Backend y configuración
+Flask>=3.1,<4
+Flask-SQLAlchemy>=3.1,<4
+psycopg2-binary>=2.9,<3
+python-dotenv>=1,<2
+Werkzeug>=3.1,<4
+
+# Formularios y seguridad CSRF
+Flask-WTF>=1.2,<2
+email-validator>=2,<3
+
+# Comprobantes PDF
+reportlab>=4,<5
+
+# Pruebas
+pytest>=8,<10
+

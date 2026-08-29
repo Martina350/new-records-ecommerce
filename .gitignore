@@ -1,0 +1,38 @@
+# Entorno local y secretos
+.env
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Flask y archivos generados
+instance/
+facturas/
+*.pdf
+
+# PostgreSQL y respaldos
+backups/*
+!backups/.gitkeep
+*.backup
+*.dump
+*.sql.gz
+
+# Editores y sistema operativo
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporales y registros
+*.log
+*.tmp
+*.temp
+~$*
+
