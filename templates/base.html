@@ -21,7 +21,22 @@
         </a>
         <nav class="nav-principal" aria-label="Navegación principal">
           <a class="enlace-nav{% if request.endpoint == 'inicio' %} activo{% endif %}" href="{{ url_for('inicio') }}">Inicio</a>
-          <a class="enlace-nav{% if request.endpoint == 'categorias' %} activo{% endif %}" href="{{ url_for('categorias') }}">Categorías</a>
+          <details class="menu-categorias-global">
+            <summary class="enlace-nav{% if request.endpoint in ['categorias', 'productos', 'detalle_producto'] %} activo{% endif %}">
+              Géneros
+              <span class="material-symbols-outlined icono-menu-categorias" aria-hidden="true">expand_more</span>
+            </summary>
+            <div class="lista-menu-categorias">
+              <a href="{{ url_for('productos') }}">Todos los discos</a>
+              {% for categoria_global in categorias_globales %}
+                <a href="{{ url_for('productos', categoria=categoria_global.slug) }}">
+                  {{ categoria_global.nombre }}
+                </a>
+              {% else %}
+                <span class="menu-categorias-vacio">No hay géneros disponibles</span>
+              {% endfor %}
+            </div>
+          </details>
           <a class="enlace-nav{% if request.endpoint == 'productos' %} activo{% endif %}" href="{{ url_for('productos') }}">Productos</a>
           <a class="enlace-nav{% if request.endpoint == 'contacto' %} activo{% endif %}" href="{{ url_for('contacto') }}">Contacto</a>
         </nav>
@@ -71,7 +86,23 @@
 
       <nav class="nav-movil" id="navMovil" aria-label="Navegación móvil">
         <a class="enlace-nav{% if request.endpoint == 'inicio' %} activo{% endif %}" href="{{ url_for('inicio') }}">Inicio</a>
-        <a class="enlace-nav{% if request.endpoint == 'categorias' %} activo{% endif %}" href="{{ url_for('categorias') }}">Categorías</a>
+        <details class="menu-categorias-global menu-categorias-movil">
+          <summary class="enlace-nav{% if request.endpoint in ['categorias', 'productos', 'detalle_producto'] %} activo{% endif %}">
+            Géneros
+            <span class="material-symbols-outlined icono-menu-categorias" aria-hidden="true">expand_more</span>
+          </summary>
+          <div class="lista-menu-categorias">
+            <a href="{{ url_for('categorias') }}">Explorar categorías</a>
+            <a href="{{ url_for('productos') }}">Todos los discos</a>
+            {% for categoria_global in categorias_globales %}
+              <a href="{{ url_for('productos', categoria=categoria_global.slug) }}">
+                {{ categoria_global.nombre }}
+              </a>
+            {% else %}
+              <span class="menu-categorias-vacio">No hay géneros disponibles</span>
+            {% endfor %}
+          </div>
+        </details>
         <a class="enlace-nav{% if request.endpoint == 'productos' %} activo{% endif %}" href="{{ url_for('productos') }}">Productos</a>
         <a class="enlace-nav{% if request.endpoint == 'contacto' %} activo{% endif %}" href="{{ url_for('contacto') }}">Contacto</a>
         <hr class="separador-nav-movil"/>

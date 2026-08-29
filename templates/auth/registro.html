@@ -25,6 +25,8 @@
               type="text" 
               value="{{ nombre or '' }}" 
               placeholder="Ej. Martina Gómez" 
+              minlength="2"
+              maxlength="100"
               required 
               autocomplete="name"
               autofocus
@@ -40,6 +42,7 @@
               type="email" 
               value="{{ email or '' }}" 
               placeholder="tu@correo.com" 
+              maxlength="120"
               required 
               autocomplete="email"
             />

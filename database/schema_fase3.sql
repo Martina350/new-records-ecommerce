@@ -34,8 +34,8 @@ CREATE TABLE public.categorias (
     descripcion text,
     imagen character varying(255),
     activo boolean DEFAULT true NOT NULL,
-    fecha_creacion timestamp with time zone NOT NULL,
-    fecha_actualizacion timestamp with time zone NOT NULL
+    fecha_creacion timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    fecha_actualizacion timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 
@@ -116,8 +116,8 @@ CREATE TABLE public.discos (
     costo_embalaje numeric(10,2) DEFAULT '0'::numeric NOT NULL,
     imagen character varying(255),
     activo boolean DEFAULT true NOT NULL,
-    fecha_creacion timestamp with time zone NOT NULL,
-    fecha_actualizacion timestamp with time zone NOT NULL,
+    fecha_creacion timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    fecha_actualizacion timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     CONSTRAINT ck_discos_costo_embalaje CHECK ((costo_embalaje >= (0)::numeric)),
     CONSTRAINT ck_discos_costo_envio CHECK ((costo_envio_por_kg >= (0)::numeric)),
     CONSTRAINT ck_discos_formato CHECK (((formato)::text = ANY ((ARRAY['CD'::character varying, 'VINILO'::character varying])::text[]))),
@@ -156,7 +156,7 @@ CREATE TABLE public.facturas (
     pedido_id integer NOT NULL,
     numero character varying(30) NOT NULL,
     tipo character varying(30) NOT NULL,
-    fecha_emision timestamp with time zone NOT NULL,
+    fecha_emision timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     ruta_pdf character varying(255) NOT NULL,
     CONSTRAINT ck_facturas_tipo CHECK (((tipo)::text = ANY ((ARRAY['COMPROBANTE_PENDIENTE'::character varying, 'FACTURA_FINAL'::character varying])::text[])))
 );
@@ -235,7 +235,7 @@ CREATE TABLE public.pedidos (
     metodo_pago_id integer NOT NULL,
     estado character varying(20) DEFAULT 'PENDIENTE'::character varying NOT NULL,
     total numeric(10,2) NOT NULL,
-    fecha_creacion timestamp with time zone NOT NULL,
+    fecha_creacion timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     fecha_revision timestamp with time zone,
     administrador_revisor_id integer,
     motivo_rechazo character varying(255),
@@ -316,7 +316,10 @@ CREATE TABLE public.usuarios (
     direccion character varying(200),
     ciudad character varying(100),
     activo boolean DEFAULT true NOT NULL,
-    fecha_registro timestamp with time zone NOT NULL,
+    fecha_registro timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT ck_usuarios_email_formato CHECK (((email)::text ~ '^[^@ ]+@[^@ ]+\.[^@ ]+$'::text)),
+    CONSTRAINT ck_usuarios_email_normalizado CHECK (((email)::text = lower(btrim((email)::text)))),
+    CONSTRAINT ck_usuarios_nombre_valido CHECK (((char_length(btrim((nombre)::text)) >= 2) AND (char_length(btrim((nombre)::text)) <= 100))),
     CONSTRAINT ck_usuarios_rol CHECK (((rol)::text = ANY ((ARRAY['cliente'::character varying, 'administrador'::character varying])::text[])))
 );
 
@@ -356,7 +359,7 @@ CREATE TABLE public.verificaciones_tarjeta (
     titular character varying(120) NOT NULL,
     mes_vencimiento integer NOT NULL,
     anio_vencimiento integer NOT NULL,
-    fecha_creacion timestamp with time zone NOT NULL,
+    fecha_creacion timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     fecha_expiracion timestamp with time zone NOT NULL,
     intentos integer DEFAULT 0 NOT NULL,
     verificada boolean DEFAULT false NOT NULL,
@@ -775,4 +778,3 @@ ALTER TABLE ONLY public.verificaciones_tarjeta
 --
 
 \unrestrict K0qWICH4IxRZchDI6GDWDdlIxXpoE7ilPj9fDOWnuV9d3uKml5tAwLaKwfxPE4Z
-

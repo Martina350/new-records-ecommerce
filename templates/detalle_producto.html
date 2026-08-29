@@ -109,17 +109,19 @@
         </div>
 
         <div class="detalle-acciones-compra">
-          <form action="{{ url_for('agregar_al_carrito', disco_id=disco.id) }}" method="post" class="form-agregar-detalle">
-            <input type="hidden" name="cantidad" value="1"/>
-            <button 
-              class="boton boton-principal boton-agregar-carrito resplandor-neon" 
-              type="submit"
-              {% if disco.stock == 0 %}disabled{% endif %}
-            >
-              <span class="material-symbols-outlined" aria-hidden="true">add_shopping_cart</span>
-              Agregar al Carrito
-            </button>
-          </form>
+          {% if not esta_autenticado or es_cliente %}
+            <form action="{{ url_for('agregar_al_carrito', disco_id=disco.id) }}" method="post" class="form-agregar-detalle">
+              <input type="hidden" name="cantidad" value="1"/>
+              <button
+                class="boton boton-principal boton-agregar-carrito resplandor-neon"
+                type="submit"
+                {% if disco.stock == 0 %}disabled{% endif %}
+              >
+                <span class="material-symbols-outlined" aria-hidden="true">add_shopping_cart</span>
+                Agregar al Carrito
+              </button>
+            </form>
+          {% endif %}
           <a class="boton boton-secundario" href="{{ url_for('productos') }}">
             <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
             Volver al catálogo

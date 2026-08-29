@@ -5,13 +5,6 @@ import pytest
 from app import app
 
 
-@pytest.fixture()
-def client():
-    app.config.update(TESTING=True)
-    with app.test_client() as test_client:
-        yield test_client
-
-
 @pytest.mark.parametrize(
     "ruta",
     ["/", "/categorias", "/productos", "/contacto"],
@@ -34,4 +27,3 @@ def test_todas_las_plantillas_compilan():
     with app.app_context():
         for nombre in app.jinja_env.list_templates():
             app.jinja_env.get_template(nombre)
-

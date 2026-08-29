@@ -1,20 +1,10 @@
 """Pruebas del sistema de carrito de compras y preparación de checkout de la Fase 6."""
 
 import os
-import pytest
 from flask import session
 
 from app import app
 from models import Disco, db
-
-
-@pytest.fixture()
-def client():
-    app.config.update(
-        TESTING=True,
-        WTF_CSRF_ENABLED=False,
-    )
-    return app.test_client()
 
 
 def obtener_cliente_pass():
@@ -32,6 +22,19 @@ def autenticar_cliente(client):
     )
 
 
+def autenticar_administrador(client):
+    return client.post(
+        "/login",
+        data={
+            "email": "admin@newrecords.local",
+            "password": os.getenv(
+                "ADMIN_PASSWORD", "4119c3d7df348fed21f685809151b30e"
+            ),
+        },
+        follow_redirects=True,
+    )
+
+
 def test_carrito_requiere_login(client):
     resp_get = client.get("/carrito", follow_redirects=False)
     assert resp_get.status_code == 302
@@ -40,6 +43,24 @@ def test_carrito_requiere_login(client):
     resp_post = client.post("/carrito/agregar/1", follow_redirects=False)
     assert resp_post.status_code == 302
     assert "/login" in resp_post.headers["Location"]
+
+
+def test_carrito_y_checkout_rechazan_al_administrador(client):
+    autenticar_administrador(client)
+
+    with app.app_context():
+        disco_id = Disco.query.filter_by(codigo="NR-POP-001").first().id
+
+    comprobaciones = (
+        client.get("/carrito"),
+        client.post(f"/carrito/agregar/{disco_id}"),
+        client.post(f"/carrito/actualizar/{disco_id}", data={"cantidad": 1}),
+        client.post(f"/carrito/eliminar/{disco_id}"),
+        client.post("/carrito/vaciar"),
+        client.get("/checkout/resumen"),
+    )
+
+    assert all(respuesta.status_code == 403 for respuesta in comprobaciones)
 
 
 def test_agregar_disco_al_carrito(client):

@@ -454,7 +454,7 @@ Resultado de ejecución:
 - PostgreSQL rechazó correctamente una operación de prueba con stock negativo.
 - Se generó `database/schema_fase3.sql` como referencia del esquema real validado.
 - Se documentaron el modelo entidad-relación y el diccionario de datos.
-- Las once pruebas automatizadas finalizaron correctamente.
+- Las trece pruebas acumuladas hasta esta fase finalizaron correctamente, incluyendo la verificación de defaults y restricciones directamente en PostgreSQL.
 
 ### Fase 4 - Autenticación, perfil, sesiones y roles
 
@@ -491,7 +491,7 @@ Resultado de ejecución:
 - Se crearon las plantillas Jinja2 `templates/auth/login.html`, `templates/auth/registro.html`, `templates/auth/perfil.html` y `templates/admin/dashboard.html`.
 - Se actualizó `base.html` con navegación responsive condicional para visitantes, clientes y administradores, e integración de mensajes flash con estilos (`success`, `warning`, `error`, `info`).
 - Se añadieron estilos CSS dedicados en `static/css/styles.css` respetando el diseño cyberpunk oscuro y acentos neón.
-- Se agregaron 10 pruebas automatizadas en `tests/test_auth.py`, alcanzando un total de **21/21 pruebas pasando exitosamente**.
+- Se agregaron 11 pruebas automatizadas en `tests/test_auth.py`, alcanzando un total de **24/24 pruebas pasando exitosamente**.
 
 ### Fase 5 - Catálogo dinámico y detalle de discos
 
@@ -515,13 +515,14 @@ Tareas previstas:
 Resultado de ejecución:
 
 - Se dinamizaron las rutas `/categorias`, `/productos` y la nueva ruta `/productos/<codigo>` en `app.py`.
+- Se incorporó un menú desplegable global y responsive que carga los géneros activos desde PostgreSQL.
 - Se eliminaron las listas estáticas de discos y categorías de los archivos HTML, cargándose dinámicamente desde PostgreSQL.
 - Las consultas cargan exclusivamente registros con `activo == True`.
 - Se implementó el filtrado dinámico por categoría (`?categoria=slug`) y búsqueda por texto (`?q=termino`).
 - Se construyó la plantilla `templates/detalle_producto.html` mostrando álbum, artista, género, SKU, tipo `CD` o `Vinilo`, descripción, stock y desglose polimórfico del cálculo de precio final (`precio_base`, costo por peso y embalaje).
 - Se implementó la sección de discos recomendados de la misma categoría (hasta 4 discos excluyendo el actual).
 - Se agregaron estilos dedicados en `static/css/styles.css` para tarjetas, barra de búsqueda, migas de pan, estados vacíos y desglose de precios.
-- Se crearon 8 pruebas automatizadas en `tests/test_catalogo.py`, alcanzando un total de **29/29 pruebas pasando exitosamente**.
+- Se crearon 9 pruebas automatizadas en `tests/test_catalogo.py`, alcanzando un total de **33/33 pruebas pasando exitosamente**.
 
 ### Fase 6 - Carrito y preparación del checkout
 
@@ -549,12 +550,12 @@ Resultado de ejecución:
 - Los IDs de discos se serializan como texto y la sesión se fuerza como modificada ante cada cambio.
 - Cada consulta revalida existencias en PostgreSQL y ajusta cantidades automáticamente según el stock real.
 - Los subtotales e importe total acumulado se calculan estrictamente en el backend mediante el método polimórfico `disco.precio_final()`.
-- Se incorporaron en `app.py` las rutas `/carrito` (`GET`), `/carrito/agregar/<disco_id>` (`POST`), `/carrito/actualizar/<disco_id>` (`POST`), `/carrito/eliminar/<disco_id>` (`POST`), `/carrito/vaciar` (`POST`) y `/checkout/resumen` (`GET`), todas protegidas con `@login_requerido`.
+- Se incorporaron en `app.py` las rutas `/carrito` (`GET`), `/carrito/agregar/<disco_id>` (`POST`), `/carrito/actualizar/<disco_id>` (`POST`), `/carrito/eliminar/<disco_id>` (`POST`), `/carrito/vaciar` (`POST`) y `/checkout/resumen` (`GET`), todas protegidas exclusivamente para el rol `cliente`.
 - Se actualizaron el context processor de `app.py` y `templates/base.html` para incluir un enlace e ícono con badge contador dinámico (`total_items_carrito`).
 - Se crearon las plantillas `templates/carrito.html` y `templates/checkout_resumen.html`.
 - Se vinculó el botón "Agregar al Carrito" en `templates/detalle_producto.html`.
 - Se añadieron estilos CSS dedicados en `static/css/styles.css` para la grilla de carrito, controles de cantidad, tarjetas de resumen y badge contador.
-- Se agregaron 8 pruebas automatizadas en `tests/test_carrito.py`, alcanzando un total de **37/37 pruebas pasando exitosamente**.
+- Se agregaron 9 pruebas automatizadas en `tests/test_carrito.py`, alcanzando un total de **42/42 pruebas pasando exitosamente**. Las pruebas web se aíslan mediante transacciones reversibles para no alterar los datos de desarrollo.
 
 ### Fase 7 - Métodos de pago y verificación por PIN
 

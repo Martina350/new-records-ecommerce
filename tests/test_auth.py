@@ -1,20 +1,10 @@
 """Pruebas del sistema de autenticación, sesiones, roles y perfil de la Fase 4."""
 
 import os
-import pytest
 from flask import session
 
 from app import app
 from models import Usuario, db
-
-
-@pytest.fixture()
-def client():
-    app.config.update(
-        TESTING=True,
-        WTF_CSRF_ENABLED=False,
-    )
-    return app.test_client()
 
 
 def obtener_credenciales_demo():
@@ -104,6 +94,25 @@ def test_registro_rechaza_password_corta_o_no_coincidente(client):
     assert b"Las contrase\xc3\xb1as no coinciden" in resp2.data
 
 
+def test_registro_rechaza_correo_con_formato_invalido(client):
+    respuesta = client.post(
+        "/registro",
+        data={
+            "nombre": "Correo Inválido",
+            "email": "correo-sin-arroba",
+            "password": "PasswordSeguro123!",
+            "confirmar_password": "PasswordSeguro123!",
+        },
+        follow_redirects=True,
+    )
+
+    assert respuesta.status_code == 200
+    assert b"Introduce un correo electr\xc3\xb3nico v\xc3\xa1lido" in respuesta.data
+
+    with app.app_context():
+        assert Usuario.query.filter_by(email="correo-sin-arroba").first() is None
+
+
 def test_login_exitoso_y_sesion(client):
     _, cliente_pass = obtener_credenciales_demo()
     with client:
@@ -119,7 +128,7 @@ def test_login_exitoso_y_sesion(client):
         assert respuesta.status_code == 200
         assert session.get("usuario_id") is not None
         assert session.get("usuario_rol") == "cliente"
-        assert session.get("usuario_email") == "cliente@newrecords.local"
+        assert "usuario_email" not in session
         assert b"Bienvenido de nuevo" in respuesta.data
 
 

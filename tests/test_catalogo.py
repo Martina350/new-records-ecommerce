@@ -1,19 +1,9 @@
 """Pruebas del catálogo dinámico, filtros, detalle de discos y recomendaciones de la Fase 5."""
 
-import pytest
 from decimal import Decimal
 
 from app import app
 from models import CD, Categoria, Disco, Vinilo, db
-
-
-@pytest.fixture()
-def client():
-    app.config.update(
-        TESTING=True,
-        WTF_CSRF_ENABLED=False,
-    )
-    return app.test_client()
 
 
 def test_categorias_dinamicas_responden(client):
@@ -22,6 +12,16 @@ def test_categorias_dinamicas_responden(client):
     assert b"Rock" in respuesta.data
     assert b"Pop" in respuesta.data
     assert b"Reggaeton" in respuesta.data
+
+
+def test_menu_global_lista_generos_desde_postgresql(client):
+    respuesta = client.get("/")
+
+    assert respuesta.status_code == 200
+    assert b"menu-categorias-global" in respuesta.data
+    assert b"/productos?categoria=rock" in respuesta.data
+    assert b"/productos?categoria=pop" in respuesta.data
+    assert b"/productos?categoria=reggaeton" in respuesta.data
 
 
 def test_catalogo_todos_los_productos(client):

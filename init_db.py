@@ -7,6 +7,8 @@ y nunca elimina tablas ni datos existentes.
 import os
 from decimal import Decimal
 
+from sqlalchemy import text
+
 from app import app
 from models import CD, Categoria, Disco, Usuario, Vinilo, db
 
@@ -205,6 +207,56 @@ DISCOS = [
 ]
 
 
+DEFAULTS_FECHA = (
+    ("usuarios", "fecha_registro"),
+    ("categorias", "fecha_creacion"),
+    ("categorias", "fecha_actualizacion"),
+    ("discos", "fecha_creacion"),
+    ("discos", "fecha_actualizacion"),
+    ("verificaciones_tarjeta", "fecha_creacion"),
+    ("pedidos", "fecha_creacion"),
+    ("facturas", "fecha_emision"),
+)
+
+
+RESTRICCIONES_USUARIO = {
+    "ck_usuarios_nombre_valido": (
+        "CHECK (char_length(btrim(nombre)) BETWEEN 2 AND 100)"
+    ),
+    "ck_usuarios_email_normalizado": "CHECK (email = lower(btrim(email)))",
+    "ck_usuarios_email_formato": (
+        "CHECK (email ~ '^[^@ ]+@[^@ ]+\\.[^@ ]+$')"
+    ),
+}
+
+
+def actualizar_reglas_schema():
+    """Aplica de forma idempotente reglas añadidas después de la creación inicial."""
+    for tabla, columna in DEFAULTS_FECHA:
+        db.session.execute(
+            text(
+                f"ALTER TABLE {tabla} "
+                f"ALTER COLUMN {columna} SET DEFAULT CURRENT_TIMESTAMP"
+            )
+        )
+
+    for nombre, expresion in RESTRICCIONES_USUARIO.items():
+        existe = db.session.execute(
+            text(
+                "SELECT EXISTS ("
+                "SELECT 1 FROM pg_constraint WHERE conname = :nombre"
+                ")"
+            ),
+            {"nombre": nombre},
+        ).scalar_one()
+        if not existe:
+            db.session.execute(
+                text(
+                    f"ALTER TABLE usuarios ADD CONSTRAINT {nombre} {expresion}"
+                )
+            )
+
+
 def obtener_password(nombre_variable):
     password = os.getenv(nombre_variable, "")
     if not password or password.startswith("change_"):
@@ -269,6 +321,7 @@ def inicializar_base():
     with app.app_context():
         try:
             db.create_all()
+            actualizar_reglas_schema()
 
             categorias = {
                 datos["slug"]: cargar_categoria(datos) for datos in CATEGORIAS
@@ -303,4 +356,3 @@ def inicializar_base():
 
 if __name__ == "__main__":
     inicializar_base()
-

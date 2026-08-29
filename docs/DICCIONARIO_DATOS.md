@@ -9,7 +9,7 @@
 - `rol`: obligatorio, con valor inicial `cliente` y restricción a `cliente` o `administrador`.
 - `telefono`, `direccion`, `ciudad`: información editable del perfil.
 - `activo`: booleano obligatorio, inicialmente verdadero.
-- `fecha_registro`: fecha y hora UTC de creación.
+- `fecha_registro`: fecha y hora UTC de creación, con valor predeterminado en PostgreSQL.
 
 ## `categorias`
 
@@ -19,7 +19,7 @@
 - `descripcion`: explicación del género.
 - `imagen`: ruta relativa dentro de `static`.
 - `activo`: estado para eliminación lógica.
-- `fecha_creacion`, `fecha_actualizacion`: fechas UTC de auditoría básica.
+- `fecha_creacion`, `fecha_actualizacion`: fechas UTC de auditoría básica, con valor predeterminado en PostgreSQL.
 
 ## `discos`
 
@@ -37,7 +37,7 @@
 - `costo_embalaje`: decimal no negativo.
 - `imagen`: ruta relativa de la portada.
 - `activo`: estado para eliminación lógica.
-- `fecha_creacion`, `fecha_actualizacion`: fechas UTC.
+- `fecha_creacion`, `fecha_actualizacion`: fechas UTC, con valor predeterminado en PostgreSQL.
 
 ## `metodos_pago`
 
@@ -61,7 +61,7 @@
 - `pin_hash`: hash del PIN, nunca el código original.
 - `token_tarjeta`: token temporal; no contiene PAN ni CVV.
 - `marca`, `ultimos4`, `titular`, `mes_vencimiento`, `anio_vencimiento`: datos enmascarados pendientes de verificación.
-- `fecha_creacion`, `fecha_expiracion`: delimitan la vigencia.
+- `fecha_creacion`, `fecha_expiracion`: delimitan la vigencia; la fecha de creación tiene valor predeterminado en PostgreSQL.
 - `intentos`: entero entre 0 y 5, inicialmente cero.
 - `verificada`: confirma que el PIN fue utilizado correctamente.
 
@@ -73,7 +73,7 @@
 - `metodo_pago_id`: FK obligatoria hacia un método verificado.
 - `estado`: inicialmente `PENDIENTE`; admite `APROBADO` o `RECHAZADO`.
 - `total`: decimal no negativo.
-- `fecha_creacion`: fecha UTC del checkout.
+- `fecha_creacion`: fecha UTC del checkout, con valor predeterminado en PostgreSQL.
 - `fecha_revision`: fecha UTC de aprobación o rechazo.
 - `administrador_revisor_id`: FK opcional hacia el administrador.
 - `motivo_rechazo`: obligatorio por restricción cuando el pedido está rechazado.
@@ -105,7 +105,7 @@
 - `pedido_id`: FK obligatoria hacia el pedido.
 - `numero`: identificador documental obligatorio, único e indexado.
 - `tipo`: `COMPROBANTE_PENDIENTE` o `FACTURA_FINAL`.
-- `fecha_emision`: fecha UTC.
+- `fecha_emision`: fecha UTC con valor predeterminado en PostgreSQL.
 - `ruta_pdf`: ubicación controlada del documento generado.
 - La combinación `pedido_id` y `tipo` es única.
 
@@ -119,4 +119,3 @@
 - 1 cuenta cliente de desarrollo.
 
 Las contraseñas iniciales se leen desde `.env` y se almacenan exclusivamente como hash.
-

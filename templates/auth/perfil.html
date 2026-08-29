@@ -34,9 +34,11 @@
                 class="entrada-formulario" 
                 id="nombre" 
                 name="nombre" 
-                type="text" 
-                value="{{ usuario.nombre }}" 
-                required 
+                type="text"
+                value="{{ usuario.nombre }}"
+                minlength="2"
+                maxlength="100"
+                required
                 autocomplete="name"
               />
             </div>
@@ -62,8 +64,9 @@
                 id="telefono" 
                 name="telefono" 
                 type="tel" 
-                value="{{ usuario.telefono or '' }}" 
-                placeholder="Ej. +593 99 123 4567" 
+                value="{{ usuario.telefono or '' }}"
+                placeholder="Ej. +593 99 123 4567"
+                maxlength="20"
                 autocomplete="tel"
               />
             </div>
@@ -75,8 +78,9 @@
                 id="ciudad" 
                 name="ciudad" 
                 type="text" 
-                value="{{ usuario.ciudad or '' }}" 
-                placeholder="Ej. Quito" 
+                value="{{ usuario.ciudad or '' }}"
+                placeholder="Ej. Quito"
+                maxlength="100"
                 autocomplete="address-level2"
               />
             </div>
@@ -91,6 +95,7 @@
               type="text" 
               value="{{ usuario.direccion or '' }}" 
               placeholder="Ej. Av. Amazonas y República" 
+              maxlength="200"
               autocomplete="street-address"
             />
           </div>

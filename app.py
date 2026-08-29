@@ -1,6 +1,7 @@
 """Punto de entrada de la aplicación New Records."""
 
 import click
+from email_validator import EmailNotValidError, validate_email
 from flask import (
     Flask,
     flash,
@@ -46,15 +47,31 @@ def es_url_segura(destino):
     return not test_host or test_host == ref_host
 
 
+def normalizar_email(email):
+    """Valida la estructura del correo y retorna una versión normalizada."""
+    resultado = validate_email(email, check_deliverability=False)
+    return resultado.normalized.strip().lower()
+
+
 @app.context_processor
 def inyectar_contexto_usuario():
     """Inyecta el usuario actual, su estado y el contador de ítems del carrito en todas las plantillas."""
+    usuario = obtener_usuario_actual()
     carrito = obtener_carrito_sesion()
-    total_items = sum(cantidad for cantidad in carrito.values() if isinstance(cantidad, int))
+    total_items = sum(
+        cantidad
+        for cantidad in carrito.values()
+        if isinstance(cantidad, int) and not isinstance(cantidad, bool) and cantidad > 0
+    )
+    categorias_globales = (
+        Categoria.query.filter_by(activo=True).order_by(Categoria.nombre).all()
+    )
     return {
-        "usuario_actual": obtener_usuario_actual(),
-        "esta_autenticado": "usuario_id" in session,
-        "es_admin": session.get("usuario_rol") == "administrador",
+        "usuario_actual": usuario,
+        "esta_autenticado": usuario is not None,
+        "es_admin": usuario is not None and usuario.rol == "administrador",
+        "es_cliente": usuario is not None and usuario.rol == "cliente",
+        "categorias_globales": categorias_globales,
         "total_items_carrito": total_items,
     }
 
@@ -156,16 +173,34 @@ def registro():
             flash("Todos los campos obligatorios deben ser completados.", "error")
             return render_template("auth/registro.html", nombre=nombre, email=email)
 
+        if len(nombre) < 2 or len(nombre) > 100:
+            flash("El nombre debe contener entre 2 y 100 caracteres.", "error")
+            return render_template("auth/registro.html", nombre=nombre, email=email)
+
+        if Usuario.query.filter_by(email=email).first() is not None:
+            flash("Ya existe una cuenta registrada con este correo electrónico.", "error")
+            return render_template("auth/registro.html", nombre=nombre, email=email)
+
+        try:
+            email = normalizar_email(email)
+        except EmailNotValidError:
+            flash("Introduce un correo electrónico válido.", "error")
+            return render_template("auth/registro.html", nombre=nombre, email=email)
+
+        if len(email) > 120:
+            flash("El correo electrónico no puede superar 120 caracteres.", "error")
+            return render_template("auth/registro.html", nombre=nombre, email=email)
+
+        if Usuario.query.filter_by(email=email).first() is not None:
+            flash("Ya existe una cuenta registrada con este correo electrónico.", "error")
+            return render_template("auth/registro.html", nombre=nombre, email=email)
+
         if len(password) < 8:
             flash("La contraseña debe tener al menos 8 caracteres.", "error")
             return render_template("auth/registro.html", nombre=nombre, email=email)
 
         if password != confirmar_password:
             flash("Las contraseñas no coinciden. Inténtalo de nuevo.", "error")
-            return render_template("auth/registro.html", nombre=nombre, email=email)
-
-        if Usuario.query.filter_by(email=email).first() is not None:
-            flash("Ya existe una cuenta registrada con este correo electrónico.", "error")
             return render_template("auth/registro.html", nombre=nombre, email=email)
 
         nuevo_usuario = Usuario(
@@ -252,6 +287,14 @@ def perfil():
             flash("El nombre completo es obligatorio.", "error")
             return render_template("auth/perfil.html", usuario=usuario)
 
+        if len(nombre) < 2 or len(nombre) > 100:
+            flash("El nombre debe contener entre 2 y 100 caracteres.", "error")
+            return render_template("auth/perfil.html", usuario=usuario)
+
+        if len(telefono) > 20 or len(direccion) > 200 or len(ciudad) > 100:
+            flash("Uno de los datos del perfil supera la longitud permitida.", "error")
+            return render_template("auth/perfil.html", usuario=usuario)
+
         usuario.nombre = nombre
         usuario.telefono = telefono or None
         usuario.direccion = direccion or None
@@ -271,7 +314,7 @@ def perfil():
 
 
 @app.route("/carrito")
-@login_requerido
+@rol_requerido("cliente")
 def ver_carrito():
     """Muestra los productos del carrito con subtotales polimórficos y total general."""
     detalle_carrito = obtener_detalle_carrito()
@@ -279,7 +322,7 @@ def ver_carrito():
 
 
 @app.route("/carrito/agregar/<int:disco_id>", methods=["POST"])
-@login_requerido
+@rol_requerido("cliente")
 def agregar_al_carrito(disco_id):
     """Agrega un disco al carrito o incrementa su cantidad."""
     try:
@@ -300,7 +343,7 @@ def agregar_al_carrito(disco_id):
 
 
 @app.route("/carrito/actualizar/<int:disco_id>", methods=["POST"])
-@login_requerido
+@rol_requerido("cliente")
 def actualizar_carrito(disco_id):
     """Actualiza la cantidad solicitada para un disco del carrito."""
     try:
@@ -313,7 +356,7 @@ def actualizar_carrito(disco_id):
 
 
 @app.route("/carrito/eliminar/<int:disco_id>", methods=["POST"])
-@login_requerido
+@rol_requerido("cliente")
 def eliminar_del_carrito(disco_id):
     """Remueve un disco del carrito."""
     eliminar_disco(disco_id)
@@ -321,7 +364,7 @@ def eliminar_del_carrito(disco_id):
 
 
 @app.route("/carrito/vaciar", methods=["POST"])
-@login_requerido
+@rol_requerido("cliente")
 def vaciar_carrito_ruta():
     """Vacía completamente el carrito."""
     vaciar_carrito()
@@ -330,7 +373,7 @@ def vaciar_carrito_ruta():
 
 
 @app.route("/checkout/resumen")
-@login_requerido
+@rol_requerido("cliente")
 def checkout_resumen():
     """Muestra el resumen previo del pedido antes del pago y confirmación."""
     detalle_carrito = obtener_detalle_carrito()

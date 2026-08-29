@@ -2,7 +2,7 @@
 
 from functools import wraps
 
-from flask import abort, flash, redirect, session, url_for
+from flask import abort, flash, redirect, request, session, url_for
 
 from models import Usuario, db
 
@@ -12,11 +12,11 @@ def login_requerido(vista):
 
     @wraps(vista)
     def vista_decorada(*args, **kwargs):
-        if "usuario_id" not in session:
+        if obtener_usuario_actual() is None:
             flash(
                 "Debes iniciar sesión para acceder a esta página.", "warning"
             )
-            return redirect(url_for("login"))
+            return redirect(url_for("login", next=request.full_path))
         return vista(*args, **kwargs)
 
     return vista_decorada
@@ -28,15 +28,15 @@ def rol_requerido(*roles_permitidos):
     def decorador(vista):
         @wraps(vista)
         def vista_decorada(*args, **kwargs):
-            if "usuario_id" not in session:
+            usuario = obtener_usuario_actual()
+            if usuario is None:
                 flash(
                     "Debes iniciar sesión para acceder a esta página.",
                     "warning",
                 )
-                return redirect(url_for("login"))
+                return redirect(url_for("login", next=request.full_path))
 
-            rol_actual = session.get("usuario_rol")
-            if rol_actual not in roles_permitidos:
+            if usuario.rol not in roles_permitidos:
                 abort(403)
 
             return vista(*args, **kwargs)
@@ -51,7 +51,6 @@ def iniciar_sesion(usuario):
     session.clear()
     session["usuario_id"] = usuario.id
     session["usuario_nombre"] = usuario.nombre
-    session["usuario_email"] = usuario.email
     session["usuario_rol"] = usuario.rol
 
 
@@ -65,4 +64,11 @@ def obtener_usuario_actual():
     usuario_id = session.get("usuario_id")
     if not usuario_id:
         return None
-    return db.session.get(Usuario, usuario_id)
+    usuario = db.session.get(Usuario, usuario_id)
+    if usuario is None or not usuario.activo:
+        session.clear()
+        return None
+
+    session["usuario_nombre"] = usuario.nombre
+    session["usuario_rol"] = usuario.rol
+    return usuario

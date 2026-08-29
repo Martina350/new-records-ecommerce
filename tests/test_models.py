@@ -57,6 +57,47 @@ def test_tablas_esperadas_existen_en_postgresql():
     assert tablas_esperadas <= tablas_reales
 
 
+def test_fechas_de_creacion_tienen_default_en_postgresql():
+    columnas_esperadas = {
+        ("usuarios", "fecha_registro"),
+        ("categorias", "fecha_creacion"),
+        ("categorias", "fecha_actualizacion"),
+        ("discos", "fecha_creacion"),
+        ("discos", "fecha_actualizacion"),
+        ("verificaciones_tarjeta", "fecha_creacion"),
+        ("pedidos", "fecha_creacion"),
+        ("facturas", "fecha_emision"),
+    }
+
+    with app.app_context():
+        inspector = inspect(db.engine)
+        for tabla, columna in columnas_esperadas:
+            definicion = next(
+                item
+                for item in inspector.get_columns(tabla)
+                if item["name"] == columna
+            )
+            assert definicion["default"] is not None
+
+
+def test_restricciones_de_calidad_de_usuario_existen():
+    restricciones_esperadas = {
+        "ck_usuarios_nombre_valido",
+        "ck_usuarios_email_normalizado",
+        "ck_usuarios_email_formato",
+        "ck_usuarios_rol",
+    }
+
+    with app.app_context():
+        inspector = inspect(db.engine)
+        restricciones_reales = {
+            restriccion["name"]
+            for restriccion in inspector.get_check_constraints("usuarios")
+        }
+
+    assert restricciones_esperadas <= restricciones_reales
+
+
 def test_datos_iniciales_y_polimorfismo_desde_postgresql():
     with app.app_context():
         discos = Disco.query.order_by(Disco.codigo).all()
@@ -90,4 +131,3 @@ def test_postgresql_rechaza_stock_negativo():
             db.session.flush()
 
         db.session.rollback()
-

@@ -18,6 +18,18 @@ class Usuario(db.Model):
     __tablename__ = "usuarios"
     __table_args__ = (
         db.CheckConstraint(
+            "char_length(btrim(nombre)) BETWEEN 2 AND 100",
+            name="ck_usuarios_nombre_valido",
+        ),
+        db.CheckConstraint(
+            "email = lower(btrim(email))",
+            name="ck_usuarios_email_normalizado",
+        ),
+        db.CheckConstraint(
+            "email ~ '^[^[:space:]@]+@[^[:space:]@]+\\.[^[:space:]@]+$'",
+            name="ck_usuarios_email_formato",
+        ),
+        db.CheckConstraint(
             "rol IN ('cliente', 'administrador')",
             name="ck_usuarios_rol",
         ),
@@ -35,7 +47,10 @@ class Usuario(db.Model):
     ciudad = db.Column(db.String(100))
     activo = db.Column(db.Boolean, nullable=False, default=True, server_default="true")
     fecha_registro = db.Column(
-        db.DateTime(timezone=True), nullable=False, default=ahora_utc
+        db.DateTime(timezone=True),
+        nullable=False,
+        default=ahora_utc,
+        server_default=db.func.now(),
     )
 
     metodos_pago = db.relationship(
@@ -80,13 +95,17 @@ class Categoria(db.Model):
     imagen = db.Column(db.String(255))
     activo = db.Column(db.Boolean, nullable=False, default=True, server_default="true")
     fecha_creacion = db.Column(
-        db.DateTime(timezone=True), nullable=False, default=ahora_utc
+        db.DateTime(timezone=True),
+        nullable=False,
+        default=ahora_utc,
+        server_default=db.func.now(),
     )
     fecha_actualizacion = db.Column(
         db.DateTime(timezone=True),
         nullable=False,
         default=ahora_utc,
         onupdate=ahora_utc,
+        server_default=db.func.now(),
     )
 
     discos = db.relationship("Disco", back_populates="categoria")
@@ -136,13 +155,17 @@ class Disco(db.Model):
     imagen = db.Column(db.String(255))
     activo = db.Column(db.Boolean, nullable=False, default=True, server_default="true")
     fecha_creacion = db.Column(
-        db.DateTime(timezone=True), nullable=False, default=ahora_utc
+        db.DateTime(timezone=True),
+        nullable=False,
+        default=ahora_utc,
+        server_default=db.func.now(),
     )
     fecha_actualizacion = db.Column(
         db.DateTime(timezone=True),
         nullable=False,
         default=ahora_utc,
         onupdate=ahora_utc,
+        server_default=db.func.now(),
     )
 
     categoria = db.relationship("Categoria", back_populates="discos")
@@ -253,7 +276,10 @@ class VerificacionTarjeta(db.Model):
     mes_vencimiento = db.Column(db.Integer, nullable=False)
     anio_vencimiento = db.Column(db.Integer, nullable=False)
     fecha_creacion = db.Column(
-        db.DateTime(timezone=True), nullable=False, default=ahora_utc
+        db.DateTime(timezone=True),
+        nullable=False,
+        default=ahora_utc,
+        server_default=db.func.now(),
     )
     fecha_expiracion = db.Column(db.DateTime(timezone=True), nullable=False)
     intentos = db.Column(db.Integer, nullable=False, default=0, server_default="0")
@@ -296,7 +322,10 @@ class Pedido(db.Model):
     )
     total = db.Column(db.Numeric(10, 2), nullable=False)
     fecha_creacion = db.Column(
-        db.DateTime(timezone=True), nullable=False, default=ahora_utc
+        db.DateTime(timezone=True),
+        nullable=False,
+        default=ahora_utc,
+        server_default=db.func.now(),
     )
     fecha_revision = db.Column(db.DateTime(timezone=True))
     administrador_revisor_id = db.Column(
@@ -421,9 +450,11 @@ class Factura(db.Model):
     numero = db.Column(db.String(30), nullable=False, unique=True, index=True)
     tipo = db.Column(db.String(30), nullable=False)
     fecha_emision = db.Column(
-        db.DateTime(timezone=True), nullable=False, default=ahora_utc
+        db.DateTime(timezone=True),
+        nullable=False,
+        default=ahora_utc,
+        server_default=db.func.now(),
     )
     ruta_pdf = db.Column(db.String(255), nullable=False)
 
     pedido = db.relationship("Pedido", back_populates="facturas")
-
