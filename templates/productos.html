@@ -13,7 +13,7 @@
   <section class="seccion-productos" aria-labelledby="titulo-productos">
     <div class="contenedor">
       <div class="encabezado-productos">
-        <div>
+        <div class="encabezado-productos-info">
           <h1 id="titulo-productos" class="titulo-productos">
             Colección <span class="degradado">Musical</span>
           </h1>
@@ -25,30 +25,36 @@
             {% endif %}
           </p>
         </div>
-
-        <div class="botones-filtro">
-          <a 
-            class="boton boton-secundario{% if categoria_slug == 'todos' %} activo{% endif %}" 
-            href="{{ url_for('productos') }}"
-          >
-            Todos
-          </a>
-          {% for cat in categorias %}
-            <a 
-              class="boton boton-secundario{% if categoria_slug == cat.slug %} activo{% endif %}" 
-              href="{{ url_for('productos', categoria=cat.slug) }}"
-            >
-              {{ cat.nombre }}
-            </a>
-          {% endfor %}
-        </div>
       </div>
 
-      <div class="barra-busqueda-catalogo">
-        <form class="formulario-busqueda" action="{{ url_for('productos') }}" method="get">
-          {% if categoria_slug != 'todos' %}
-            <input type="hidden" name="categoria" value="{{ categoria_slug }}"/>
-          {% endif %}
+      <div class="barra-filtros-catalogo">
+        <form class="formulario-catalogo-filtros" action="{{ url_for('productos') }}" method="get" id="formFiltroProductos">
+          <div class="grupo-filtro-categoria">
+            <label for="filtroCategoria" class="etiqueta-filtro-select">
+              <span class="material-symbols-outlined icono-filtro-select" aria-hidden="true">category</span>
+              Género:
+            </label>
+            <div class="contenedor-select-estilizado">
+              <select 
+                class="select-filtro-categoria" 
+                name="categoria" 
+                id="filtroCategoria"
+                onchange="document.getElementById('formFiltroProductos').requestSubmit()"
+                aria-label="Filtrar por género musical"
+              >
+                <option value="todos"{% if categoria_slug == 'todos' or not categoria_slug %} selected{% endif %}>
+                  Todos los géneros ({{ categorias|length }} disponibles)
+                </option>
+                {% for cat in categorias %}
+                  <option value="{{ cat.slug }}"{% if categoria_slug == cat.slug %} selected{% endif %}>
+                    {{ cat.nombre }}
+                  </option>
+                {% endfor %}
+              </select>
+              <span class="material-symbols-outlined icono-select-flecha" aria-hidden="true">expand_more</span>
+            </div>
+          </div>
+
           <div class="contenedor-input-busqueda">
             <span class="material-symbols-outlined icono-busqueda-input" aria-hidden="true">search</span>
             <input 
@@ -57,14 +63,18 @@
               name="q" 
               placeholder="Buscar por álbum o artista..." 
               value="{{ busqueda or '' }}"
+              aria-label="Buscar discos por álbum o artista"
             />
-            {% if busqueda %}
-              <a class="limpiar-busqueda" href="{{ url_for('productos', categoria=categoria_slug if categoria_slug != 'todos' else None) }}" title="Limpiar búsqueda">
+            {% if busqueda or (categoria_slug and categoria_slug != 'todos') %}
+              <a class="limpiar-busqueda" href="{{ url_for('productos') }}" title="Limpiar todos los filtros">
                 <span class="material-symbols-outlined" aria-hidden="true">close</span>
               </a>
             {% endif %}
           </div>
-          <button class="boton boton-principal boton-chico" type="submit">Buscar</button>
+          <button class="boton boton-principal boton-chico" type="submit">
+            <span class="material-symbols-outlined" aria-hidden="true">search</span>
+            <span>Buscar</span>
+          </button>
         </form>
       </div>
 

@@ -1,190 +1,414 @@
 <!DOCTYPE html>
-<html class="dark" lang="es">
+<html class="dark" lang="es" style="background-color: #121212; color-scheme: dark;">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="color-scheme" content="dark"/>
+  <meta name="theme-color" content="#121212"/>
+  <style>
+    html, body {
+      background-color: #121212 !important;
+      color-scheme: dark;
+    }
+  </style>
   <title>{% block titulo %}New Records{% endblock %} - New Records</title>
+  <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-  <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet"/>
+  <script
+    src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.10/dist/htmx.min.js"
+    integrity="sha384-H5SrcfygHmAuTDZphMHqBJLc3FhssKjG7w/CeCpFReSfwBWDTKpkzPP8c+cLsK+V"
+    crossorigin="anonymous"
+    defer
+  ></script>
+  <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
   {% block head_extra %}{% endblock %}
 </head>
-<body>
-  <header class="cabecera-sitio">
-    <div class="contenedor cabecera-interior">
-      <div class="cabecera-izquierda">
+<body
+  class="cuerpo-app{% if request.endpoint in ['inicio', 'login', 'registro'] %} vista-inicio{% endif %}"
+  style="background-color: #121212;"
+  hx-boost="true"
+  hx-push-url="true"
+  hx-swap="innerHTML transition:true"
+  hx-indicator="#indicadorNavegacion"
+>
+  <div class="capa-transicion-pagina" id="indicadorNavegacion" aria-hidden="true">
+    <span class="spinner-transicion" aria-hidden="true"></span>
+    <span class="oculto-visual">Cargando contenido</span>
+  </div>
+  {% if request.endpoint == 'inicio' %}
+    <!-- =====================================================================
+         HEADER SUPERIOR EXCLUSIVO PARA INICIO (Solo Logo y Opción de Ingresar)
+         ===================================================================== -->
+    <header class="cabecera-sitio cabecera-inicio">
+      <div class="contenedor cabecera-interior cabecera-inicio-interior">
         <a class="enlace-logo" href="{{ url_for('inicio') }}">
           <span class="material-symbols-outlined icono-logo" aria-hidden="true">album</span>
           <span class="texto-logo">New Records</span>
         </a>
-        <nav class="nav-principal" aria-label="Navegación principal">
-          <a class="enlace-nav{% if request.endpoint == 'inicio' %} activo{% endif %}" href="{{ url_for('inicio') }}">Inicio</a>
-          <details class="menu-categorias-global">
-            <summary class="enlace-nav{% if request.endpoint in ['categorias', 'productos', 'detalle_producto'] %} activo{% endif %}">
-              Géneros
-              <span class="material-symbols-outlined icono-menu-categorias" aria-hidden="true">expand_more</span>
-            </summary>
-            <div class="lista-menu-categorias">
-              <a href="{{ url_for('productos') }}">Todos los discos</a>
-              {% for categoria_global in categorias_globales %}
-                <a href="{{ url_for('productos', categoria=categoria_global.slug) }}">
-                  {{ categoria_global.nombre }}
-                </a>
-              {% else %}
-                <span class="menu-categorias-vacio">No hay géneros disponibles</span>
-              {% endfor %}
-            </div>
-          </details>
-          <a class="enlace-nav{% if request.endpoint == 'productos' %} activo{% endif %}" href="{{ url_for('productos') }}">Productos</a>
-          <a class="enlace-nav{% if request.endpoint == 'contacto' %} activo{% endif %}" href="{{ url_for('contacto') }}">Contacto</a>
-        </nav>
-      </div>
 
-      <div class="cabecera-derecha">
-        <nav class="nav-usuario" aria-label="Navegación de usuario">
-          {% if esta_autenticado %}
-            {% if es_admin %}
-              <a class="enlace-nav badge-admin-nav{% if request.endpoint == 'admin_dashboard' %} activo{% endif %}" href="{{ url_for('admin_dashboard') }}">
-                <span class="material-symbols-outlined" aria-hidden="true">admin_panel_settings</span>
-                Admin
-              </a>
-            {% else %}
-              <a class="enlace-nav enlace-carrito-nav{% if request.endpoint == 'ver_carrito' %} activo{% endif %}" href="{{ url_for('ver_carrito') }}" title="Ver mi carrito">
-                <span class="material-symbols-outlined" aria-hidden="true">shopping_cart</span>
-                Carrito
-                {% if total_items_carrito > 0 %}
-                  <span class="badge-contador-carrito">{{ total_items_carrito }}</span>
-                {% endif %}
-              </a>
-              <a class="enlace-nav{% if request.endpoint == 'lista_pedidos' %} activo{% endif %}" href="{{ url_for('lista_pedidos') }}" title="Mis compras">
-                <span class="material-symbols-outlined" aria-hidden="true">receipt_long</span>
-                Pedidos
-              </a>
-            {% endif %}
-            <a class="enlace-nav{% if request.endpoint == 'perfil' %} activo{% endif %}" href="{{ url_for('perfil') }}">
-              <span class="material-symbols-outlined" aria-hidden="true">account_circle</span>
-              {{ session.usuario_nombre.split()[0] }}
-            </a>
-            <form class="form-logout" action="{{ url_for('logout') }}" method="post">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <button class="boton boton-secundario boton-chico" type="submit" title="Cerrar sesión">
-                <span class="material-symbols-outlined" aria-hidden="true">logout</span>
-                <span class="texto-boton-nav">Salir</span>
-              </button>
-            </form>
-          {% else %}
-            <a class="enlace-nav{% if request.endpoint == 'login' %} activo{% endif %}" href="{{ url_for('login') }}">
-              <span class="material-symbols-outlined" aria-hidden="true">login</span>
-              Ingresar
-            </a>
-            <a class="boton boton-destacado boton-chico" href="{{ url_for('registro') }}">
-              <span class="material-symbols-outlined" aria-hidden="true">person_add</span>
-              Registrarse
-            </a>
-          {% endif %}
-        </nav>
-
-        <button class="alternar-nav" type="button" aria-label="Abrir menú" aria-controls="navMovil" aria-expanded="false">
-          <span class="material-symbols-outlined" aria-hidden="true">menu</span>
-        </button>
-      </div>
-
-      <nav class="nav-movil" id="navMovil" aria-label="Navegación móvil">
-        <a class="enlace-nav{% if request.endpoint == 'inicio' %} activo{% endif %}" href="{{ url_for('inicio') }}">Inicio</a>
-        <details class="menu-categorias-global menu-categorias-movil">
-          <summary class="enlace-nav{% if request.endpoint in ['categorias', 'productos', 'detalle_producto'] %} activo{% endif %}">
-            Géneros
-            <span class="material-symbols-outlined icono-menu-categorias" aria-hidden="true">expand_more</span>
-          </summary>
-          <div class="lista-menu-categorias">
-            <a href="{{ url_for('categorias') }}">Explorar categorías</a>
-            <a href="{{ url_for('productos') }}">Todos los discos</a>
-            {% for categoria_global in categorias_globales %}
-              <a href="{{ url_for('productos', categoria=categoria_global.slug) }}">
-                {{ categoria_global.nombre }}
-              </a>
-            {% else %}
-              <span class="menu-categorias-vacio">No hay géneros disponibles</span>
-            {% endfor %}
-          </div>
-        </details>
-        <a class="enlace-nav{% if request.endpoint == 'productos' %} activo{% endif %}" href="{{ url_for('productos') }}">Productos</a>
-        <a class="enlace-nav{% if request.endpoint == 'contacto' %} activo{% endif %}" href="{{ url_for('contacto') }}">Contacto</a>
-        <hr class="separador-nav-movil"/>
-        {% if esta_autenticado %}
-          {% if es_admin %}
-            <a class="enlace-nav badge-admin-nav{% if request.endpoint == 'admin_dashboard' %} activo{% endif %}" href="{{ url_for('admin_dashboard') }}">
-              <span class="material-symbols-outlined" aria-hidden="true">admin_panel_settings</span>
-              Panel de Administración
-            </a>
-          {% else %}
-            <a class="enlace-nav{% if request.endpoint == 'ver_carrito' %} activo{% endif %}" href="{{ url_for('ver_carrito') }}">
-              <span class="material-symbols-outlined" aria-hidden="true">shopping_cart</span>
-              Mi Carrito ({% if total_items_carrito > 0 %}{{ total_items_carrito }}{% else %}0{% endif %})
-            </a>
-            <a class="enlace-nav{% if request.endpoint == 'lista_pedidos' %} activo{% endif %}" href="{{ url_for('lista_pedidos') }}">
-              <span class="material-symbols-outlined" aria-hidden="true">receipt_long</span>
-              Mis Pedidos
-            </a>
-            <a class="enlace-nav{% if request.endpoint == 'pago_metodos' %} activo{% endif %}" href="{{ url_for('pago_metodos') }}">
-              <span class="material-symbols-outlined" aria-hidden="true">credit_card</span>
-              Métodos de Pago
-            </a>
-          {% endif %}
-          <a class="enlace-nav{% if request.endpoint == 'perfil' %} activo{% endif %}" href="{{ url_for('perfil') }}">
-            <span class="material-symbols-outlined" aria-hidden="true">account_circle</span>
-            Mi Perfil ({{ session.usuario_nombre }})
-          </a>
-          <form class="form-logout form-logout-movil" action="{{ url_for('logout') }}" method="post">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button class="enlace-nav enlace-salir" type="submit">
-              <span class="material-symbols-outlined" aria-hidden="true">logout</span>
-              Cerrar Sesión
-            </button>
-          </form>
-        {% else %}
-          <a class="enlace-nav{% if request.endpoint == 'login' %} activo{% endif %}" href="{{ url_for('login') }}">
+        <div class="cabecera-derecha">
+          <a class="enlace-nav enlace-login-header btn-abrir-login" id="btnHeaderLogin" href="{{ url_for('login') }}">
             <span class="material-symbols-outlined" aria-hidden="true">login</span>
-            Iniciar Sesión
+            Ingresar
           </a>
-          <a class="enlace-nav{% if request.endpoint == 'registro' %} activo{% endif %}" href="{{ url_for('registro') }}">
-            <span class="material-symbols-outlined" aria-hidden="true">person_add</span>
-            Crear Cuenta
+        </div>
+      </div>
+    </header>
+  {% elif request.endpoint not in ['login', 'registro'] %}
+    <!-- =====================================================================
+         BARRA MÓVIL Y BACKDROP (Para vistas internas con Sidebar)
+         ===================================================================== -->
+    <header class="barra-movil" aria-label="Cabecera móvil">
+      <button class="btn-toggle-sidebar-mobile" id="btnToggleSidebarMobile" type="button" aria-label="Abrir menú de navegación" aria-expanded="false" aria-controls="sidebar">
+        <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+      </button>
+
+      <a class="enlace-logo-movil" href="{{ url_for('productos') if esta_autenticado else url_for('inicio') }}">
+        <span class="material-symbols-outlined icono-logo" aria-hidden="true">album</span>
+        <span class="texto-logo">New Records</span>
+      </a>
+
+      <div class="acciones-movil-rapidas">
+        {% if esta_autenticado %}
+          {% if not es_admin %}
+            <a class="btn-icono-movil" href="{{ url_for('ver_carrito') }}" title="Carrito">
+              <span class="material-symbols-outlined" aria-hidden="true">shopping_cart</span>
+              {% if total_items_carrito > 0 %}
+                <span class="badge-contador-movil">{{ total_items_carrito }}</span>
+              {% endif %}
+            </a>
+          {% endif %}
+          <a class="avatar-movil-enlace" href="{{ url_for('perfil') }}" title="Mi Perfil">
+            <span class="avatar-iniciales-mini">{{ usuario_iniciales }}</span>
+          </a>
+        {% else %}
+          <a class="btn-icono-movil" href="{{ url_for('login') }}" title="Iniciar Sesión">
+            <span class="material-symbols-outlined" aria-hidden="true">login</span>
           </a>
         {% endif %}
-      </nav>
-    </div>
-  </header>
-
-  {% with mensajes = get_flashed_messages(with_categories=true) %}
-    {% if mensajes %}
-      <div class="contenedor mensajes-flash" aria-live="polite">
-        {% for categoria, mensaje in mensajes %}
-          <div class="mensaje-flash mensaje-flash-{{ categoria }}" role="alert">
-            <span class="material-symbols-outlined icono-flash" aria-hidden="true">
-              {% if categoria == 'success' %}check_circle
-              {% elif categoria == 'error' or categoria == 'danger' %}error
-              {% elif categoria == 'warning' %}warning
-              {% else %}info{% endif %}
-            </span>
-            <span class="texto-flash">{{ mensaje }}</span>
-          </div>
-        {% endfor %}
       </div>
+    </header>
+
+    <div class="sidebar-backdrop" id="sidebarBackdrop" aria-hidden="true"></div>
+  {% endif %}
+
+  <!-- Layout Principal -->
+  <div class="layout-app{% if request.endpoint in ['inicio', 'login', 'registro'] %} layout-landing{% endif %}" id="layoutApp">
+    {% if request.endpoint not in ['inicio', 'login', 'registro'] %}
+      <!-- Sidebar Lateral (Exclusivo para vistas internas) -->
+      <aside class="sidebar" id="sidebar" aria-label="Navegación lateral principal">
+        <!-- Encabezado del Sidebar -->
+        <div class="sidebar-header">
+          <a class="enlace-logo-sidebar" href="{{ url_for('admin_dashboard') if es_admin else (url_for('productos') if esta_autenticado else url_for('inicio')) }}">
+            <div class="contenedor-icono-logo">
+              <span class="material-symbols-outlined icono-logo-sidebar" aria-hidden="true">album</span>
+            </div>
+            <span class="texto-logo-sidebar">New Records</span>
+          </a>
+          <button class="btn-colapso-sidebar" id="btnColapsoSidebar" type="button" aria-label="Alternar tamaño del menú lateral" title="Colapsar / Expandir menú">
+            <span class="material-symbols-outlined icono-colapso" aria-hidden="true">menu_open</span>
+          </button>
+          <button class="btn-cerrar-sidebar-mobile" id="btnCerrarSidebarMobile" type="button" aria-label="Cerrar menú lateral">
+            <span class="material-symbols-outlined" aria-hidden="true">close</span>
+          </button>
+        </div>
+
+        <!-- Navegación Jerárquica del Sidebar -->
+        <nav class="sidebar-nav" aria-label="Menú de navegación">
+          {% if es_admin %}
+            <!-- MENÚ ADMINISTRADOR -->
+            <div class="modulo-sidebar">
+              <span class="modulo-titulo">Administración</span>
+              <ul class="lista-menu-sidebar">
+                <li class="item-menu-sidebar">
+                  <a class="enlace-sidebar{% if request.endpoint == 'admin_dashboard' %} activo{% endif %}" href="{{ url_for('admin_dashboard') }}" title="Panel Principal">
+                    <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">dashboard</span>
+                    <span class="texto-item-sidebar">Dashboard</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div class="modulo-sidebar">
+              <span class="modulo-titulo">Catálogo</span>
+              <ul class="lista-menu-sidebar">
+                <li class="item-menu-sidebar submodulo-sidebar{% if request.endpoint in ['admin_discos_lista', 'admin_discos_nuevo', 'admin_discos_editar'] %} abierto{% endif %}">
+                  <button class="btn-acordeon-sidebar" type="button" aria-expanded="{% if request.endpoint in ['admin_discos_lista', 'admin_discos_nuevo', 'admin_discos_editar'] %}true{% else %}false{% endif %}">
+                    <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">album</span>
+                    <span class="texto-item-sidebar">Discos</span>
+                    <span class="material-symbols-outlined icono-flecha-acordeon" aria-hidden="true">expand_more</span>
+                  </button>
+                  <ul class="sublista-sidebar">
+                    <li>
+                      <a class="enlace-subitem{% if request.endpoint == 'admin_discos_lista' %} activo{% endif %}" href="{{ url_for('admin_discos_lista') }}">
+                        <span class="indicador-subitem"></span>
+                        <span>Listado de Discos</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a class="enlace-subitem{% if request.endpoint == 'admin_discos_nuevo' %} activo{% endif %}" href="{{ url_for('admin_discos_nuevo') }}">
+                        <span class="indicador-subitem"></span>
+                        <span>Registrar Disco</span>
+                      </a>
+                    </li>
+                  </ul>
+                </li>
+
+                <li class="item-menu-sidebar submodulo-sidebar{% if request.endpoint in ['admin_categorias_lista', 'admin_categorias_nueva', 'admin_categorias_editar'] %} abierto{% endif %}">
+                  <button class="btn-acordeon-sidebar" type="button" aria-expanded="{% if request.endpoint in ['admin_categorias_lista', 'admin_categorias_nueva', 'admin_categorias_editar'] %}true{% else %}false{% endif %}">
+                    <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">category</span>
+                    <span class="texto-item-sidebar">Categorías</span>
+                    <span class="material-symbols-outlined icono-flecha-acordeon" aria-hidden="true">expand_more</span>
+                  </button>
+                  <ul class="sublista-sidebar">
+                    <li>
+                      <a class="enlace-subitem{% if request.endpoint == 'admin_categorias_lista' %} activo{% endif %}" href="{{ url_for('admin_categorias_lista') }}">
+                        <span class="indicador-subitem"></span>
+                        <span>Listado de Géneros</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a class="enlace-subitem{% if request.endpoint == 'admin_categorias_nueva' %} activo{% endif %}" href="{{ url_for('admin_categorias_nueva') }}">
+                        <span class="indicador-subitem"></span>
+                        <span>Nueva Categoría</span>
+                      </a>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+
+            <div class="modulo-sidebar">
+              <span class="modulo-titulo">Ventas y Gestión</span>
+              <ul class="lista-menu-sidebar">
+                <li class="item-menu-sidebar">
+                  <a class="enlace-sidebar{% if request.endpoint in ['admin_pedidos_lista', 'admin_pedido_detalle'] %} activo{% endif %}" href="{{ url_for('admin_pedidos_lista') }}" title="Gestión de Pedidos">
+                    <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">receipt_long</span>
+                    <span class="texto-item-sidebar">Pedidos Clientes</span>
+                  </a>
+                </li>
+                <li class="item-menu-sidebar">
+                  <a class="enlace-sidebar{% if request.endpoint == 'admin_reportes' %} activo{% endif %}" href="{{ url_for('admin_reportes') }}" title="Estadísticas y Reportes">
+                    <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">analytics</span>
+                    <span class="texto-item-sidebar">Reportes y Métricas</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div class="modulo-sidebar">
+              <span class="modulo-titulo">Vista Pública</span>
+              <ul class="lista-menu-sidebar">
+                <li class="item-menu-sidebar">
+                  <a class="enlace-sidebar{% if request.endpoint == 'productos' %} activo{% endif %}" href="{{ url_for('productos') }}" title="Ver Tienda">
+                    <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">storefront</span>
+                    <span class="texto-item-sidebar">Catálogo Público</span>
+                  </a>
+                </li>
+                <li class="item-menu-sidebar">
+                  <a class="enlace-sidebar{% if request.endpoint == 'perfil' %} activo{% endif %}" href="{{ url_for('perfil') }}" title="Mi Perfil">
+                    <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">account_circle</span>
+                    <span class="texto-item-sidebar">Mi Perfil</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+          {% elif esta_autenticado %}
+            <!-- MENÚ CLIENTE AUTENTICADO -->
+            <div class="modulo-sidebar">
+              <span class="modulo-titulo">Tienda</span>
+              <ul class="lista-menu-sidebar">
+                <li class="item-menu-sidebar">
+                  <a class="enlace-sidebar{% if request.endpoint == 'categorias' %} activo{% endif %}" href="{{ url_for('categorias') }}" title="Explorar Categorías">
+                    <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">category</span>
+                    <span class="texto-item-sidebar">Explorar Categorías</span>
+                  </a>
+                </li>
+                <li class="item-menu-sidebar">
+                  <a class="enlace-sidebar{% if request.endpoint in ['productos', 'detalle_producto'] %} activo{% endif %}" href="{{ url_for('productos') }}" title="Catálogo de Productos">
+                    <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">album</span>
+                    <span class="texto-item-sidebar">Productos / Discos</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div class="modulo-sidebar">
+              <span class="modulo-titulo">Mis Compras</span>
+              <ul class="lista-menu-sidebar">
+                <li class="item-menu-sidebar">
+                  <a class="enlace-sidebar{% if request.endpoint == 'ver_carrito' %} activo{% endif %}" href="{{ url_for('ver_carrito') }}" title="Mi Carrito de Compras">
+                    <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">shopping_cart</span>
+                    <span class="texto-item-sidebar">Mi Carrito</span>
+                    {% if total_items_carrito > 0 %}
+                      <span class="badge-sidebar-contador">{{ total_items_carrito }}</span>
+                    {% endif %}
+                  </a>
+                </li>
+                <li class="item-menu-sidebar">
+                  <a class="enlace-sidebar{% if request.endpoint in ['lista_pedidos', 'detalle_pedido'] %} activo{% endif %}" href="{{ url_for('lista_pedidos') }}" title="Mis Pedidos">
+                    <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">receipt_long</span>
+                    <span class="texto-item-sidebar">Mis Pedidos</span>
+                  </a>
+                </li>
+                <li class="item-menu-sidebar">
+                  <a class="enlace-sidebar{% if request.endpoint in ['pago_metodos', 'pago_agregar', 'pago_verificar'] %} activo{% endif %}" href="{{ url_for('pago_metodos') }}" title="Métodos de Pago">
+                    <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">credit_card</span>
+                    <span class="texto-item-sidebar">Métodos de Pago</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div class="modulo-sidebar">
+              <span class="modulo-titulo">Cuenta y Ayuda</span>
+              <ul class="lista-menu-sidebar">
+                <li class="item-menu-sidebar">
+                  <a class="enlace-sidebar{% if request.endpoint == 'perfil' %} activo{% endif %}" href="{{ url_for('perfil') }}" title="Mi Perfil">
+                    <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">account_circle</span>
+                    <span class="texto-item-sidebar">Mi Perfil</span>
+                  </a>
+                </li>
+                <li class="item-menu-sidebar">
+                  <a class="enlace-sidebar{% if request.endpoint == 'contacto' %} activo{% endif %}" href="{{ url_for('contacto') }}" title="Contacto y Soporte">
+                    <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">mail</span>
+                    <span class="texto-item-sidebar">Contacto</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+          {% else %}
+            <!-- MENÚ USUARIO INVITADO (Vistas internas sin login) -->
+            <div class="modulo-sidebar">
+              <span class="modulo-titulo">Navegación</span>
+              <ul class="lista-menu-sidebar">
+                <li class="item-menu-sidebar">
+                  <a class="enlace-sidebar{% if request.endpoint == 'inicio' %} activo{% endif %}" href="{{ url_for('inicio') }}" title="Página de Inicio">
+                    <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">home</span>
+                    <span class="texto-item-sidebar">Inicio</span>
+                  </a>
+                </li>
+                <li class="item-menu-sidebar">
+                  <a class="enlace-sidebar{% if request.endpoint == 'categorias' %} activo{% endif %}" href="{{ url_for('categorias') }}" title="Explorar Categorías">
+                    <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">category</span>
+                    <span class="texto-item-sidebar">Explorar Categorías</span>
+                  </a>
+                </li>
+                <li class="item-menu-sidebar">
+                  <a class="enlace-sidebar{% if request.endpoint in ['productos', 'detalle_producto'] %} activo{% endif %}" href="{{ url_for('productos') }}" title="Catálogo de Productos">
+                    <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">album</span>
+                    <span class="texto-item-sidebar">Productos</span>
+                  </a>
+                </li>
+                <li class="item-menu-sidebar">
+                  <a class="enlace-sidebar{% if request.endpoint == 'contacto' %} activo{% endif %}" href="{{ url_for('contacto') }}" title="Contacto y Soporte">
+                    <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">mail</span>
+                    <span class="texto-item-sidebar">Contacto</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div class="modulo-sidebar">
+              <span class="modulo-titulo">Acceso</span>
+              <ul class="lista-menu-sidebar">
+                <li class="item-menu-sidebar">
+                  <a class="enlace-sidebar{% if request.endpoint == 'login' %} activo{% endif %}" href="{{ url_for('login') }}" title="Iniciar Sesión">
+                    <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">login</span>
+                    <span class="texto-item-sidebar">Iniciar Sesión</span>
+                  </a>
+                </li>
+                <li class="item-menu-sidebar">
+                  <a class="enlace-sidebar enlace-destacado-sidebar{% if request.endpoint == 'registro' %} activo{% endif %}" href="{{ url_for('registro') }}" title="Crear Cuenta">
+                    <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">person_add</span>
+                    <span class="texto-item-sidebar">Registrarse</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          {% endif %}
+        </nav>
+
+        <!-- Footer del Sidebar: Tarjeta de Usuario / Invitado -->
+        <div class="sidebar-footer">
+          {% if esta_autenticado %}
+            <div class="tarjeta-usuario-sidebar" id="tarjetaUsuarioSidebar">
+              <a class="enlace-perfil-tarjeta" href="{{ url_for('perfil') }}" title="Ver perfil de {{ usuario_actual.nombre }}">
+                <div class="avatar-usuario-gradiente" aria-hidden="true">
+                  {{ usuario_iniciales }}
+                </div>
+                <div class="detalles-usuario-sidebar">
+                  <span class="nombre-usuario-sidebar">{{ usuario_actual.nombre }}</span>
+                  <span class="email-usuario-sidebar" title="{{ usuario_actual.email }}">{{ usuario_actual.email }}</span>
+                </div>
+              </a>
+              <form class="form-logout-sidebar" action="{{ url_for('logout') }}" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <button class="btn-logout-sidebar" type="submit" title="Cerrar sesión" aria-label="Cerrar sesión">
+                  <span class="material-symbols-outlined" aria-hidden="true">logout</span>
+                </button>
+              </form>
+            </div>
+          {% else %}
+            <div class="tarjeta-invitado-sidebar">
+              <div class="avatar-invitado" aria-hidden="true">
+                <span class="material-symbols-outlined">account_circle</span>
+              </div>
+              <div class="detalles-usuario-sidebar">
+                <span class="nombre-usuario-sidebar">Invitado</span>
+                <a class="enlace-login-tarjeta" href="{{ url_for('login') }}">Iniciar Sesión</a>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </aside>
     {% endif %}
-  {% endwith %}
 
-  {% block contenido %}{% endblock %}
+    <!-- Contenedor del Contenido Principal y Toasts -->
+    <div class="layout-contenido{% if request.endpoint in ['inicio', 'login', 'registro'] %} contenido-landing{% endif %}" id="layoutContenido">
+      <!-- Sistema Flotante de Notificaciones Toast -->
+      <div class="contenedor-toasts" id="contenedorToasts" aria-live="polite">
+        {% with mensajes = get_flashed_messages(with_categories=true) %}
+          {% if mensajes %}
+            {% for categoria, mensaje in mensajes %}
+              <div class="toast-alerta toast-{{ categoria }}" role="alert">
+                <div class="toast-icono" aria-hidden="true">
+                  <span class="material-symbols-outlined">
+                    {% if categoria == 'success' %}check_circle
+                    {% elif categoria in ['error', 'danger'] %}error
+                    {% elif categoria == 'warning' %}warning
+                    {% else %}info{% endif %}
+                  </span>
+                </div>
+                <div class="toast-cuerpo">
+                  <span class="toast-mensaje">{{ mensaje }}</span>
+                </div>
+                <button class="btn-cerrar-toast" type="button" aria-label="Cerrar notificación">
+                  <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                </button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+      </div>
 
-  <footer class="pie-sitio">
-    <div class="contenedor">
-      <p class="pie-texto">© 2026 New Records. Todos los derechos reservados.</p>
+      <!-- Bloque de Contenido de la Página -->
+      {% block contenido %}{% endblock %}
+
+      <!-- Pie de Página -->
+      <footer class="pie-sitio{% if request.endpoint in ['inicio', 'login', 'registro'] %} pie-inicio{% endif %}">
+        <div class="contenedor">
+          <p class="pie-texto">© 2026 New Records. Todos los derechos reservados.</p>
+        </div>
+      </footer>
     </div>
-  </footer>
+  </div>
 
-  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

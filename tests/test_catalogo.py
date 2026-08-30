@@ -16,13 +16,12 @@ def test_categorias_dinamicas_responden(client):
 
 
 def test_menu_global_lista_generos_desde_postgresql(client):
-    respuesta = client.get("/")
-
+    respuesta = client.get("/productos")
     assert respuesta.status_code == 200
-    assert b"menu-categorias-global" in respuesta.data
-    assert b"/productos?categoria=rock" in respuesta.data
-    assert b"/productos?categoria=pop" in respuesta.data
-    assert b"/productos?categoria=reggaeton" in respuesta.data
+    assert b"filtroCategoria" in respuesta.data
+    assert b"rock" in respuesta.data
+    assert b"pop" in respuesta.data
+    assert b"reggaeton" in respuesta.data
 
 
 def test_catalogo_todos_los_productos(client):

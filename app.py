@@ -91,6 +91,15 @@ def es_url_segura(destino):
     return not test_host or test_host == ref_host
 
 
+def es_url_segura(destino):
+    """Verifica que la redirección sea interna y no apunte a dominios externos."""
+    if not destino:
+        return False
+    ref_host = urlsplit(request.host_url).netloc
+    test_host = urlsplit(destino).netloc
+    return not test_host or test_host == ref_host
+
+
 def normalizar_email(email):
     """Valida la estructura del correo y retorna una versión normalizada."""
     resultado = validate_email(email, check_deliverability=False)
@@ -99,7 +108,7 @@ def normalizar_email(email):
 
 @app.context_processor
 def inyectar_contexto_usuario():
-    """Inyecta el usuario actual, su estado y el contador de ítems del carrito en todas las plantillas."""
+    """Inyecta el usuario actual, sus iniciales, su estado y el contador de ítems del carrito en todas las plantillas."""
     usuario = obtener_usuario_actual()
     carrito = obtener_carrito_sesion()
     total_items = sum(
@@ -110,8 +119,20 @@ def inyectar_contexto_usuario():
     categorias_globales = (
         Categoria.query.filter_by(activo=True).order_by(Categoria.nombre).all()
     )
+    
+    iniciales = ""
+    if usuario and usuario.nombre:
+        partes = usuario.nombre.strip().split()
+        if len(partes) >= 2:
+            iniciales = f"{partes[0][0]}{partes[1][0]}".upper()
+        elif len(partes) == 1 and len(partes[0]) >= 2:
+            iniciales = partes[0][:2].upper()
+        elif len(partes) == 1:
+            iniciales = partes[0][0].upper()
+
     return {
         "usuario_actual": usuario,
+        "usuario_iniciales": iniciales or "NR",
         "esta_autenticado": usuario is not None,
         "es_admin": usuario is not None and usuario.rol == "administrador",
         "es_cliente": usuario is not None and usuario.rol == "cliente",
@@ -122,7 +143,12 @@ def inyectar_contexto_usuario():
 
 @app.route("/")
 def inicio():
-    """Muestra la portada de New Records."""
+    """Muestra la portada de New Records solo a usuarios no autenticados o redirige al contenido interno."""
+    usuario = obtener_usuario_actual()
+    if usuario is not None:
+        if usuario.es_administrador():
+            return redirect(url_for("admin_dashboard"))
+        return redirect(url_for("productos"))
     return render_template("index.html")
 
 
@@ -204,8 +230,21 @@ def contacto():
 @app.route("/registro", methods=["GET", "POST"])
 def registro():
     """Registra una nueva cuenta pública asignando siempre el rol cliente."""
+    es_ajax = (
+        request.headers.get("X-Requested-With") == "XMLHttpRequest"
+        or request.headers.get("Accept", "").startswith("application/json")
+        or request.is_json
+    )
+
     if "usuario_id" in session:
-        return redirect(url_for("inicio"))
+        usuario = obtener_usuario_actual()
+        if usuario and usuario.es_administrador():
+            dest = url_for("admin_dashboard")
+        else:
+            dest = url_for("productos")
+        if es_ajax:
+            return jsonify({"ok": True, "redirect": dest})
+        return redirect(dest)
 
     if request.method == "POST":
         nombre = request.form.get("nombre", "").strip()
@@ -213,39 +252,48 @@ def registro():
         password = request.form.get("password", "")
         confirmar_password = request.form.get("confirmar_password", "")
 
-        if not nombre or not email or not password:
-            flash("Todos los campos obligatorios deben ser completados.", "error")
-            return render_template("auth/registro.html", nombre=nombre, email=email)
+        errores = {}
 
-        if len(nombre) < 2 or len(nombre) > 100:
-            flash("El nombre debe contener entre 2 y 100 caracteres.", "error")
-            return render_template("auth/registro.html", nombre=nombre, email=email)
+        if not nombre:
+            errores["nombre"] = "El nombre completo es un campo obligatorio."
+        elif len(nombre) < 2 or len(nombre) > 100:
+            errores["nombre"] = "El nombre debe contener entre 2 y 100 caracteres."
 
-        if Usuario.query.filter_by(email=email).first() is not None:
-            flash("Ya existe una cuenta registrada con este correo electrónico.", "error")
-            return render_template("auth/registro.html", nombre=nombre, email=email)
+        if not email:
+            errores["email"] = "El correo es un campo obligatorio."
+        elif Usuario.query.filter_by(email=email).first() is not None:
+            errores["email"] = "Ya existe una cuenta registrada con este correo electrónico."
+        else:
+            try:
+                email_normalizado = normalizar_email(email)
+                if len(email_normalizado) > 120:
+                    errores["email"] = "El correo electrónico no puede superar 120 caracteres."
+                elif Usuario.query.filter_by(email=email_normalizado).first() is not None:
+                    errores["email"] = "Ya existe una cuenta registrada con este correo electrónico."
+                else:
+                    email = email_normalizado
+            except EmailNotValidError:
+                errores["email"] = "El correo debe ser un correo válido. Introduce un correo electrónico válido."
 
-        try:
-            email = normalizar_email(email)
-        except EmailNotValidError:
-            flash("Introduce un correo electrónico válido.", "error")
-            return render_template("auth/registro.html", nombre=nombre, email=email)
+        if not password:
+            errores["password"] = "La contraseña es un campo obligatorio."
+        elif len(password) < 8:
+            errores["password"] = "La contraseña debe tener mínimo 8 caracteres (al menos 8 caracteres)."
 
-        if len(email) > 120:
-            flash("El correo electrónico no puede superar 120 caracteres.", "error")
-            return render_template("auth/registro.html", nombre=nombre, email=email)
+        if not confirmar_password:
+            errores["confirmar_password"] = "Confirmar contraseña es un campo obligatorio."
+        elif password and password != confirmar_password:
+            errores["confirmar_password"] = "La contraseña debe coincidir (Las contraseñas no coinciden)."
 
-        if Usuario.query.filter_by(email=email).first() is not None:
-            flash("Ya existe una cuenta registrada con este correo electrónico.", "error")
-            return render_template("auth/registro.html", nombre=nombre, email=email)
-
-        if len(password) < 8:
-            flash("La contraseña debe tener al menos 8 caracteres.", "error")
-            return render_template("auth/registro.html", nombre=nombre, email=email)
-
-        if password != confirmar_password:
-            flash("Las contraseñas no coinciden. Inténtalo de nuevo.", "error")
-            return render_template("auth/registro.html", nombre=nombre, email=email)
+        if errores:
+            if es_ajax:
+                return jsonify({"ok": False, "errores": errores}), 400
+            return render_template(
+                "auth/registro.html",
+                nombre=nombre,
+                email=email,
+                errores=errores,
+            )
 
         nuevo_usuario = Usuario(
             nombre=nombre,
@@ -259,11 +307,15 @@ def registro():
             db.session.add(nuevo_usuario)
             db.session.commit()
             flash("¡Tu cuenta ha sido creada exitosamente! Ahora puedes iniciar sesión.", "success")
+            if es_ajax:
+                return jsonify({"ok": True, "redirect": url_for("login")}), 200
             return redirect(url_for("login"))
         except Exception:
             db.session.rollback()
-            flash("Ocurrió un error al procesar el registro. Inténtalo más tarde.", "error")
-            return render_template("auth/registro.html", nombre=nombre, email=email)
+            errores["general"] = "Ocurrió un error al procesar el registro. Inténtalo más tarde."
+            if es_ajax:
+                return jsonify({"ok": False, "errores": errores}), 500
+            return render_template("auth/registro.html", nombre=nombre, email=email, errores=errores)
 
     return render_template("auth/registro.html")
 
@@ -271,8 +323,21 @@ def registro():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """Inicia la sesión del usuario previa verificación de credenciales."""
+    es_ajax = (
+        request.headers.get("X-Requested-With") == "XMLHttpRequest"
+        or request.headers.get("Accept", "").startswith("application/json")
+        or request.is_json
+    )
+
     if "usuario_id" in session:
-        return redirect(url_for("inicio"))
+        usuario = obtener_usuario_actual()
+        if usuario and usuario.es_administrador():
+            dest = url_for("admin_dashboard")
+        else:
+            dest = url_for("productos")
+        if es_ajax:
+            return jsonify({"ok": True, "redirect": dest})
+        return redirect(dest)
 
     next_url = request.args.get("next")
 
@@ -280,26 +345,48 @@ def login():
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
 
+        errores = {}
+
+        if not email:
+            errores["email"] = "El correo electrónico es un campo obligatorio."
+        if not password:
+            errores["password"] = "La contraseña es un campo obligatorio."
+
+        if errores:
+            if es_ajax:
+                return jsonify({"ok": False, "errores": errores}), 400
+            return render_template("auth/login.html", email=email, next=next_url, errores=errores)
+
         usuario = Usuario.query.filter_by(email=email).first()
 
         if usuario is None or not usuario.check_password(password):
-            flash("Correo electrónico o contraseña incorrectos.", "error")
-            return render_template("auth/login.html", email=email, next=next_url)
+            errores["password"] = "Correo electrónico o contraseña incorrectos."
+            errores["general"] = "Correo electrónico o contraseña incorrectos."
+            if es_ajax:
+                return jsonify({"ok": False, "errores": errores}), 400
+            return render_template("auth/login.html", email=email, next=next_url, errores=errores)
 
         if not usuario.activo:
-            flash("Esta cuenta se encuentra desactivada. Contacta al administrador.", "error")
-            return render_template("auth/login.html", email=email, next=next_url)
+            errores["password"] = "Esta cuenta se encuentra desactivada. Contacta al administrador."
+            errores["general"] = "Esta cuenta se encuentra desactivada. Contacta al administrador."
+            if es_ajax:
+                return jsonify({"ok": False, "errores": errores}), 400
+            return render_template("auth/login.html", email=email, next=next_url, errores=errores)
 
         iniciar_sesion(usuario)
         flash(f"¡Bienvenido de nuevo, {usuario.nombre}!", "success")
 
         if next_url and es_url_segura(next_url):
-            return redirect(next_url)
+            dest = next_url
+        elif usuario.es_administrador():
+            dest = url_for("admin_dashboard")
+        else:
+            dest = url_for("productos")
 
-        if usuario.es_administrador():
-            return redirect(url_for("admin_dashboard"))
+        if es_ajax:
+            return jsonify({"ok": True, "redirect": dest}), 200
 
-        return redirect(url_for("inicio"))
+        return redirect(dest)
 
     return render_template("auth/login.html", next=next_url)
 
@@ -1176,7 +1263,16 @@ def admin_pedido_rechazar(numero):
 
 @app.after_request
 def agregar_cabeceras_seguridad(response):
-    """Inyecta cabeceras HTTP de seguridad para mitigar ataques comunes (XSS, Clickjacking, MIME sniffing)."""
+    """Añade seguridad y convierte redirecciones HTMX en navegación parcial."""
+    if (
+        request.headers.get("HX-Request") == "true"
+        and response.status_code in {301, 302, 303, 307, 308}
+        and response.headers.get("Location")
+    ):
+        destino = response.headers.pop("Location")
+        response.status_code = 204
+        response.headers["HX-Location"] = destino
+
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "SAMEORIGIN"
     response.headers["X-XSS-Protection"] = "1; mode=block"

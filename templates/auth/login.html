@@ -3,62 +3,81 @@
 {% block titulo %}Iniciar Sesión{% endblock %}
 
 {% block contenido %}
-<main class="contacto-principal auth-seccion">
-  <div class="contenedor">
-    <div class="caja-formulario auth-caja">
-      <section class="contenedor-formulario-contacto" aria-labelledby="titulo-login">
-        <div class="auth-cabecera">
-          <span class="material-symbols-outlined auth-icono" aria-hidden="true">lock_open</span>
-          <h1 id="titulo-login" class="titulo-formulario-contacto">
-            Iniciar <span class="degradado">Sesión</span>
-          </h1>
-          <p class="auth-subtitulo">Accede a tu cuenta de New Records para gestionar tus compras y pedidos.</p>
+  <!-- Fondo de Inicio con Desenfoque (Blur) -->
+  <section class="inicio inicio-desenfocado" aria-hidden="true">
+    <div class="inicio-fondo" role="img" aria-label="Vinilo iluminado en una tornamesa"></div>
+    <div class="inicio-superposicion"></div>
+    <div class="inicio-contenido">
+      <h1 class="inicio-titulo">
+        NEW <span class="degradado">RECORDS</span>
+      </h1>
+      <p class="inicio-descripcion">
+        Nuestra tienda online es el destino definitivo para los amantes de la música. Encuentra los mejores discos de tus géneros favoritos.
+      </p>
+    </div>
+  </section>
+
+  <!-- Modal Flotante de Iniciar Sesión -->
+  <div class="modal-auth-overlay activo" id="modalLoginOverlay">
+    <div class="modal-auth-tarjeta" role="dialog" aria-modal="true" aria-labelledby="titulo-login">
+      <!-- Botón de Cerrar Modal (X) -->
+      <a class="btn-cerrar-modal" href="{{ url_for('inicio') }}" aria-label="Cerrar ventana y volver al inicio" title="Cerrar">
+        <span class="material-symbols-outlined" aria-hidden="true">close</span>
+      </a>
+
+      <div class="auth-cabecera">
+        <span class="material-symbols-outlined auth-icono" aria-hidden="true">lock_open</span>
+        <h1 id="titulo-login" class="auth-titulo">
+          Iniciar <span class="degradado">Sesión</span>
+        </h1>
+        <p class="auth-subtitulo">Accede a tu cuenta de New Records para gestionar tus compras y pedidos.</p>
+      </div>
+
+      <form class="formulario-auth" id="formLogin" action="{{ url_for('login', next=next) }}" method="post" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        
+        <div class="grupo-formulario">
+          <label class="etiqueta-formulario" for="email">Correo electrónico</label>
+          <input 
+            class="entrada-formulario{% if errores and (errores.get('email') or errores.get('general')) %} no-valido{% endif %}" 
+            id="email" 
+            name="email" 
+            type="email" 
+            value="{{ email or '' }}" 
+            placeholder="tu@correo.com" 
+            required 
+            autocomplete="email"
+            autofocus
+          />
+          <span class="mensaje-error{% if errores and errores.get('email') %} visible{% endif %}" id="emailError" role="alert">{{ errores.get('email', '') if errores else '' }}</span>
         </div>
 
-        <form class="formulario-contacto" action="{{ url_for('login', next=next) }}" method="post">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-          <div class="grupo-formulario">
-            <label class="etiqueta-formulario" for="email">Correo electrónico</label>
-            <input 
-              class="entrada-formulario" 
-              id="email" 
-              name="email" 
-              type="email" 
-              value="{{ email or '' }}" 
-              placeholder="tu@correo.com" 
-              required 
-              autocomplete="email"
-              autofocus
-            />
-          </div>
+        <div class="grupo-formulario">
+          <label class="etiqueta-formulario" for="password">Contraseña</label>
+          <input 
+            class="entrada-formulario{% if errores and (errores.get('password') or errores.get('general')) %} no-valido{% endif %}" 
+            id="password" 
+            name="password" 
+            type="password" 
+            placeholder="••••••••" 
+            required 
+            autocomplete="current-password"
+          />
+          <span class="mensaje-error{% if errores and (errores.get('password') or errores.get('general')) %} visible{% endif %}" id="passwordError" role="alert">{{ (errores.get('password') or errores.get('general', '')) if errores else '' }}</span>
+        </div>
 
-          <div class="grupo-formulario">
-            <label class="etiqueta-formulario" for="password">Contraseña</label>
-            <input 
-              class="entrada-formulario" 
-              id="password" 
-              name="password" 
-              type="password" 
-              placeholder="••••••••" 
-              required 
-              autocomplete="current-password"
-            />
-          </div>
+        <button class="boton boton-principal boton-enviar resplandor-neon" type="submit">
+          Ingresar
+          <span class="material-symbols-outlined" aria-hidden="true">login</span>
+        </button>
 
-          <button class="boton boton-principal boton-enviar resplandor-neon" type="submit">
-            Ingresar
-            <span class="material-symbols-outlined" aria-hidden="true">login</span>
-          </button>
-
-          <div class="auth-pie-enlaces">
-            <p class="auth-texto-enlace">
-              ¿Aún no tienes cuenta? 
-              <a class="enlace-destacado" href="{{ url_for('registro') }}">Crear una cuenta nueva</a>
-            </p>
-          </div>
-        </form>
-      </section>
+        <div class="auth-pie-enlaces">
+          <p class="auth-texto-enlace">
+            ¿Aún no tienes cuenta? 
+            <a class="enlace-destacado" href="{{ url_for('registro') }}">Crear una cuenta nueva</a>
+          </p>
+        </div>
+      </form>
     </div>
   </div>
-</main>
 {% endblock %}
