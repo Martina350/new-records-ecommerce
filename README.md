@@ -1,200 +1,179 @@
-# New Records
+# New Records — Plataforma de Comercio Electrónico para Música Física
 
-New Records es un proyecto académico de comercio electrónico para la venta de música en formato físico, específicamente CD y vinilo. El sistema se desarrollará como un monolito sencillo con Flask, SQLAlchemy y PostgreSQL, reutilizando el prototipo responsive existente.
+**New Records** es una aplicación web monolítica de comercio electrónico desarrollada con **Flask**, **SQLAlchemy** y **PostgreSQL**, orientada a la venta de música en formato físico (**CD** y **Vinilo**).
 
-## Estado actual
+El sistema cuenta con una arquitectura relacional sólida respaldada por procedimientos almacenados, triggers y restricciones de integridad en PostgreSQL, seguridad en capa web, generación de comprobantes y facturas en PDF mediante ReportLab, reportes analíticos de ventas y una suite exhaustiva de pruebas automatizadas.
 
-Las fases 1 a 11 están implementadas y verificadas. El proyecto incluye la base Flask, PostgreSQL, autenticación y roles, perfil, catálogo dinámico, carrito, métodos de pago con PIN, pedidos, comprobantes y facturas PDF, notificaciones, administración de catálogo y pedidos, y reportes analíticos de ventas (diario, semanal, mensual, ranking de discos y ranking de categorías).
+---
 
-La aprobación de pedidos y el descuento concurrente de stock se realizan mediante un procedimiento almacenado de PostgreSQL. La suite automatizada contiene 85 pruebas aisladas que no persisten información ni escriben PDFs en el repositorio. La integridad avanzada, seguridad y respaldos pertenecen a la Fase 12.
+## 🌟 Características Principales
 
-El alcance completo y la regla de aprobación entre fases están documentados en `PLAN_IMPLEMENTACION.md`, que también puede ser entregado por separado a cada colaborador.
+- 🎵 **Catálogo Dinámico y Polimorfismo**:
+  - Especialización de productos en `CD` y `Vinilo` mediante herencia de tabla única en SQLAlchemy.
+  - Desglose de precios polimórfico en tiempo real (precio base, peso en kg, embalaje y costo de envío).
+  - Filtro interactivo por géneros musicales (Rock, Pop, Reggaeton, Jazz, etc.) y buscador por texto.
+- 🔐 **Autenticación y Control de Acceso (RBAC)**:
+  - Roles bien diferenciados: `cliente` y `administrador`.
+  - Contraseñas cifradas con Werkzeug (`scrypt`).
+  - Gestión de perfil de usuario y cierre seguro de sesiones.
+- 💳 **Métodos de Pago y Verificación por PIN**:
+  - Almacenamiento seguro de tarjetas tokenizadas y enmascaradas (sin PAN completo ni CVV).
+  - Verificación de tarjeta mediante PIN temporal de 6 dígitos con vigencia de 5 minutos y bloqueo al tercer intento.
+- 🛒 **Carrito y Checkout Transaccional**:
+  - Carrito persistente en sesión que valida existencias de stock en tiempo real.
+  - Proceso de checkout que genera un pedido con estado inicial `PENDIENTE` y emite un **Comprobante de Pedido en PDF**.
+- 🛠️ **Panel Administrativo y Procedimientos Almacenados**:
+  - Dashboard con métricas clave en vivo (inventario, pedidos pendientes, ingresos).
+  - CRUD de discos y categorías con **eliminación suave (Soft Delete)** y confirmación en cascada.
+  - Aprobación concurrente de pedidos mediante el procedimiento almacenado de PostgreSQL `aprobar_pedido_new_records`, el cual descuenta stock de forma atómica y emite la **Factura Final en PDF**.
+  - Rechazo de pedidos con registro obligatorio de motivo sin alterar inventario.
+- 📈 **Reportes Analíticos de Ventas**:
+  - Evolución temporal de ingresos por período diario, semanal y mensual.
+  - Ranking de discos más vendidos con medallas de posición y distribución de ventas por categoría musical.
+- 🛡️ **Seguridad, Mínimo Privilegio y Respaldos**:
+  - Definición de roles de base de datos (`new_records_app`, `new_records_backup`, `new_records_admin`).
+  - Cabeceras HTTP de seguridad (`X-Content-Type-Options`, `X-Frame-Options`, `X-XSS-Protection`, `Referrer-Policy`).
+  - Comando CLI `flask crear-backup` para copias de seguridad consistentes con `pg_dump`.
 
-## Tecnologías previstas
+---
 
-- Python 3.10 o superior.
-- Flask y Jinja2.
-- Flask-SQLAlchemy.
-- PostgreSQL.
-- HTML5, CSS3 y JavaScript.
-- Werkzeug para contraseñas.
-- SMTP para códigos PIN y notificaciones.
-- ReportLab para comprobantes PDF.
-- pytest para pruebas.
+## 🚀 Tecnologías Utilizadas
 
-## Estructura inicial
+- **Backend**: Python 3.10+ / Flask 3.x
+- **ORM**: Flask-SQLAlchemy / SQLAlchemy 2.x
+- **Base de Datos**: PostgreSQL 15+
+- **Frontend**: HTML5, CSS3 responsive y Jinja2
+- **Documentos PDF**: ReportLab
+- **Seguridad**: Werkzeug Security (`scrypt`) y decoradores RBAC
+- **Pruebas Automatizadas**: pytest
 
-- `templates/`: páginas HTML del prototipo y futuras plantillas Jinja2.
-- `static/`: CSS, JavaScript e imágenes.
-- `database/`: restricciones, triggers, procedimientos y reportes PostgreSQL de fases posteriores.
-- `migrations/`: historial futuro de cambios del esquema.
-- `tests/`: pruebas del proyecto.
-- `docs/`: inventario, decisiones y documentación funcional.
-- `backups/`: destino local para respaldos; su contenido no se versiona.
+---
 
-Los módulos nuevos de la aplicación se crearán únicamente cuando se aprueben sus fases correspondientes.
+## 📂 Estructura del Repositorio
 
-## Guía para clonar el repositorio y continuar el desarrollo
+```text
+new-records-ecommerce/
+├── app.py                      # Aplicación Flask principal y rutas
+├── auth.py                     # Decoradores de autenticación y helpers de sesión
+├── backup_manager.py           # Gestor y orquestador de respaldos pg_dump
+├── config.py                   # Configuración y variables de entorno
+├── init_db.py                  # Script de inicialización y carga de datos demo
+├── mailer.py                   # Notificaciones por correo electrónico (SMTP/simulado)
+├── models.py                   # Modelos de datos y herencia polimórfica SQLAlchemy
+├── payments.py                 # Lógica de métodos de pago y verificación por PIN
+├── pdf_generator.py            # Generador de comprobantes y facturas en PDF
+├── services.py                 # Capa de servicios y lógica analítica de negocio
+├── utils.py                    # Utilidades de fecha, moneda y validaciones
+├── database/                   # Scripts SQL de esquema, reglas, procedimientos y roles
+│   ├── reports.sql             # Consultas analíticas de reportes
+│   ├── roles_seguridad.sql     # Roles de mínimo privilegio PostgreSQL
+│   ├── rules_fases7_10.sql     # Procedimiento de aprobación y triggers
+│   ├── rules_fases12.sql       # Restricciones CHECK y triggers avanzados
+│   └── schema_fase3.sql        # Esquema inicial DDL
+├── docs/                       # Documentación técnica y de negocio
+│   ├── CHECKLIST_DEMOSTRACION.md
+│   ├── CONFIGURACION_POSTGRESQL.md
+│   ├── DICCIONARIO_DATOS.md
+│   ├── MODELO_ENTIDAD_RELACION.md
+│   ├── REGLAS_NEGOCIO.md
+│   └── SEGURIDAD_Y_RESPALDOS.md
+├── static/                     # CSS, JavaScript e imágenes estáticas
+├── templates/                  # Plantillas Jinja2 organizadas por módulo
+└── tests/                      # Suite completa de pruebas automatizadas
+```
 
-El repositorio queda preparado hasta la **Fase 11**. La siguiente persona debe completar estos pasos desde la raíz del proyecto antes de comenzar la Fase 12.
+---
+
+## ⚙️ Instalación y Puesta en Marcha
 
 ### 1. Clonar el repositorio
 
 ```bash
-git clone --branch origin/martina-implementations --single-branch https://github.com/Martina350/new-records-ecommerce.git
+git clone https://github.com/Martina350/new-records-ecommerce.git
 cd new-records-ecommerce
 ```
 
-El comando anterior clona directamente la rama de continuidad utilizada por el equipo. Debe ejecutarse después de que los cambios de la Fase 10 hayan sido confirmados y publicados en el remoto.
-
 ### 2. Crear y activar el entorno virtual
 
-Se recomienda utilizar Python 3.10 o superior.
-
 En Windows PowerShell:
-
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-En Linux o macOS:
-
+En Linux/macOS:
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-### 3. Instalar las dependencias
-
-Con el entorno virtual activado:
+### 3. Instalar dependencias
 
 ```bash
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 
-### 4. Configurar PostgreSQL
+### 4. Configurar variables de entorno
 
-PostgreSQL debe estar instalado y el servicio debe encontrarse iniciado. Desde pgAdmin o `psql`, crear los siguientes recursos locales:
+Copiar el archivo `.env.example` a `.env` y configurar las credenciales de PostgreSQL:
 
-- Usuario de aplicación: `new_records_app`.
-- Base de datos: `new_records_db`.
-- Propietario de la base: `new_records_app`.
-- Codificación: UTF-8.
+```ini
+SECRET_KEY=tu_clave_secreta_segura
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=new_records_db
+DB_USER=postgres
+DB_PASSWORD=tu_password_postgres
 
-La contraseña debe ser elegida por cada colaborador y no debe compartirse ni subirse a Git. La aplicación no debe utilizar normalmente el superusuario `postgres`.
+ADMIN_NAME=Administrador New Records
+ADMIN_EMAIL=admin@newrecords.local
+ADMIN_PASSWORD=admin12345
 
-Las instrucciones detalladas se encuentran en [Configuración de PostgreSQL](docs/CONFIGURACION_POSTGRESQL.md).
+CLIENTE_DEMO_NAME=Cliente Demo
+CLIENTE_DEMO_EMAIL=cliente@newrecords.local
+CLIENTE_DEMO_PASSWORD=cliente12345
+```
 
-### 5. Crear y completar el archivo de entorno
+### 5. Inicializar la Base de Datos
 
-Copiar `.env.example` como `.env`.
-
-En Windows PowerShell:
+Ejecutar el script de inicialización para crear las tablas, aplicar restricciones, procedimientos almacenados y cargar el catálogo y usuarios de demostración:
 
 ```powershell
-Copy-Item .env.example .env
-```
-
-En Linux o macOS:
-
-```bash
-cp .env.example .env
-```
-
-Editar únicamente el archivo local `.env` y completar, como mínimo:
-
-- `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT` y `DB_NAME` con la configuración PostgreSQL local.
-- `SECRET_KEY` con un valor aleatorio propio.
-- Las contraseñas de las cuentas iniciales de administrador y cliente.
-
-Puede generarse una clave secreta con:
-
-```bash
-python -c "import secrets; print(secrets.token_hex(32))"
-```
-
-No se debe copiar el archivo `.env` de otro integrante. Este archivo está excluido de Git y cada entorno debe utilizar sus propias credenciales.
-
-### 6. Comprobar la conexión e inicializar la base de datos
-
-Primero verificar que Flask pueda conectarse a PostgreSQL:
-
-```bash
-python -m flask --app app check-db
-```
-
-Después crear las tablas y cargar el catálogo y las cuentas iniciales:
-
-```bash
 python init_db.py
 ```
 
-El inicializador puede volver a ejecutarse sin borrar ni duplicar los datos iniciales existentes.
+### 6. Iniciar el Servidor de Desarrollo
 
-### 7. Ejecutar las pruebas
-
-```bash
-python -m pytest -q
-```
-
-Antes de continuar se espera que todas las pruebas existentes terminen correctamente.
-
-### 8. Iniciar la aplicación
-
-```bash
+```powershell
 python -m flask --app app run --debug
 ```
 
-La dirección predeterminada es `http://127.0.0.1:5000`.
+Acceder en el navegador a `http://127.0.0.1:5000`.
 
-### 9. Continuar con las fases restantes
+---
 
-El desarrollo debe continuar desde la **Fase 12**, siguiendo la copia actualizada de `PLAN_IMPLEMENTACION.md` proporcionada por la persona responsable del proyecto. El plan puede entregarse por separado y no contiene credenciales.
+## 🧪 Pruebas Automatizadas
 
-Antes de implementar una fase nueva, se debe confirmar que la fase anterior esté aprobada, trabajar en una rama propia y evitar modificar o eliminar las funcionalidades y pruebas ya terminadas.
+La suite completa contiene **97 pruebas automatizadas** que validan todos los componentes del sistema sin persistir datos basura ni escribir PDFs innecesarios en el repositorio.
 
-## Ejecución de Flask
+Para ejecutar todas las pruebas:
 
-Con el entorno virtual activado y las dependencias instaladas, iniciar la aplicación desde la raíz del proyecto. La portada estará disponible en la dirección local mostrada por Flask.
+```powershell
+python -m pytest -v
+```
 
-Rutas disponibles en la Fase 2:
+---
 
-- `/`
-- `/categorias`
-- `/productos`
-- `/contacto`
+## 📦 Copias de Seguridad (Backups)
 
-Una ruta inexistente debe mostrar la página 404 propia de New Records.
+Generar una copia de seguridad en formato SQL plano:
+```powershell
+python -m flask --app app crear-backup --formato plain
+```
 
-## Conexión con PostgreSQL
+Generar una copia de seguridad en formato binario comprimido de PostgreSQL (`pg_dump`):
+```powershell
+python -m flask --app app crear-backup --formato custom
+```
 
-La preparación del usuario y la base está explicada en [Configuración de PostgreSQL](docs/CONFIGURACION_POSTGRESQL.md).
-
-Después de configurar el archivo local `.env`, el comando Flask `check-db` comprueba la conexión mediante una lectura sin modificar datos.
-
-## Inicialización del modelo y catálogo
-
-Después de configurar las variables de las cuentas iniciales en `.env`, ejecutar `init_db.py`. El proceso crea las tablas faltantes y carga categorías, discos y usuarios de demostración sin borrar ni duplicar datos existentes.
-
-La estructura resultante está descrita en:
-
-- [Modelo entidad-relación](docs/MODELO_ENTIDAD_RELACION.md)
-- [Diccionario de datos](docs/DICCIONARIO_DATOS.md)
-
-## Flujo de trabajo con Git
-
-- `main`: versión estable y revisada.
-- Una rama corta por fase o funcionalidad.
-- No mezclar cambios de varias fases en una misma rama.
-- Revisar `git status` y ejecutar las verificaciones correspondientes antes de integrar.
-- Nunca versionar `.env`, contraseñas, facturas generadas ni respaldos reales.
-
-## Documentación
-
-- [Inventario del prototipo](docs/PROTOTIPO_INICIAL.md)
-- [Pendientes del frontend](docs/PENDIENTES_FRONTEND.md)
-- [Configuración de PostgreSQL](docs/CONFIGURACION_POSTGRESQL.md)
-- [Modelo entidad-relación](docs/MODELO_ENTIDAD_RELACION.md)
-- [Diccionario de datos](docs/DICCIONARIO_DATOS.md)
+Los respaldos se almacenan automáticamente en la carpeta `backups/`. Consulta [`docs/SEGURIDAD_Y_RESPALDOS.md`](docs/SEGURIDAD_Y_RESPALDOS.md) para más detalles sobre restauración y roles.
