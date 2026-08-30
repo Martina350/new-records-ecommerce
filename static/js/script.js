@@ -24,20 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  const params = new URLSearchParams(window.location.search);
-  const categoria = params.get('categoria');
-  const tarjetas = document.querySelectorAll('.tarjeta-producto');
-  if (tarjetas.length && categoria) {
-    tarjetas.forEach((card) => {
-      card.style.display = card.getAttribute('data-categoria') === categoria ? '' : 'none';
-    });
-  }
-
-  const categoriaActiva = categoria || 'todos';
-  document.querySelectorAll('.botones-filtro [data-categoria]').forEach((link) => {
-    link.classList.toggle('activo', link.getAttribute('data-categoria') === categoriaActiva);
-  });
-
   const formulario = document.getElementById('contactForm');
 
   if (formulario) {

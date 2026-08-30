@@ -1,6 +1,7 @@
 """Pruebas del catálogo dinámico, filtros, detalle de discos y recomendaciones de la Fase 5."""
 
 from decimal import Decimal
+from pathlib import Path
 
 from app import app
 from models import CD, Categoria, Disco, Vinilo, db
@@ -47,6 +48,23 @@ def test_filtro_productos_por_categoria(client):
     assert b"Future Nostalgia" in resp_pop.data
     assert b"After Hours" in resp_pop.data
     assert b"Pink Floyd" not in resp_pop.data
+
+    # Filtrar por Reggaeton
+    resp_reggaeton = client.get("/productos?categoria=reggaeton")
+    assert resp_reggaeton.status_code == 200
+    assert b"Deb\xc3\xad Tirar M\xc3\xa1s Fotos" in resp_reggaeton.data
+    assert b"Atrevido" in resp_reggaeton.data
+    assert b"FERXXOCALIPSIS" in resp_reggaeton.data
+    assert b"Dua Lipa" not in resp_reggaeton.data
+
+
+def test_javascript_no_oculta_resultados_filtrados_por_flask():
+    """El catálogo se filtra en PostgreSQL y no vuelve a ocultarse en el navegador."""
+    ruta_script = Path(__file__).resolve().parent.parent / "static" / "js" / "script.js"
+    contenido = ruta_script.read_text(encoding="utf-8")
+
+    assert "card.style.display" not in contenido
+    assert "getAttribute('data-categoria')" not in contenido
 
 
 def test_busqueda_productos_por_texto(client):
