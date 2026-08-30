@@ -1,33 +1,24 @@
-# Pendientes del frontend
+# Revisión final del frontend
 
-Este documento registra mejoras detectadas en la Fase 1. No se implementan todavía para evitar modificar el comportamiento visible del prototipo antes de la fase correspondiente.
+Este documento conserva la revisión iniciada en la Fase 1 y registra su cierre
+en la Fase 13.
 
-## Jinja2
+## Elementos completados
 
-- Crear `base.html` y eliminar la repetición de cabecera, navegación y pie.
-- Reemplazar enlaces estáticos por `url_for`.
-- Cargar categorías y discos desde PostgreSQL.
-- Convertir tarjetas repetidas en bucles Jinja2.
-- Mostrar mensajes flash en un componente común.
+- Plantilla `base.html`, navegación compartida, mensajes flash y rutas `url_for`.
+- Catálogo, filtros, estados vacíos, detalle, stock, carrito y recomendaciones
+  alimentados desde PostgreSQL.
+- Menú móvil con `aria-controls`, actualización de `aria-expanded`, cierre con
+  la tecla `Escape`, devolución del foco y cierre al seleccionar un enlace.
+- Indicadores globales de `focus-visible` para navegación por teclado.
+- Textos alternativos en las imágenes informativas y elementos decorativos
+  ocultos mediante `aria-hidden`.
+- Formularios POST protegidos con token CSRF y mensajes de error comprensibles.
+- Reglas responsive verificables en los puntos de corte móvil, tableta y escritorio.
 
-## Accesibilidad
+## Mejora futura fuera del alcance académico
 
-- Añadir `aria-controls` y actualizar `aria-expanded` en el botón del menú móvil.
-- Permitir cerrar el menú con teclado y al cambiar de página.
-- No depender exclusivamente de `hover` para mostrar descripciones.
-- Reemplazar atributos `alt` aplicados a elementos `div` por alternativas semánticas válidas.
-- Añadir indicadores de foco visibles y revisar el orden de navegación.
-
-## Rendimiento
-
-- Optimizar las imágenes más pesadas.
-- Evaluar WebP manteniendo una alternativa compatible.
-- Definir dimensiones de imágenes para reducir movimientos durante la carga.
-
-## Funcionalidad pendiente
-
-- Sustituir el filtro visual por consultas dinámicas del catálogo.
-- Enviar realmente el formulario de contacto o retirarlo del alcance final.
-- Incorporar estados vacíos y errores provenientes de Flask.
-- Añadir detalle individual, stock, formato, carrito y recomendaciones.
-
+- Convertir portadas pesadas a WebP manteniendo una alternativa compatible.
+- Integrar el formulario de contacto con un proveedor real de mensajería.
+- Ejecutar auditorías automáticas Lighthouse/axe dentro de CI cuando exista un
+  entorno de despliegue.

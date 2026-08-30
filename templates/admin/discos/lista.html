@@ -85,12 +85,14 @@
                       </a>
                       {% if d.activo %}
                         <form action="{{ url_for('admin_discos_desactivar', id=d.id) }}" method="post" onsubmit="return confirm('¿Desactivar este disco del catálogo público?');">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                           <button class="boton boton-chico boton-peligro" type="submit" title="Desactivar del catálogo">
                             <span class="material-symbols-outlined" aria-hidden="true">visibility_off</span>
                           </button>
                         </form>
                       {% else %}
                         <form action="{{ url_for('admin_discos_reactivar', id=d.id) }}" method="post">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                           <button class="boton boton-chico boton-exito" type="submit" title="Reactivar en el catálogo">
                             <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
                           </button>

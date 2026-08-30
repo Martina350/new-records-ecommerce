@@ -1,49 +1,72 @@
-# Configuración inicial de PostgreSQL
+# Configuración de PostgreSQL para New Records
 
-Esta guía completa la conexión de la Fase 2. No crea todavía tablas ni datos de New Records.
+New Records separa tres responsabilidades técnicas:
 
-## Datos definidos para desarrollo
+- `new_records_admin`: propietario del esquema, migraciones e inicialización.
+- `new_records_app`: conexión diaria de Flask con permisos DML.
+- `new_records_backup`: lectura destinada a `pg_dump`.
 
-- Base de datos: `new_records_db`.
-- Usuario de aplicación: `new_records_app`.
-- Host local: `localhost`.
-- Puerto: `5432`.
-- Codificación: UTF-8.
+La aplicación nunca debe ejecutarse con el superusuario `postgres`.
 
-La aplicación no debe conectarse habitualmente con el superusuario `postgres`.
+## 1. Crear solamente la base vacía
 
-## Creación mediante pgAdmin
+Desde pgAdmin, conectado como administrador, crear `new_records_db` con
+codificación UTF-8. No es necesario crear manualmente los tres roles.
 
-1. Abrir pgAdmin y conectarse al servidor PostgreSQL local como administrador.
-2. Abrir Query Tool sobre la base administrativa `postgres`.
-3. Crear el usuario `new_records_app` con una contraseña local segura.
-4. Crear `new_records_db` indicando a `new_records_app` como propietario.
-5. Confirmar que el usuario puede conectarse a la nueva base.
-6. Copiar la misma contraseña únicamente en `DB_PASSWORD` del archivo local `.env`.
+## 2. Configurar `.env`
 
-Las operaciones SQL equivalentes son:
+Copiar `.env.example` como `.env` y asignar claves diferentes y aleatorias a:
 
-```sql
-CREATE ROLE new_records_app
-WITH LOGIN PASSWORD 'REEMPLAZAR_POR_UNA_CONTRASENA_LOCAL_SEGURA';
+- `DB_PASSWORD`.
+- `DB_ADMIN_PASSWORD`.
+- `DB_BACKUP_PASSWORD`.
+- `DB_BOOTSTRAP_PASSWORD`.
 
-CREATE DATABASE new_records_db
-WITH OWNER = new_records_app
-ENCODING = 'UTF8';
+`DB_BOOTSTRAP_USER` y su clave se usan solamente durante el aprovisionamiento.
+No deben utilizarse para iniciar Flask ni compartirse en Git.
+
+Cuando `pg_dump`, `pg_restore`, `createdb` y `dropdb` no estén en `PATH`, definir
+`POSTGRES_BIN` con la carpeta `bin` de la instalación.
+
+## 3. Aplicar roles y permisos
+
+Con el entorno virtual activo:
+
+```powershell
+python configure_db_roles.py
 ```
 
-Si el rol ya existe, no debe intentarse crearlo nuevamente. En ese caso se puede asignar una nueva contraseña local al rol existente y comprobar la propiedad de la base desde pgAdmin.
+El script crea o actualiza los roles, transfiere la propiedad de la base, esquema,
+tablas, secuencias y rutinas a `new_records_admin`, elimina permisos implícitos de
+`PUBLIC` y concede únicamente los privilegios necesarios.
 
-## Verificación desde el proyecto
+Después de que termine correctamente puede retirarse
+`DB_BOOTSTRAP_PASSWORD` del `.env` de uso cotidiano y conservarse en un gestor de
+secretos administrativo.
 
-Después de completar `.env`, activar el entorno virtual y ejecutar el comando Flask `check-db`. El resultado esperado es el mensaje “Conexión con PostgreSQL correcta”.
+## 4. Inicializar y comprobar
 
-El comando realiza solamente una consulta `SELECT 1`; no crea ni modifica información.
+```powershell
+python init_db.py
+python -m flask --app app check-db
+python -m pytest -q
+```
+
+El comando `check-db` debe informar que Flask se conecta como
+`new_records_app`; ese rol no debe ser propietario de la base ni de las tablas.
+
+Para ejecutar la auditoría directa de privilegios:
+
+```powershell
+$env:RUN_DB_SECURITY_TESTS="1"
+python -m pytest tests/test_seguridad_respaldos.py -v
+```
 
 ## Seguridad
 
-- No copiar la contraseña real en este documento ni en `.env.example`.
-- No subir `.env` a Git.
-- No utilizar la contraseña del ejemplo literalmente.
-- No habilitar autenticación `trust` ni modificar `pg_hba.conf` para evitar la contraseña.
-
+- No versionar `.env`, dumps, contraseñas ni claves reales.
+- Rotar cualquier credencial que alguna vez haya aparecido en un commit.
+- Después de cambiar `ADMIN_PASSWORD` o `CLIENTE_DEMO_PASSWORD`, ejecutar
+  `python init_db.py` para actualizar sus hashes en PostgreSQL.
+- No habilitar autenticación `trust` para simplificar la instalación.
+- Usar `SESSION_COOKIE_SECURE=1` cuando el sitio funcione sobre HTTPS.

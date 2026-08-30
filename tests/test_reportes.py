@@ -28,11 +28,11 @@ from services import (
 
 
 def pass_admin():
-    return os.getenv("ADMIN_PASSWORD", "4119c3d7df348fed21f685809151b30e")
+    return os.environ["ADMIN_PASSWORD"]
 
 
 def pass_cliente():
-    return os.getenv("CLIENTE_DEMO_PASSWORD", "5c45d1a0df71bcead793c6d654a14cbf")
+    return os.environ["CLIENTE_DEMO_PASSWORD"]
 
 
 def autenticar_admin(client):
@@ -141,7 +141,7 @@ def test_reportes_requiere_autenticacion_y_rol_admin(client):
         autenticar_cliente(client)
         resp_cliente = client.get("/admin/reportes")
         assert resp_cliente.status_code == 403
-        client.get("/logout", follow_redirects=True)
+        client.post("/logout", follow_redirects=True)
 
     # Administrador
     with client:
@@ -220,7 +220,7 @@ def test_reporte_ventas_calculos_y_ticket_promedio(client):
 
 
 def test_reporte_ventas_agrupaciones_temporales(client):
-    """Verifica que las agrupaciones diaria, semanal y mensual funcionen adecuadamente."""
+    """Verifica las agrupaciones diaria, semanal, mensual y anual."""
     with app.app_context():
         cliente = Usuario.query.filter_by(rol="cliente").first()
         disco = Disco.query.filter_by(activo=True).first()
@@ -247,6 +247,44 @@ def test_reporte_ventas_agrupaciones_temporales(client):
         assert len(mensual) >= 1
         assert mensual[0]["total_unidades"] == 4
         assert mensual[0]["total_facturado"] == 80.0
+
+        # Anual
+        anual = obtener_reporte_ventas_temporal("anual")
+        assert len(anual) >= 1
+        assert anual[0]["etiqueta"] == str(ped.fecha_creacion.year)
+        assert anual[0]["total_unidades"] == 4
+        assert anual[0]["total_facturado"] == 80.0
+
+
+def test_reporte_anual_consolida_meses_del_mismo_anio(client):
+    """Mensual separa meses y anual los consolida en una sola fila."""
+    with app.app_context():
+        cliente = Usuario.query.filter_by(rol="cliente").first()
+        disco = Disco.query.filter_by(activo=True).first()
+
+        enero = crear_pedido_auxiliar(
+            cliente.id,
+            estado="APROBADO",
+            fecha=datetime(2025, 1, 15, tzinfo=timezone.utc),
+        )
+        agregar_detalle_auxiliar(enero, disco, 1, Decimal("10.00"))
+        febrero = crear_pedido_auxiliar(
+            cliente.id,
+            estado="APROBADO",
+            fecha=datetime(2025, 2, 15, tzinfo=timezone.utc),
+        )
+        agregar_detalle_auxiliar(febrero, disco, 2, Decimal("10.00"))
+        db.session.commit()
+
+        mensual = obtener_reporte_ventas_temporal("mensual")
+        anual = obtener_reporte_ventas_temporal("anual")
+
+        assert len(mensual) == 2
+        assert len(anual) == 1
+        assert anual[0]["etiqueta"] == "2025"
+        assert anual[0]["total_pedidos"] == 2
+        assert anual[0]["total_unidades"] == 3
+        assert anual[0]["total_facturado"] == 30.0
 
 
 # ── Tests de Rankings (Discos y Géneros) ──────────────────────────────────────
@@ -320,7 +358,7 @@ def test_vistas_reportes_filtros_http(client):
     with client:
         autenticar_admin(client)
 
-        for p in ("diario", "semanal", "mensual"):
+        for p in ("diario", "semanal", "mensual", "anual"):
             resp = client.get(f"/admin/reportes?periodo={p}")
             assert resp.status_code == 200
             assert b"Evoluci" in resp.data

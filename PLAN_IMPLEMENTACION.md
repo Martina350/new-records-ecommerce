@@ -215,7 +215,7 @@ El modelo definitivo se documentará mediante un diagrama entidad-relación ante
 - Código o SKU obligatorio y único.
 - Álbum y artista obligatorios.
 - Descripción comercial.
-- Precio decimal obligatorio y no negativo.
+- Precio decimal obligatorio y positivo.
 - Stock entero obligatorio y no negativo.
 - Formato discriminador limitado a CD o VINILO.
 - Peso y datos de embalaje necesarios para el comportamiento físico.
@@ -424,7 +424,7 @@ Tareas previstas:
 - Definir en `Disco` el comportamiento común y sobrescribir en `CD` y `Vinilo` únicamente reglas físicas justificables.
 - Evitar las clases y campos del tutorial correspondientes a licencias digitales o vencimiento de perecibles.
 - Usar tipos decimales para precios y totales, enteros para cantidades y fechas con hora para eventos del sistema.
-- Incorporar `CHECK` para precio no negativo, stock no negativo, cantidad positiva, vencimiento válido, rol permitido y estado de pedido permitido.
+- Incorporar `CHECK` para precio positivo, stock no negativo, cantidad positiva, vencimiento válido, rol permitido y estado de pedido permitido.
 - Incorporar `UNIQUE` para correo, código de disco, identificador de categoría, número de pedido y número de factura.
 - Incorporar valores `DEFAULT` para rol cliente, disco activo, stock inicial, fecha de creación y pedido pendiente.
 - Crear `init_db.py` para ejecutar la inicialización dentro del contexto de Flask.
@@ -678,11 +678,11 @@ Resultado de ejecución:
 
 ### Fase 11 - Reportes administrativos
 
-**Estado:** completada y verificada; preparada para iniciar la Fase 12.
+**Estado:** completada y verificada.
 
 Tareas previstas:
 
-- Crear reporte de ventas diario, semanal y anual.
+- Crear reportes de ventas diario, semanal, mensual y anual.
 - Crear ranking de discos más vendidos.
 - Crear ranking de géneros más vendidos.
 - Utilizar consultas con múltiples `JOIN`, agrupaciones y agregaciones.
@@ -692,16 +692,17 @@ Tareas previstas:
 
 Resultado de ejecución:
 
-- Se creó el script [`database/reports.sql`](file:///c:/Users/Windows-PC/OneDrive%20-%20Pontificia%20Universidad%20Cat%C3%B3lica%20del%20Ecuador/Documentos/PUCE/proyectofinalll/new-records-ecommerce/database/reports.sql) documentando las consultas SQL analíticas de ventas con sintaxis optimizada (`DATE_TRUNC`, CTEs, `JOIN`, `GROUP BY`, `SUM` y `COUNT`) filtrando estrictamente por pedidos con estado `APROBADO`.
-- Se incorporaron en [`services.py`](file:///c:/Users/Windows-PC/OneDrive%20-%20Pontificia%20Universidad%20Cat%C3%B3lica%20del%20Ecuador/Documentos/PUCE/proyectofinalll/new-records-ecommerce/services.py) las funciones analíticas `obtener_resumen_metricas_ventas()`, `obtener_reporte_ventas_temporal()`, `obtener_ranking_discos()` y `obtener_ranking_categorias()`.
-- Se añadió en [`app.py`](file:///c:/Users/Windows-PC/OneDrive%20-%20Pontificia%20Universidad%20Cat%C3%B3lica%20del%20Ecuador/Documentos/PUCE/proyectofinalll/new-records-ecommerce/app.py) la ruta protegida `@app.route("/admin/reportes")` con filtro dinámico de períodos (`diario`, `semanal`, `mensual`).
-- Se crearon las plantillas [`templates/admin/reportes.html`](file:///c:/Users/Windows-PC/OneDrive%20-%20Pontificia%20Universidad%20Cat%C3%B3lica%20del%20Ecuador/Documentos/PUCE/proyectofinalll/new-records-ecommerce/templates/admin/reportes.html) y se actualizó [`templates/admin/dashboard.html`](file:///c:/Users/Windows-PC/OneDrive%20-%20Pontificia%20Universidad%20Cat%C3%B3lica%20del%20Ecuador/Documentos/PUCE/proyectofinalll/new-records-ecommerce/templates/admin/dashboard.html).
-- Se añadieron estilos CSS dedicados en [`static/css/styles.css`](file:///c:/Users/Windows-PC/OneDrive%20-%20Pontificia%20Universidad%20Cat%C3%B3lica%20del%20Ecuador/Documentos/PUCE/proyectofinalll/new-records-ecommerce/static/css/styles.css) para medallas de ranking, barras de progreso y filtros temporales.
-- Se agregaron 7 pruebas automatizadas en [`tests/test_reportes.py`](file:///c:/Users/Windows-PC/OneDrive%20-%20Pontificia%20Universidad%20Cat%C3%B3lica%20del%20Ecuador/Documentos/PUCE/proyectofinalll/new-records-ecommerce/tests/test_reportes.py), alcanzando un total de **85/85 pruebas pasando exitosamente**.
+- [`database/reports.sql`](database/reports.sql) documenta consultas independientes
+  para los cuatro períodos, rankings y métricas basadas solamente en pedidos aprobados.
+- [`services.py`](services.py), [`app.py`](app.py) y
+  [`templates/admin/reportes.html`](templates/admin/reportes.html) implementan filtros
+  separados `diario`, `semanal`, `mensual` y `anual`.
+- [`tests/test_reportes.py`](tests/test_reportes.py) comprueba las cuatro agrupaciones,
+  autorización, exclusión de estados no aprobados, totales y rankings.
 
 ### Fase 12 - Integridad avanzada, seguridad y respaldos
 
-**Estado:** completada y verificada; preparada para iniciar la Fase 13.
+**Estado:** completada; las verificaciones destructivas controladas son opt-in.
 
 Tareas previstas:
 
@@ -715,17 +716,21 @@ Tareas previstas:
 
 Resultado de ejecución:
 
-- Se creó el script [`database/rules_fases12.sql`](file:///c:/Users/Windows-PC/OneDrive%20-%20Pontificia%20Universidad%20Cat%C3%B3lica%20del%20Ecuador/Documentos/PUCE/proyectofinalll/new-records-ecommerce/database/rules_fases12.sql) con restricciones `CHECK` para calidad de catálogo (precios positivos, peso positivo, stock no negativo, formato CD/VINILO), integridad de usuarios (roles válidos), pedidos (estados válidos, motivo de rechazo obligatorio), transacciones y facturas.
-- Se implementó el trigger `trg_discos_actualizar_fecha` para actualización automática de `fecha_actualizacion` en PostgreSQL.
-- Se integró la aplicación idempotente de `rules_fases12.sql` dentro de [`init_db.py`](file:///c:/Users/Windows-PC/OneDrive%20-%20Pontificia%20Universidad%20Cat%C3%B3lica%20del%20Ecuador/Documentos/PUCE/proyectofinalll/new-records-ecommerce/init_db.py).
-- Se definió la política de mínimo privilegio en [`database/roles_seguridad.sql`](file:///c:/Users/Windows-PC/OneDrive%20-%20Pontificia%20Universidad%20Cat%C3%B3lica%20del%20Ecuador/Documentos/PUCE/proyectofinalll/new-records-ecommerce/database/roles_seguridad.sql) (`new_records_app`, `new_records_backup`, `new_records_admin`).
-- Se añadieron cabeceras de seguridad HTTP (`X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `X-XSS-Protection`, `Referrer-Policy`) y el comando CLI `flask crear-backup` en [`app.py`](file:///c:/Users/Windows-PC/OneDrive%20-%20Pontificia%20Universidad%20Cat%C3%B3lica%20del%20Ecuador/Documentos/PUCE/proyectofinalll/new-records-ecommerce/app.py).
-- Se creó el gestor de respaldos [`backup_manager.py`](file:///c:/Users/Windows-PC/OneDrive%20-%20Pontificia%20Universidad%20Cat%C3%B3lica%20del%20Ecuador/Documentos/PUCE/proyectofinalll/new-records-ecommerce/backup_manager.py) y la documentación de operaciones en [`docs/SEGURIDAD_Y_RESPALDOS.md`](file:///c:/Users/Windows-PC/OneDrive%20-%20Pontificia%20Universidad%20Cat%C3%B3lica%20del%20Ecuador/Documentos/PUCE/proyectofinalll/new-records-ecommerce/docs/SEGURIDAD_Y_RESPALDOS.md).
-- Se agregaron 9 pruebas automatizadas en [`tests/test_seguridad_respaldos.py`](file:///c:/Users/Windows-PC/OneDrive%20-%20Pontificia%20Universidad%20Cat%C3%B3lica%20del%20Ecuador/Documentos/PUCE/proyectofinalll/new-records-ecommerce/tests/test_seguridad_respaldos.py), alcanzando un total de **94/94 pruebas pasando exitosamente**.
+- [`database/rules_fases12.sql`](database/rules_fases12.sql) replica las validaciones
+  críticas y conserva únicamente triggers justificados.
+- [`configure_db_roles.py`](configure_db_roles.py) y
+  [`database/roles_seguridad.sql`](database/roles_seguridad.sql) aprovisionan cuentas
+  separadas, transfieren propiedad al administrador y evitan contraseñas en SQL.
+- [`app.py`](app.py) activa CSRF, cabeceras de seguridad y cierre de sesión por POST;
+  [`config.py`](config.py) fija cookies `HttpOnly` y `SameSite`.
+- [`backup_manager.py`](backup_manager.py) utiliza el rol de solo lectura y ofrece
+  una verificación real de restauración en una base temporal controlada.
+- [`tests/test_seguridad_respaldos.py`](tests/test_seguridad_respaldos.py) incluye
+  pruebas normales y auditorías opt-in de privilegios/restauración.
 
 ### Fase 13 - Pruebas, documentación y entrega
 
-**Estado:** completada y verificada; proyecto concluido exitosamente.
+**Estado:** completada y verificada.
 
 Tareas previstas:
 
@@ -742,16 +747,15 @@ Tareas previstas:
 
 Resultado de ejecución:
 
-- Se implementó la suite de pruebas de flujo integral E2E en [`tests/test_flujo_completo_e2e.py`](file:///c:/Users/Windows-PC/OneDrive%20-%20Pontificia%20Universidad%20Cat%C3%B3lica%20del%20Ecuador/Documentos/PUCE/proyectofinalll/new-records-ecommerce/tests/test_flujo_completo_e2e.py), validando de forma interactiva el ciclo de vida completo de compras, aprobación con procedimiento PostgreSQL, facturación PDF, reportes analíticos, rechazo con motivo y operaciones CRUD.
-- Se actualizaron y enriquecieron todos los documentos de arquitectura técnica y de negocio en `docs/`:
-  - [`docs/DICCIONARIO_DATOS.md`](file:///c:/Users/Windows-PC/OneDrive%20-%20Pontificia%20Universidad%20Cat%C3%B3lica%20del%20Ecuador/Documentos/PUCE/proyectofinalll/new-records-ecommerce/docs/DICCIONARIO_DATOS.md): Diccionario de datos de las 8 tablas relacionales con tipos de datos y restricciones.
-  - [`docs/MODELO_ENTIDAD_RELACION.md`](file:///c:/Users/Windows-PC/OneDrive%20-%20Pontificia%20Universidad%20Cat%C3%B3lica%20del%20Ecuador/Documentos/PUCE/proyectofinalll/new-records-ecommerce/docs/MODELO_ENTIDAD_RELACION.md): Diagrama ER completo en Mermaid con cardinalidades y claves.
-  - [`docs/REGLAS_NEGOCIO.md`](file:///c:/Users/Windows-PC/OneDrive%20-%20Pontificia%20Universidad%20Cat%C3%B3lica%20del%20Ecuador/Documentos/PUCE/proyectofinalll/new-records-ecommerce/docs/REGLAS_NEGOCIO.md): Especificación formal de reglas de negocio en los 3 niveles arquitectónicos.
-  - [`docs/CHECKLIST_DEMOSTRACION.md`](file:///c:/Users/Windows-PC/OneDrive%20-%20Pontificia%20Universidad%20Cat%C3%B3lica%20del%20Ecuador/Documentos/PUCE/proyectofinalll/new-records-ecommerce/docs/CHECKLIST_DEMOSTRACION.md): Guía paso a paso para la defensa y evaluación del sistema.
-  - [`docs/SEGURIDAD_Y_RESPALDOS.md`](file:///c:/Users/Windows-PC/OneDrive%20-%20Pontificia%20Universidad%20Cat%C3%B3lica%20del%20Ecuador/Documentos/PUCE/proyectofinalll/new-records-ecommerce/docs/SEGURIDAD_Y_RESPALDOS.md): Guía de seguridad de roles, políticas de mínimo privilegio y copias de seguridad.
-- Se consolidó el manual integral en [`README.md`](file:///c:/Users/Windows-PC/OneDrive%20-%20Pontificia%20Universidad%20Cat%C3%B3lica%20del%20Ecuador/Documentos/PUCE/proyectofinalll/new-records-ecommerce/README.md).
-- Se ejecutó la suite de pruebas completa alcanzando **97/97 pruebas pasando exitosamente (100% de cobertura funcional)** sin persistir datos en base de datos ni generar archivos basura en el repositorio.
-- Todas las fases 1 a 13 han sido concluidas y verificadas con éxito.
+- [`tests/test_flujo_completo_e2e.py`](tests/test_flujo_completo_e2e.py) valida compra,
+  aprobación, rechazo, facturación, reportes y CRUD.
+- Las pruebas de PDF abren los bytes con un lector y verifican contenido, no solo
+  la cabecera del archivo.
+- Se retiraron credenciales de demostración versionadas; las pruebas leen las
+  claves exclusivamente desde `.env`.
+- El menú móvil admite teclado y la documentación de accesibilidad quedó cerrada.
+- [`README.md`](README.md) y los documentos de `docs/` describen la instalación,
+  las nueve tablas, los cuatro períodos y el flujo seguro de PostgreSQL.
 
 ## 8. Detalle autorizado para revisión: Fase 1
 

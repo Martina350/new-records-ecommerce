@@ -8,11 +8,11 @@ from models import CD, Categoria, Disco, Factura, MetodoPago, Pedido, Usuario, V
 from payments import crear_verificacion, verificar_pin
 
 def pass_admin():
-    return os.getenv("ADMIN_PASSWORD", "4119c3d7df348fed21f685809151b30e")
+    return os.environ["ADMIN_PASSWORD"]
 
 
 def pass_cliente():
-    return os.getenv("CLIENTE_DEMO_PASSWORD", "5c45d1a0df71bcead793c6d654a14cbf")
+    return os.environ["CLIENTE_DEMO_PASSWORD"]
 
 
 def autenticar_admin(client):
@@ -288,7 +288,7 @@ def test_admin_aprobar_pedido_descuenta_stock(client):
             numero_pedido = pedido.numero
 
         # Cerrar sesión del cliente
-        client.get("/logout")
+        client.post("/logout")
 
         # 2. El administrador aprueba el pedido
         autenticar_admin(client)
@@ -355,7 +355,7 @@ def test_admin_rechazar_pedido_con_motivo(client):
             numero_pedido = pedido.numero
 
         # Cerrar sesión del cliente
-        client.get("/logout")
+        client.post("/logout")
 
         # 2. El administrador rechaza el pedido
         autenticar_admin(client)
@@ -399,7 +399,7 @@ def test_aprobacion_revierte_stock_si_falla_factura(client, monkeypatch):
         )
         numero_pedido = checkout.headers["Location"].rsplit("/", 1)[-1]
 
-        client.get("/logout")
+        client.post("/logout")
         autenticar_admin(client)
 
         def fallo_factura(*_args, **_kwargs):
@@ -451,7 +451,7 @@ def test_admin_aprobar_falla_sin_stock(client):
             db.session.commit()
 
         # Cerrar sesión del cliente
-        client.get("/logout")
+        client.post("/logout")
 
         # El admin intenta aprobar
         autenticar_admin(client)

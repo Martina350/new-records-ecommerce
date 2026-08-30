@@ -32,6 +32,7 @@
           data-anio-actual="{{ anio_actual }}"
           data-mes-actual="{{ mes_actual }}"
         >
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <div class="campo-formulario">
             <label class="etiqueta-formulario" for="titular">Nombre del titular <span class="requerido">*</span></label>
             <input

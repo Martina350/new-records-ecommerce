@@ -10,6 +10,7 @@
         <section class="contenedor-formulario-contacto" aria-labelledby="titulo-formulario">
           <h2 id="titulo-formulario" class="titulo-formulario-contacto">Contáctanos</h2>
           <form id="contactForm" class="formulario-contacto" novalidate action="#" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="fila-formulario">
               <div class="grupo-formulario">
                 <label class="etiqueta-formulario" for="name">Nombre</label>

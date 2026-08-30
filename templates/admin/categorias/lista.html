@@ -73,6 +73,7 @@
                           method="post"
                           onsubmit="return confirm('{% if discos_activos %}Esta categoría tiene {{ discos_activos }} disco(s) activo(s). También serán desactivados. {% endif %}¿Confirmas esta operación?');"
                         >
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                           {% if discos_activos %}
                             <input type="hidden" name="confirmar_con_discos" value="si" />
                           {% endif %}
@@ -82,6 +83,7 @@
                         </form>
                       {% else %}
                         <form action="{{ url_for('admin_categorias_reactivar', id=cat.id) }}" method="post">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                           <button class="boton boton-chico boton-exito" type="submit" title="Reactivar categoría">
                             <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
                           </button>

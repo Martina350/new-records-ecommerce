@@ -54,6 +54,7 @@
                 <div class="tarjeta-acciones">
                   {% if not metodo.predeterminado %}
                     <form action="{{ url_for('pago_predeterminado', metodo_id=metodo.id) }}" method="post">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                       <button class="boton boton-secundario boton-chico" type="submit">
                         <span class="material-symbols-outlined" aria-hidden="true">star</span>
                         Predeterminar
@@ -61,6 +62,7 @@
                     </form>
                   {% endif %}
                   <form action="{{ url_for('pago_eliminar', metodo_id=metodo.id) }}" method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button class="boton-eliminar-item" type="submit" title="Eliminar tarjeta"
                       onclick="return confirm('¿Deseas eliminar esta tarjeta?')">
                       <span class="material-symbols-outlined" aria-hidden="true">delete</span>

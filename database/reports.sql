@@ -63,9 +63,9 @@ ORDER BY inicio_semana DESC;
 
 
 -- -----------------------------------------------------------------------------
--- 4. Reporte de Ventas Mensual y Anual
+-- 4. Reporte de Ventas Mensual
 -- -----------------------------------------------------------------------------
--- Agrupa la facturación por mes calendario y año, consolidando el rendimiento global.
+-- Agrupa la facturación por mes calendario.
 SELECT
     DATE_TRUNC('month', p.fecha_creacion)::date AS periodo_mes,
     EXTRACT(YEAR FROM DATE_TRUNC('month', p.fecha_creacion))::integer AS anio,
@@ -82,7 +82,25 @@ ORDER BY periodo_mes DESC;
 
 
 -- -----------------------------------------------------------------------------
--- 5. Ranking de Discos Más Vendidos (Top Products)
+-- 5. Reporte de Ventas Anual
+-- -----------------------------------------------------------------------------
+-- Consolida todos los pedidos aprobados de cada año calendario.
+SELECT
+    DATE_TRUNC('year', p.fecha_creacion)::date AS periodo_anio,
+    EXTRACT(YEAR FROM p.fecha_creacion)::integer AS anio,
+    COUNT(DISTINCT p.id) AS pedidos_aprobados,
+    SUM(dp.cantidad) AS unidades_vendidas,
+    ROUND(SUM(dp.cantidad * dp.precio_unitario), 2) AS total_facturado
+FROM pedidos p
+JOIN detalles_pedido dp ON dp.pedido_id = p.id
+WHERE p.estado = 'APROBADO'
+GROUP BY DATE_TRUNC('year', p.fecha_creacion)::date,
+         EXTRACT(YEAR FROM p.fecha_creacion)::integer
+ORDER BY periodo_anio DESC;
+
+
+-- -----------------------------------------------------------------------------
+-- 6. Ranking de Discos Más Vendidos (Top Products)
 -- -----------------------------------------------------------------------------
 -- Combina 'detalles_pedido', 'pedidos' y 'discos' para rankear los álbumes más
 -- populares por volumen de unidades y facturación generada, indicando formato.
@@ -108,7 +126,7 @@ LIMIT 10;
 
 
 -- -----------------------------------------------------------------------------
--- 6. Ranking de Géneros Musicales Más Vendidos (Top Categories)
+-- 7. Ranking de Géneros Musicales Más Vendidos (Top Categories)
 -- -----------------------------------------------------------------------------
 -- Agrupa las ventas consolidadas por categoría musical, permitiendo identificar
 -- los estilos y géneros más demandados en la tienda.

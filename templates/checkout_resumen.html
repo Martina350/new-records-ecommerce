@@ -70,6 +70,7 @@
           </h3>
           {% if metodos_pago %}
             <form action="{{ url_for('confirmar_checkout') }}" method="post" id="form-confirmar-pedido">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <div class="checkout-metodos-lista">
                 {% for metodo in metodos_pago %}
                   <label class="checkout-metodo-label">

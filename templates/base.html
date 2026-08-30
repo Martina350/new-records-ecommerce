@@ -67,10 +67,13 @@
               <span class="material-symbols-outlined" aria-hidden="true">account_circle</span>
               {{ session.usuario_nombre.split()[0] }}
             </a>
-            <a class="boton boton-secundario boton-chico" href="{{ url_for('logout') }}" title="Cerrar sesión">
-              <span class="material-symbols-outlined" aria-hidden="true">logout</span>
-              <span class="texto-boton-nav">Salir</span>
-            </a>
+            <form class="form-logout" action="{{ url_for('logout') }}" method="post">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="boton boton-secundario boton-chico" type="submit" title="Cerrar sesión">
+                <span class="material-symbols-outlined" aria-hidden="true">logout</span>
+                <span class="texto-boton-nav">Salir</span>
+              </button>
+            </form>
           {% else %}
             <a class="enlace-nav{% if request.endpoint == 'login' %} activo{% endif %}" href="{{ url_for('login') }}">
               <span class="material-symbols-outlined" aria-hidden="true">login</span>
@@ -134,10 +137,13 @@
             <span class="material-symbols-outlined" aria-hidden="true">account_circle</span>
             Mi Perfil ({{ session.usuario_nombre }})
           </a>
-          <a class="enlace-nav enlace-salir" href="{{ url_for('logout') }}">
-            <span class="material-symbols-outlined" aria-hidden="true">logout</span>
-            Cerrar Sesión
-          </a>
+          <form class="form-logout form-logout-movil" action="{{ url_for('logout') }}" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="enlace-nav enlace-salir" type="submit">
+              <span class="material-symbols-outlined" aria-hidden="true">logout</span>
+              Cerrar Sesión
+            </button>
+          </form>
         {% else %}
           <a class="enlace-nav{% if request.endpoint == 'login' %} activo{% endif %}" href="{{ url_for('login') }}">
             <span class="material-symbols-outlined" aria-hidden="true">login</span>

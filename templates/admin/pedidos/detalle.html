@@ -164,6 +164,7 @@
             <div class="admin-grid-decisiones">
               <!-- Formulario de Aprobación -->
               <form action="{{ url_for('admin_pedido_aprobar', numero=pedido.numero) }}" method="post" onsubmit="return confirm('¿Aprobar este pedido y descontar el stock del inventario?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button class="boton boton-principal boton-aprobar resplandor-neon" type="submit" id="btn-aprobar-pedido">
                   <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
                   Aprobar Pedido y Descontar Stock
@@ -173,6 +174,7 @@
               <!-- Formulario de Rechazo -->
               <div class="caja-formulario form-rechazo-caja">
                 <form action="{{ url_for('admin_pedido_rechazar', numero=pedido.numero) }}" method="post" onsubmit="return confirm('¿Rechazar este pedido?');">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                   <div class="campo-formulario">
                     <label class="etiqueta-formulario" for="motivo">Motivo de Rechazo <span class="requerido">*</span></label>
                     <input

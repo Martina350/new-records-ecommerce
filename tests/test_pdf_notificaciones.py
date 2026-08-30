@@ -2,14 +2,16 @@
 
 import os
 import secrets
+from io import BytesIO
 from app import app
+from pypdf import PdfReader
 from mailer import notificar_cambio_estado, notificar_creacion_pedido
 from models import Disco, Factura, MetodoPago, Pedido, Usuario, db
 from payments import crear_verificacion, verificar_pin
 from pdf_generator import generar_pdf_pedido
 
 def pass_cliente():
-    return os.getenv("CLIENTE_DEMO_PASSWORD", "5c45d1a0df71bcead793c6d654a14cbf")
+    return os.environ["CLIENTE_DEMO_PASSWORD"]
 
 
 def autenticar_cliente(client):
@@ -83,6 +85,13 @@ def test_generar_pdf_comprobante_valido(client):
             assert nombre_archivo.endswith(".pdf")
             assert "COMP-" in nombre_archivo
 
+            lector = PdfReader(BytesIO(pdf_bytes))
+            texto_pdf = "\n".join(pagina.extract_text() or "" for pagina in lector.pages)
+            assert len(lector.pages) >= 1
+            assert "NEW RECORDS" in texto_pdf
+            assert pedido.numero in texto_pdf
+            assert "Future Nostalgia" in texto_pdf
+
         # Comprobar persistencia de Factura
             assert factura is not None
             assert factura.tipo == "COMPROBANTE_PENDIENTE"
@@ -101,6 +110,9 @@ def test_descargar_comprobante_cliente_autenticado(client):
         assert resp.mimetype == "application/pdf"
         assert f"COMP-{numero}.pdf" in resp.headers.get("Content-Disposition", "")
         assert resp.data.startswith(b"%PDF-")
+        lector = PdfReader(BytesIO(resp.data))
+        texto_pdf = "\n".join(pagina.extract_text() or "" for pagina in lector.pages)
+        assert numero in texto_pdf
 
 
 def test_cliente_no_puede_descargar_comprobante_ajeno(client):
@@ -152,6 +164,10 @@ def test_descargar_factura_final_cuando_aprobado(client):
         assert resp.mimetype == "application/pdf"
         assert f"FAC-{numero}.pdf" in resp.headers.get("Content-Disposition", "")
         assert resp.data.startswith(b"%PDF-")
+        lector = PdfReader(BytesIO(resp.data))
+        texto_pdf = "\n".join(pagina.extract_text() or "" for pagina in lector.pages)
+        assert "FACTURA OFICIAL DE VENTA" in texto_pdf
+        assert numero in texto_pdf
 
 
 # ── Tests de notificaciones ──────────────────────────────────────────────────

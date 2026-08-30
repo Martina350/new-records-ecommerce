@@ -29,7 +29,7 @@
 - `album`: nombre del álbum obligatorio.
 - `artista`: artista obligatorio e indexado.
 - `descripcion`: información comercial obligatoria.
-- `precio_base`: valor decimal no negativo.
+- `precio_base`: valor decimal estrictamente positivo.
 - `stock`: entero no negativo, inicialmente cero.
 - `formato`: discriminador obligatorio limitado a `CD` o `VINILO`.
 - `peso_kg`: decimal positivo.

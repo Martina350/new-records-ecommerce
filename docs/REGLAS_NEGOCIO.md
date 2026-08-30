@@ -83,7 +83,7 @@ Este documento especifica formalmente las reglas de negocio implementadas en los
 1. **Filtro Estricto de Ingresos**:
    - Únicamente los pedidos en estado `APROBADO` se consideran ventas efectivas para el cálculo de facturación, volumen de unidades, ticket promedio y rankings.
 2. **Agrupaciones Temporales**:
-   - Los reportes consolidan ventas por jornada (`diario`), semana calendario (`semanal`) y mes/año (`mensual`).
+   - Los reportes consolidan ventas por jornada (`diario`), semana calendario (`semanal`), mes (`mensual`) y año (`anual`).
 3. **Rankings de Rendimiento**:
    - Ranking de álbumes más vendidos ordenados por unidades vendidas e ingresos brutos generados.
    - Distribución porcentual de ventas por género musical / categoría.

@@ -16,6 +16,7 @@
         </div>
 
         <form class="formulario-contacto" action="{{ url_for('login', next=next) }}" method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <div class="grupo-formulario">
             <label class="etiqueta-formulario" for="email">Correo electrónico</label>
             <input 

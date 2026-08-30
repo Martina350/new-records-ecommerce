@@ -27,6 +27,7 @@
         </div>
 
         <form class="formulario-contacto" method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <div class="campo-formulario">
             <label class="etiqueta-formulario" for="nombre">Nombre de la Categoría <span class="requerido">*</span></label>
             <input

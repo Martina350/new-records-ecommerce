@@ -17,11 +17,11 @@ from payments import crear_verificacion
 
 
 def pass_admin():
-    return os.getenv("ADMIN_PASSWORD", "admin12345")
+    return os.environ["ADMIN_PASSWORD"]
 
 
 def pass_cliente():
-    return os.getenv("CLIENTE_DEMO_PASSWORD", "cliente12345")
+    return os.environ["CLIENTE_DEMO_PASSWORD"]
 
 
 def autenticar_usuario(client, email, password):
@@ -133,7 +133,7 @@ def test_flujo_completo_e2e_compra_aprobacion_factura_y_reportes(client):
         assert resp_pdf_fac_bloqueada.status_code in (302, 400, 403, 404)
 
         # Cliente cierra sesión
-        client.get("/logout", follow_redirects=True)
+        client.post("/logout", follow_redirects=True)
 
         # ── 6. Administrador aprueba el pedido ─────────────────────────────────────
         autenticar_usuario(client, "admin@newrecords.local", pass_admin())
@@ -167,7 +167,7 @@ def test_flujo_completo_e2e_compra_aprobacion_factura_y_reportes(client):
         assert b"Reportes y Anal" in resp_reportes.data
 
         # Administrador cierra sesión
-        client.get("/logout", follow_redirects=True)
+        client.post("/logout", follow_redirects=True)
 
         # ── 8. Cliente descarga su Factura Final emitida en PDF ────────────────────
         autenticar_usuario(client, email_cliente, password_cliente)
@@ -224,7 +224,7 @@ def test_flujo_rechazo_pedido_con_motivo_no_altera_stock(client):
             pedido = Pedido.query.filter_by(cliente_id=cliente_id).order_by(Pedido.id.desc()).first()
             numero_ped = pedido.numero
 
-        client.get("/logout", follow_redirects=True)
+        client.post("/logout", follow_redirects=True)
 
         # 2. Administrador rechaza con motivo
         autenticar_usuario(client, "admin@newrecords.local", pass_admin())

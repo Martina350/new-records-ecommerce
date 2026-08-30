@@ -119,7 +119,7 @@ class Disco(db.Model):
 
     __tablename__ = "discos"
     __table_args__ = (
-        db.CheckConstraint("precio_base >= 0", name="ck_discos_precio"),
+        db.CheckConstraint("precio_base > 0", name="ck_discos_precio"),
         db.CheckConstraint("stock >= 0", name="ck_discos_stock"),
         db.CheckConstraint("peso_kg > 0", name="ck_discos_peso"),
         db.CheckConstraint(

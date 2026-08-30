@@ -345,9 +345,9 @@ def obtener_resumen_metricas_ventas():
 
 
 def obtener_reporte_ventas_temporal(agrupacion="diario"):
-    """Genera el reporte de ventas cronológico agrupado por día, semana o mes/año.
+    """Genera ventas aprobadas agrupadas por día, semana, mes o año.
     
-    agrupacion: 'diario', 'semanal' o 'mensual'.
+    agrupacion: 'diario', 'semanal', 'mensual' o 'anual'.
     """
     if agrupacion == "semanal":
         sql = """
@@ -395,6 +395,30 @@ def obtener_reporte_ventas_temporal(agrupacion="diario"):
                 SUM(subtotal) AS total_facturado
             FROM ventas_base
             GROUP BY fecha_mes
+            ORDER BY fecha_inicio DESC
+        """
+    elif agrupacion == "anual":
+        sql = """
+            WITH ventas_base AS (
+                SELECT
+                    p.id AS pedido_id,
+                    DATE_TRUNC('year', p.fecha_creacion)::date AS fecha_anio,
+                    dp.cantidad AS cantidad,
+                    (dp.cantidad * dp.precio_unitario) AS subtotal
+                FROM pedidos p
+                JOIN detalles_pedido dp ON dp.pedido_id = p.id
+                WHERE p.estado = 'APROBADO'
+            )
+            SELECT
+                fecha_anio AS fecha_inicio,
+                EXTRACT(YEAR FROM fecha_anio)::integer AS anio,
+                EXTRACT(YEAR FROM fecha_anio)::integer AS periodo_num,
+                TO_CHAR(fecha_anio, 'YYYY') AS etiqueta,
+                COUNT(DISTINCT pedido_id) AS total_pedidos,
+                SUM(cantidad) AS total_unidades,
+                SUM(subtotal) AS total_facturado
+            FROM ventas_base
+            GROUP BY fecha_anio
             ORDER BY fecha_inicio DESC
         """
     else:  # diario por defecto

@@ -27,6 +27,7 @@
         </div>
 
         <form class="formulario-contacto" action="{{ url_for('perfil') }}" method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <div class="fila-formulario">
             <div class="grupo-formulario">
               <label class="etiqueta-formulario" for="nombre">Nombre completo *</label>

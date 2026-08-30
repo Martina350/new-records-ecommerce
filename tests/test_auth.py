@@ -8,8 +8,8 @@ from models import Usuario, db
 
 
 def obtener_credenciales_demo():
-    admin_pass = os.getenv("ADMIN_PASSWORD", "4119c3d7df348fed21f685809151b30e")
-    cliente_pass = os.getenv("CLIENTE_DEMO_PASSWORD", "5c45d1a0df71bcead793c6d654a14cbf")
+    admin_pass = os.environ["ADMIN_PASSWORD"]
+    cliente_pass = os.environ["CLIENTE_DEMO_PASSWORD"]
     return admin_pass, cliente_pass
 
 
@@ -159,7 +159,7 @@ def test_logout_limpia_la_sesion(client):
         )
         assert session.get("usuario_id") is not None
 
-        resp_logout = client.get("/logout", follow_redirects=True)
+        resp_logout = client.post("/logout", follow_redirects=True)
         assert resp_logout.status_code == 200
         assert session.get("usuario_id") is None
         assert session.get("usuario_rol") is None

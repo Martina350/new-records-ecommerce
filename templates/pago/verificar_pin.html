@@ -43,6 +43,7 @@
 
         {% if intentos_restantes > 0 and not verificacion.verificada %}
           <form class="formulario-contacto" action="{{ url_for('pago_verificar', token=token) }}" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="campo-formulario campo-pin">
               <label class="etiqueta-formulario" for="pin">Código PIN <span class="requerido">*</span></label>
               <input

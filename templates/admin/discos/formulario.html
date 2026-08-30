@@ -27,6 +27,7 @@
         </div>
 
         <form class="formulario-contacto" method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <div class="grid-vencimiento">
             {% if not disco %}
               <div class="campo-formulario">

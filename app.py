@@ -18,6 +18,7 @@ from flask import (
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from urllib.parse import urlsplit
+from flask_wtf.csrf import CSRFError, CSRFProtect
 
 from auth import (
     cerrar_sesion,
@@ -74,8 +75,11 @@ from services import (
 
 app = Flask(__name__)
 app.config.from_object(Config)
+if not app.config.get("SECRET_KEY"):
+    raise RuntimeError("Configura SECRET_KEY en el archivo .env antes de iniciar Flask.")
 db.init_app(app)
 mail.init_app(app)
+csrf = CSRFProtect(app)
 
 
 def es_url_segura(destino):
@@ -300,7 +304,7 @@ def login():
     return render_template("auth/login.html", next=next_url)
 
 
-@app.route("/logout", methods=["GET", "POST"])
+@app.route("/logout", methods=["POST"])
 def logout():
     """Cierra la sesión activa del usuario."""
     cerrar_sesion()
@@ -714,7 +718,7 @@ def admin_dashboard():
 def admin_reportes():
     """Módulo de analítica y reportes de ventas con filtros temporales y rankings."""
     periodo = request.args.get("periodo", "diario").strip().lower()
-    if periodo not in ("diario", "semanal", "mensual"):
+    if periodo not in ("diario", "semanal", "mensual", "anual"):
         periodo = "diario"
 
     resumen = obtener_resumen_metricas_ventas()
@@ -1185,6 +1189,14 @@ def acceso_denegado(_error):
     return render_template("errors/403.html"), 403
 
 
+@app.errorhandler(CSRFError)
+def csrf_invalido(_error):
+    """Rechaza formularios sin token sin exponer detalles internos."""
+    flash("La solicitud expiró o no es válida. Inténtalo nuevamente.", "error")
+    destino = request.referrer if es_url_segura(request.referrer) else url_for("inicio")
+    return redirect(destino)
+
+
 @app.errorhandler(404)
 def pagina_no_encontrada(_error):
     return render_template("errors/404.html"), 404
@@ -1241,6 +1253,22 @@ def crear_backup(formato):
         click.echo(
             "Consulta docs/SEGURIDAD_Y_RESPALDOS.md para instrucciones de respaldo manual."
         )
+
+
+@app.cli.command("verificar-restauracion")
+def verificar_restauracion():
+    """Restaura un dump en una base temporal y valida su contenido."""
+    from backup_manager import verificar_restauracion_completa
+
+    click.echo("Creando y restaurando una copia temporal de verificación...")
+    exito, mensaje, resumen = verificar_restauracion_completa()
+    if not exito:
+        raise click.ClickException(mensaje)
+    click.echo(mensaje)
+    click.echo(
+        f"Tablas: {resumen['tablas']} | Categorías: {resumen['categorias']} | "
+        f"Discos: {resumen['discos']}"
+    )
 
 
 if __name__ == "__main__":

@@ -19,8 +19,8 @@ Esta guía describe el recorrido secuencial recomendado para la presentación y 
    - Abrir el navegador en `http://127.0.0.1:5000`.
 
 2. **Cuentas de Prueba Preconfiguradas**:
-   - **Administrador**: `admin@newrecords.local` / `admin12345` (o el configurado en `.env`).
-   - **Cliente Demo**: `cliente@newrecords.local` / `cliente12345` (o el configurado en `.env`).
+   - **Administrador**: `admin@newrecords.local` y la clave local definida en `.env`.
+   - **Cliente Demo**: `cliente@newrecords.local` y la clave local definida en `.env`.
 
 ---
 
@@ -61,7 +61,7 @@ Esta guía describe el recorrido secuencial recomendado para la presentación y 
 
 ### 📊 Paso 5: Reportes y Analítica de Ventas
 - [ ] Desde el panel de administración, acceder a **Reportes de Ventas** (`/admin/reportes`).
-- [ ] Navegar entre las pestañas de **Período Diario**, **Semanal** y **Mensual / Anual**.
+- [ ] Navegar entre las pestañas independientes **Diario**, **Semanal**, **Mensual** y **Anual**.
 - [ ] Mostrar cómo el pedido aprobado impacta directamente en los ingresos acumulados, unidades físicas vendidas y ticket promedio.
 - [ ] Señalar el **Ranking de Discos más Vendidos** con sus medallas de posición y el gráfico de barras porcentuales por **Género Musical**.
 
@@ -72,8 +72,10 @@ Esta guía describe el recorrido secuencial recomendado para la presentación y 
   python -m flask --app app crear-backup --formato plain
   ```
   - Verificar la creación del archivo con timestamp UTC en la carpeta `backups/`.
+- [ ] Ejecutar `python -m flask --app app verificar-restauracion` y confirmar que
+  la base temporal fue restaurada, validada y eliminada correctamente.
 - [ ] Ejecutar la suite completa de pruebas automatizadas:
   ```powershell
   python -m pytest -v
   ```
-  - Mostrar los 97+ tests pasando con 100% de éxito.
+  - Mostrar la suite automatizada pasando sin datos persistentes.

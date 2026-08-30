@@ -63,6 +63,7 @@
 
                       <td class="col-cantidad">
                         <form class="form-actualizar-cantidad" action="{{ url_for('actualizar_carrito', disco_id=item.disco.id) }}" method="post">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                           <input 
                             class="input-cantidad-carrito" 
                             type="number" 
@@ -81,6 +82,7 @@
 
                       <td class="col-accion">
                         <form action="{{ url_for('eliminar_del_carrito', disco_id=item.disco.id) }}" method="post">
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                           <button class="boton-eliminar-item" type="submit" title="Eliminar del carrito">
                             <span class="material-symbols-outlined" aria-hidden="true">delete</span>
                           </button>
@@ -94,6 +96,7 @@
 
             <div class="carrito-acciones-tabla">
               <form action="{{ url_for('vaciar_carrito_ruta') }}" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button class="boton boton-secundario boton-chico" type="submit">
                   <span class="material-symbols-outlined" aria-hidden="true">delete_sweep</span>
                   Vaciar carrito

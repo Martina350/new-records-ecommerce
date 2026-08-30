@@ -8,7 +8,7 @@ from models import Disco, db
 
 
 def obtener_cliente_pass():
-    return os.getenv("CLIENTE_DEMO_PASSWORD", "5c45d1a0df71bcead793c6d654a14cbf")
+    return os.environ["CLIENTE_DEMO_PASSWORD"]
 
 
 def autenticar_cliente(client):
@@ -27,9 +27,7 @@ def autenticar_administrador(client):
         "/login",
         data={
             "email": "admin@newrecords.local",
-            "password": os.getenv(
-                "ADMIN_PASSWORD", "4119c3d7df348fed21f685809151b30e"
-            ),
+            "password": os.environ["ADMIN_PASSWORD"],
         },
         follow_redirects=True,
     )

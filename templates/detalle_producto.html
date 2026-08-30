@@ -111,6 +111,7 @@
         <div class="detalle-acciones-compra">
           {% if not esta_autenticado or es_cliente %}
             <form action="{{ url_for('agregar_al_carrito', disco_id=disco.id) }}" method="post" class="form-agregar-detalle">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <input type="hidden" name="cantidad" value="1"/>
               <button
                 class="boton boton-principal boton-agregar-carrito resplandor-neon"

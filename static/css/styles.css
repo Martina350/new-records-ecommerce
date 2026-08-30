@@ -3337,3 +3337,26 @@ img { max-width: 100%; height: auto; display: block; }
 
 
 
+/* Foco visible y formularios de navegación accesibles */
+:where(a, button, input, select, textarea, summary):focus-visible {
+  outline: 3px solid #f59e0b;
+  outline-offset: 3px;
+}
+
+.form-logout {
+  display: inline-flex;
+  margin: 0;
+}
+
+.form-logout-movil,
+.form-logout-movil .enlace-salir {
+  width: 100%;
+}
+
+.form-logout-movil .enlace-salir {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}

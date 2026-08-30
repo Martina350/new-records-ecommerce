@@ -1,5 +1,7 @@
 """Pruebas de integridad avanzada, seguridad HTTP y respaldos — Fase 12."""
 
+import os
+import re
 from datetime import datetime, timezone
 from decimal import Decimal
 from pathlib import Path
@@ -13,6 +15,7 @@ from backup_manager import (
     generar_nombre_backup,
     listar_backups_locales,
     obtener_carpeta_backups,
+    verificar_restauracion_completa,
 )
 from models import CD, Categoria, Disco, Usuario, db
 
@@ -31,6 +34,52 @@ def test_cabeceras_http_seguridad(client):
         respuesta.headers.get("Referrer-Policy")
         == "strict-origin-when-cross-origin"
     )
+
+
+def test_csrf_protege_formularios_post(client):
+    """Un POST sin token se rechaza y un token emitido por Flask se acepta."""
+    estado_original = app.config["WTF_CSRF_ENABLED"]
+    app.config["WTF_CSRF_ENABLED"] = True
+    try:
+        pagina = client.get("/login")
+        token = re.search(rb'name="csrf_token" value="([^"]+)"', pagina.data)
+        assert token is not None
+
+        sin_token = client.post("/login", data={"email": "nadie@example.com", "password": "x"})
+        assert sin_token.status_code == 302
+
+        con_token = client.post(
+            "/login",
+            data={
+                "csrf_token": token.group(1).decode(),
+                "email": "nadie@example.com",
+                "password": "Password123!",
+            },
+        )
+        assert con_token.status_code == 200
+    finally:
+        app.config["WTF_CSRF_ENABLED"] = estado_original
+
+
+def test_configuracion_segura_de_sesion_y_logout(client):
+    assert app.config["SESSION_COOKIE_HTTPONLY"] is True
+    assert app.config["SESSION_COOKIE_SAMESITE"] == "Lax"
+    assert client.get("/logout").status_code == 405
+
+
+def test_todos_los_formularios_post_declaran_token_csrf():
+    raiz = Path(__file__).resolve().parent.parent / "templates"
+    formularios_sin_token = []
+    patron = re.compile(
+        r"<form\b[^>]*method=[\"']post[\"'][^>]*>(.*?)</form>",
+        re.IGNORECASE | re.DOTALL,
+    )
+    for plantilla in raiz.rglob("*.html"):
+        contenido = plantilla.read_text(encoding="utf-8")
+        for formulario in patron.findall(contenido):
+            if "csrf_token" not in formulario:
+                formularios_sin_token.append(str(plantilla.relative_to(raiz)))
+    assert formularios_sin_token == []
 
 
 # ── Tests de Restricciones Relacionales e Integridad en PostgreSQL ────────────
@@ -164,3 +213,52 @@ def test_script_roles_seguridad_existe_y_declara_roles():
     assert "new_records_backup" in contenido
     assert "new_records_admin" in contenido
     assert "GRANT SELECT, INSERT, UPDATE, DELETE" in contenido
+    assert "OWNER TO new_records_admin" in contenido
+    assert "configurar_en_env" not in contenido
+    assert "PASSWORD '" not in contenido
+
+
+@pytest.mark.skipif(
+    os.getenv("RUN_DB_SECURITY_TESTS") != "1",
+    reason="Requiere roles PostgreSQL configurados con privilegios reales.",
+)
+def test_roles_postgresql_aplicados_y_con_minimo_privilegio(client):
+    """Auditoría de integración opt-in sobre los roles instalados."""
+    with app.app_context():
+        roles = {
+            fila.rolname: fila
+            for fila in db.session.execute(
+                text(
+                    "SELECT rolname, rolsuper, rolcreatedb, rolcreaterole "
+                    "FROM pg_roles WHERE rolname IN "
+                    "('new_records_app', 'new_records_backup', 'new_records_admin')"
+                )
+            ).mappings()
+        }
+        assert set(roles) == {"new_records_app", "new_records_backup", "new_records_admin"}
+        assert not roles["new_records_app"].rolsuper
+        assert not roles["new_records_app"].rolcreatedb
+        assert not roles["new_records_backup"].rolsuper
+
+        propietarios = db.session.execute(
+            text("SELECT DISTINCT tableowner FROM pg_tables WHERE schemaname = 'public'")
+        ).scalars().all()
+        assert set(propietarios) == {"new_records_admin"}
+        assert db.session.execute(
+            text("SELECT has_table_privilege('new_records_backup', 'discos', 'SELECT')")
+        ).scalar_one()
+        assert not db.session.execute(
+            text("SELECT has_table_privilege('new_records_backup', 'discos', 'UPDATE')")
+        ).scalar_one()
+
+
+@pytest.mark.skipif(
+    os.getenv("RUN_DB_RESTORE_TEST") != "1",
+    reason="Crea y elimina una base temporal; requiere herramientas y rol administrador.",
+)
+def test_restauracion_completa_real():
+    exito, mensaje, resumen = verificar_restauracion_completa()
+    assert exito, mensaje
+    assert resumen["tablas"] >= 9
+    assert resumen["categorias"] >= 1
+    assert resumen["discos"] >= 1

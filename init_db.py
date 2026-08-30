@@ -8,7 +8,19 @@ import os
 from decimal import Decimal
 from pathlib import Path
 
+from dotenv import load_dotenv
 from sqlalchemy import text
+
+# Las modificaciones de esquema usan el rol administrativo, no la cuenta web.
+load_dotenv()
+usuario_admin = os.getenv("DB_ADMIN_USER", "new_records_admin").strip()
+password_admin = os.getenv("DB_ADMIN_PASSWORD", "").strip()
+if not password_admin or password_admin.startswith("change_"):
+    raise RuntimeError(
+        "Configura DB_ADMIN_PASSWORD y ejecuta configure_db_roles.py antes de init_db.py."
+    )
+os.environ["DB_USER"] = usuario_admin
+os.environ["DB_PASSWORD"] = password_admin
 
 from app import app
 from models import CD, Categoria, Disco, Usuario, Vinilo, db
@@ -302,10 +314,11 @@ def cargar_usuario(nombre, email, rol, password):
     usuario = Usuario.query.filter_by(email=email_normalizado).first()
     if usuario is None:
         usuario = Usuario(email=email_normalizado)
-        usuario.set_password(password)
         db.session.add(usuario)
 
     usuario.nombre = nombre
+    # Permite rotar las cuentas demo cambiando .env y repitiendo init_db.py.
+    usuario.set_password(password)
     usuario.rol = rol
     usuario.activo = True
     return usuario

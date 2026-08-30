@@ -8,7 +8,7 @@ from models import MetodoPago, VerificacionTarjeta, ahora_utc, db
 from payments import crear_verificacion, verificar_pin, DURACION_PIN_MINUTOS, MAX_INTENTOS_PIN
 
 def pass_cliente():
-    return os.getenv("CLIENTE_DEMO_PASSWORD", "5c45d1a0df71bcead793c6d654a14cbf")
+    return os.environ["CLIENTE_DEMO_PASSWORD"]
 
 
 def autenticar_cliente(client):

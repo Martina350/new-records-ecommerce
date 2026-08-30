@@ -2,9 +2,25 @@ document.addEventListener('DOMContentLoaded', () => {
   const botonMenu = document.querySelector('.alternar-nav');
   const menuMobile = document.getElementById('navMovil');
   if (botonMenu && menuMobile) {
+    const actualizarMenu = (abierto) => {
+      menuMobile.classList.toggle('abierto', abierto);
+      botonMenu.setAttribute('aria-expanded', String(abierto));
+      botonMenu.setAttribute('aria-label', abierto ? 'Cerrar menú' : 'Abrir menú');
+    };
+
     botonMenu.addEventListener('click', () => {
-      const estaAbierto = menuMobile.classList.toggle('abierto');
-      botonMenu.setAttribute('aria-expanded', String(estaAbierto));
+      actualizarMenu(!menuMobile.classList.contains('abierto'));
+    });
+
+    document.addEventListener('keydown', (evento) => {
+      if (evento.key === 'Escape' && menuMobile.classList.contains('abierto')) {
+        actualizarMenu(false);
+        botonMenu.focus();
+      }
+    });
+
+    menuMobile.querySelectorAll('a').forEach((enlace) => {
+      enlace.addEventListener('click', () => actualizarMenu(false));
     });
   }
 

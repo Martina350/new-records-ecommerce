@@ -28,7 +28,7 @@ El sistema cuenta con una arquitectura relacional sólida respaldada por procedi
   - Aprobación concurrente de pedidos mediante el procedimiento almacenado de PostgreSQL `aprobar_pedido_new_records`, el cual descuenta stock de forma atómica y emite la **Factura Final en PDF**.
   - Rechazo de pedidos con registro obligatorio de motivo sin alterar inventario.
 - 📈 **Reportes Analíticos de Ventas**:
-  - Evolución temporal de ingresos por período diario, semanal y mensual.
+  - Evolución temporal de ingresos por período diario, semanal, mensual y anual.
   - Ranking de discos más vendidos con medallas de posición y distribución de ventas por categoría musical.
 - 🛡️ **Seguridad, Mínimo Privilegio y Respaldos**:
   - Definición de roles de base de datos (`new_records_app`, `new_records_backup`, `new_records_admin`).
@@ -57,13 +57,13 @@ new-records-ecommerce/
 ├── auth.py                     # Decoradores de autenticación y helpers de sesión
 ├── backup_manager.py           # Gestor y orquestador de respaldos pg_dump
 ├── config.py                   # Configuración y variables de entorno
+├── configure_db_roles.py       # Aprovisionamiento seguro de roles PostgreSQL
 ├── init_db.py                  # Script de inicialización y carga de datos demo
 ├── mailer.py                   # Notificaciones por correo electrónico (SMTP/simulado)
 ├── models.py                   # Modelos de datos y herencia polimórfica SQLAlchemy
 ├── payments.py                 # Lógica de métodos de pago y verificación por PIN
 ├── pdf_generator.py            # Generador de comprobantes y facturas en PDF
 ├── services.py                 # Capa de servicios y lógica analítica de negocio
-├── utils.py                    # Utilidades de fecha, moneda y validaciones
 ├── database/                   # Scripts SQL de esquema, reglas, procedimientos y roles
 │   ├── reports.sql             # Consultas analíticas de reportes
 │   ├── roles_seguridad.sql     # Roles de mínimo privilegio PostgreSQL
@@ -115,32 +115,46 @@ pip install -r requirements.txt
 
 ### 4. Configurar variables de entorno
 
-Copiar el archivo `.env.example` a `.env` y configurar las credenciales de PostgreSQL:
+Copiar `.env.example` como `.env` y reemplazar todos los valores que comienzan
+con `change_`. Cada integrante utiliza credenciales locales propias. No se deben
+copiar contraseñas desde pruebas, documentación ni mensajes del equipo.
 
 ```ini
 SECRET_KEY=tu_clave_secreta_segura
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=new_records_db
-DB_USER=postgres
-DB_PASSWORD=tu_password_postgres
+DB_USER=new_records_app
+DB_PASSWORD=change_app_db_password
+DB_ADMIN_USER=new_records_admin
+DB_ADMIN_PASSWORD=change_admin_db_password
+DB_BACKUP_USER=new_records_backup
+DB_BACKUP_PASSWORD=change_backup_db_password
+DB_BOOTSTRAP_USER=postgres
+DB_BOOTSTRAP_PASSWORD=change_postgres_bootstrap_password
 
 ADMIN_NAME=Administrador New Records
 ADMIN_EMAIL=admin@newrecords.local
-ADMIN_PASSWORD=admin12345
+ADMIN_PASSWORD=change_admin_password
 
 CLIENTE_DEMO_NAME=Cliente Demo
 CLIENTE_DEMO_EMAIL=cliente@newrecords.local
-CLIENTE_DEMO_PASSWORD=cliente12345
+CLIENTE_DEMO_PASSWORD=change_client_password
 ```
 
-### 5. Inicializar la Base de Datos
+### 5. Configurar roles e inicializar la base de datos
 
-Ejecutar el script de inicialización para crear las tablas, aplicar restricciones, procedimientos almacenados y cargar el catálogo y usuarios de demostración:
+Después de crear una base vacía llamada `new_records_db`, configurar los tres
+roles técnicos. El usuario bootstrap se utiliza únicamente durante este paso:
 
 ```powershell
+python configure_db_roles.py
 python init_db.py
 ```
+
+`init_db.py` se conecta como `new_records_admin`. Flask utiliza
+`new_records_app`, que no es propietario de las tablas, y `pg_dump` utiliza
+`new_records_backup`, que solo tiene permisos de lectura.
 
 ### 6. Iniciar el Servidor de Desarrollo
 
@@ -154,12 +168,20 @@ Acceder en el navegador a `http://127.0.0.1:5000`.
 
 ## 🧪 Pruebas Automatizadas
 
-La suite completa contiene **97 pruebas automatizadas** que validan todos los componentes del sistema sin persistir datos basura ni escribir PDFs innecesarios en el repositorio.
+La suite valida todos los componentes sin persistir datos de prueba ni escribir
+PDF en el repositorio. Las comprobaciones que crean una base temporal son opt-in.
 
 Para ejecutar todas las pruebas:
 
 ```powershell
 python -m pytest -v
+```
+
+Después de configurar los roles, ejecutar también la auditoría de privilegios:
+
+```powershell
+$env:RUN_DB_SECURITY_TESTS="1"
+python -m pytest tests/test_seguridad_respaldos.py -v
 ```
 
 ---
@@ -177,3 +199,10 @@ python -m flask --app app crear-backup --formato custom
 ```
 
 Los respaldos se almacenan automáticamente en la carpeta `backups/`. Consulta [`docs/SEGURIDAD_Y_RESPALDOS.md`](docs/SEGURIDAD_Y_RESPALDOS.md) para más detalles sobre restauración y roles.
+
+Para crear un dump temporal, restaurarlo en una base aislada, validar su esquema
+y eliminar el destino de prueba automáticamente:
+
+```powershell
+python -m flask --app app verificar-restauracion
+```
