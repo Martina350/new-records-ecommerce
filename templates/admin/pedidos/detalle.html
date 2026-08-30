@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+
+{% block titulo %}Auditoría de Pedido {{ pedido.numero }}{% endblock %}
+
+{% block contenido %}
+<main class="contacto-principal checkout-seccion">
+  <div class="contenedor">
+    <div class="caja-formulario checkout-caja pedido-detalle-caja">
+      <section class="contenedor-formulario-contacto" aria-labelledby="titulo-auditoria">
+
+        <!-- Cabecera de Auditoría -->
+        <div class="pedido-cabecera">
+          <div class="pedido-cabecera-info">
+            <span class="material-symbols-outlined pedido-icono-cabecera" aria-hidden="true">admin_panel_settings</span>
+            <div>
+              <h1 id="titulo-auditoria" class="pedido-titulo">
+                Auditoría: <span class="degradado">{{ pedido.numero }}</span>
+              </h1>
+              <span class="pedido-fecha">
+                Registrado el {{ pedido.fecha_creacion.strftime('%d/%m/%Y a las %H:%M UTC') }}
+              </span>
+            </div>
+          </div>
+
+          <div class="pedido-cabecera-estado">
+            <span class="badge-estado badge-estado-{{ pedido.estado | lower }} badge-grande">
+              {{ pedido.estado }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Información de Revisión si ya fue procesado -->
+        {% if pedido.estado != "PENDIENTE" %}
+          <div class="aviso-estado {% if pedido.estado == 'APROBADO' %}aviso-estado-aprobado{% else %}aviso-estado-rechazado{% endif %}">
+            <span class="material-symbols-outlined icono-aviso" aria-hidden="true">
+              {% if pedido.estado == 'APROBADO' %}verified{% else %}cancel{% endif %}
+            </span>
+            <div>
+              <strong>
+                Pedido {{ pedido.estado }} el {{ pedido.fecha_revision.strftime('%d/%m/%Y %H:%M') if pedido.fecha_revision else 'N/A' }}
+              </strong>
+              {% if pedido.administrador_revisor %}
+                <p>Revisado por: {{ pedido.administrador_revisor.nombre }} ({{ pedido.administrador_revisor.email }})</p>
+              {% endif %}
+              {% if pedido.motivo_rechazo %}
+                <p><strong>Motivo del rechazo:</strong> {{ pedido.motivo_rechazo }}</p>
+              {% endif %}
+            </div>
+          </div>
+        {% endif %}
+
+        <!-- Grid de Datos: Cliente y Pago -->
+        <div class="checkout-grid">
+          <div class="checkout-bloque">
+            <h3 class="checkout-subtitulo-bloque">
+              <span class="material-symbols-outlined" aria-hidden="true">person</span>
+              Datos del Cliente
+            </h3>
+            <div class="checkout-datos-usuario">
+              <p><strong>Nombre:</strong> {{ pedido.cliente.nombre }}</p>
+              <p><strong>Email:</strong> {{ pedido.cliente.email }}</p>
+              <p><strong>Teléfono:</strong> {{ pedido.cliente.telefono or 'No registrado' }}</p>
+              <p><strong>Ciudad:</strong> {{ pedido.cliente.ciudad or 'No registrada' }}</p>
+              <p><strong>Dirección:</strong> {{ pedido.cliente.direccion or 'No registrada' }}</p>
+            </div>
+          </div>
+
+          <div class="checkout-bloque">
+            <h3 class="checkout-subtitulo-bloque">
+              <span class="material-symbols-outlined" aria-hidden="true">credit_card</span>
+              Transacción y Cobro Simulado
+            </h3>
+            <div class="checkout-datos-usuario">
+              <p><strong>Tarjeta:</strong> {{ pedido.metodo_pago.marca }} **** {{ pedido.metodo_pago.ultimos4 }}</p>
+              <p><strong>Titular:</strong> {{ pedido.metodo_pago.titular }}</p>
+              <p><strong>Vencimiento:</strong> {{ "%02d"|format(pedido.metodo_pago.mes_vencimiento) }}/{{ pedido.metodo_pago.anio_vencimiento }}</p>
+              {% if pedido.transaccion_pago %}
+                <p><strong>Referencia:</strong> <code class="texto-codigo">{{ pedido.transaccion_pago.referencia }}</code></p>
+                <p><strong>Estado Cobro:</strong> <span class="badge-estado badge-estado-{{ pedido.transaccion_pago.estado | lower }}">{{ pedido.transaccion_pago.estado }}</span></p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabla de Artículos con Comprobación de Stock en Tiempo Real -->
+        <div class="pedido-articulos-seccion">
+          <h3 class="checkout-subtitulo-bloque">
+            <span class="material-symbols-outlined" aria-hidden="true">inventory_2</span>
+            Comprobación de Inventario Físico
+          </h3>
+          <div class="tabla-carrito-contenedor">
+            <table class="tabla-carrito">
+              <thead>
+                <tr>
+                  <th>Disco / Álbum</th>
+                  <th>Formato</th>
+                  <th>Cant. Pedida</th>
+                  <th>Stock Actual</th>
+                  <th>Precio Unit.</th>
+                  <th>Subtotal</th>
+                  <th>Disponibilidad</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for detalle in pedido.detalles %}
+                  <tr>
+                    <td>
+                      <strong>{{ detalle.album }}</strong><br/>
+                      <small class="artista-disco-carrito">{{ detalle.artista }}</small>
+                    </td>
+                    <td>
+                      <span class="badge-formato-tarjeta badge-formato-{{ detalle.formato | lower }}">
+                        {{ detalle.formato }}
+                      </span>
+                    </td>
+                    <td><strong>{{ detalle.cantidad }}</strong></td>
+                    <td>
+                      {% if detalle.disco %}
+                        <span>{{ detalle.disco.stock }} unidades</span>
+                      {% else %}
+                        <span class="badge-stock-agotado">Eliminado</span>
+                      {% endif %}
+                    </td>
+                    <td>${{ "%.2f"|format(detalle.precio_unitario) }}</td>
+                    <td><strong>${{ "%.2f"|format(detalle.subtotal) }}</strong></td>
+                    <td>
+                      {% if detalle.disco and detalle.disco.stock >= detalle.cantidad %}
+                        <span class="badge-estado badge-estado-aprobado">
+                          <span class="material-symbols-outlined icono-estado-chico" aria-hidden="true">check</span>
+                          Suficiente
+                        </span>
+                      {% else %}
+                        <span class="badge-estado badge-estado-rechazado">
+                          <span class="material-symbols-outlined icono-estado-chico" aria-hidden="true">warning</span>
+                          Insuficiente
+                        </span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="pedido-total-resumen">
+            <div class="pedido-total-fila">
+              <span class="pedido-total-etiqueta">Total de la Orden:</span>
+              <span class="checkout-monto-total">${{ "%.2f"|format(pedido.total) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Acciones de Aprobación y Rechazo para Pedidos Pendientes -->
+        {% if pedido.estado == "PENDIENTE" %}
+          <div class="admin-panel-decision">
+            <h3 class="checkout-subtitulo-bloque">
+              <span class="material-symbols-outlined" aria-hidden="true">gavel</span>
+              Decisión Administrativa
+            </h3>
+            <p class="admin-texto-decision">
+              Al aprobar, se descontarán las unidades físicas del inventario, se formalizará la transacción de cobro simulada y se emitirá la Factura Oficial en PDF.
+            </p>
+
+            <div class="admin-grid-decisiones">
+              <!-- Formulario de Aprobación -->
+              <form action="{{ url_for('admin_pedido_aprobar', numero=pedido.numero) }}" method="post" onsubmit="return confirm('¿Aprobar este pedido y descontar el stock del inventario?');">
+                <button class="boton boton-principal boton-aprobar resplandor-neon" type="submit" id="btn-aprobar-pedido">
+                  <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+                  Aprobar Pedido y Descontar Stock
+                </button>
+              </form>
+
+              <!-- Formulario de Rechazo -->
+              <div class="caja-formulario form-rechazo-caja">
+                <form action="{{ url_for('admin_pedido_rechazar', numero=pedido.numero) }}" method="post" onsubmit="return confirm('¿Rechazar este pedido?');">
+                  <div class="campo-formulario">
+                    <label class="etiqueta-formulario" for="motivo">Motivo de Rechazo <span class="requerido">*</span></label>
+                    <input
+                      class="entrada-formulario"
+                      type="text"
+                      id="motivo"
+                      name="motivo"
+                      placeholder="Ej. Stock agotado en almacén, datos de envío inconsistentes..."
+                      required
+                    />
+                  </div>
+                  <button class="boton boton-peligro boton-rechazar" type="submit" id="btn-rechazar-pedido">
+                    <span class="material-symbols-outlined" aria-hidden="true">cancel</span>
+                    Rechazar Pedido
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        {% else %}
+          <!-- Documentos Generados -->
+          <div class="pedido-documentos-descarga">
+            <h3 class="checkout-subtitulo-bloque">
+              <span class="material-symbols-outlined" aria-hidden="true">picture_as_pdf</span>
+              Comprobantes y Facturas Asociadas
+            </h3>
+            <div class="pedido-documentos-botones">
+              <a class="boton boton-pdf" href="{{ url_for('descargar_comprobante', numero=pedido.numero) }}" target="_blank">
+                <span class="material-symbols-outlined icono-pdf" aria-hidden="true">download</span>
+                Ver Comprobante Preliminar
+              </a>
+              {% if pedido.estado == "APROBADO" %}
+                <a class="boton boton-destacado boton-pdf resplandor-neon" href="{{ url_for('descargar_factura', numero=pedido.numero) }}" target="_blank">
+                  <span class="material-symbols-outlined icono-pdf" aria-hidden="true">receipt</span>
+                  Ver Factura Oficial Emitida
+                </a>
+              {% endif %}
+            </div>
+          </div>
+        {% endif %}
+
+        <div class="pedido-acciones-pie">
+          <a class="boton boton-secundario" href="{{ url_for('admin_pedidos_lista') }}">
+            <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+            Volver a Bandeja de Pedidos
+          </a>
+          <a class="boton boton-secundario" href="{{ url_for('admin_dashboard') }}">
+            <span class="material-symbols-outlined" aria-hidden="true">dashboard</span>
+            Panel de Control
+          </a>
+        </div>
+
+      </section>
+    </div>
+  </div>
+</main>
+{% endblock %}

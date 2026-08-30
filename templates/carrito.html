@@ -38,7 +38,7 @@
                         <div class="info-producto-carrito">
                           <img 
                             class="imagen-producto-carrito" 
-                            src="{{ url_for('static', filename=item.disco.imagen) }}" 
+                            src="{{ url_for('static', filename=item.disco.imagen if item.disco.imagen else 'img/placeholder.jpg') }}" 
                             alt="Portada de {{ item.disco.album }}"
                           />
                           <div class="texto-producto-carrito">

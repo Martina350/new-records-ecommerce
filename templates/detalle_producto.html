@@ -22,7 +22,7 @@
         <div class="detalle-imagen-contenedor">
           <img 
             class="detalle-imagen-portada" 
-            src="{{ url_for('static', filename=disco.imagen) }}" 
+            src="{{ url_for('static', filename=disco.imagen if disco.imagen else 'img/placeholder.jpg') }}" 
             alt="Portada de {{ disco.album }} - {{ disco.artista }}"
           />
           <div class="badge-formato-flotante badge-formato-{{ disco.formato | lower }}">
@@ -143,7 +143,7 @@
                 <div class="tarjeta-producto-imagen">
                   <div 
                     class="tarjeta-producto-imagen-fondo" 
-                    style="background-image: url('{{ url_for('static', filename=rec.imagen) }}');" 
+                    style="background-image: url('{{ url_for('static', filename=rec.imagen if rec.imagen else 'img/placeholder.jpg') }}');" 
                     role="img" 
                     aria-label="Portada {{ rec.album }}"
                   ></div>

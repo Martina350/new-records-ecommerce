@@ -88,7 +88,14 @@ def test_detalle_producto_inexistente_retorna_404(client):
 
 
 def test_disco_inactivo_no_se_muestra_en_catalogo_ni_detalle(client):
+    codigo_inactivo = f"NR-INACT-{Decimal('100')}"
     with app.app_context():
+        # Limpieza previa por si acaso
+        existente = Disco.query.filter_by(codigo="NR-TEST-INACTIVO").first()
+        if existente:
+            db.session.delete(existente)
+            db.session.commit()
+
         categoria = Categoria.query.filter_by(slug="rock").first()
         disco_inactivo = CD(
             categoria=categoria,
@@ -106,17 +113,18 @@ def test_disco_inactivo_no_se_muestra_en_catalogo_ni_detalle(client):
         db.session.add(disco_inactivo)
         db.session.commit()
 
-    # En catálogo general no debe aparecer
-    resp_cat = client.get("/productos")
-    assert b"Album Oculto" not in resp_cat.data
+    try:
+        # En catálogo general no debe aparecer
+        resp_cat = client.get("/productos")
+        assert b"Album Oculto" not in resp_cat.data
 
-    # Al intentar ver su detalle debe dar 404
-    resp_det = client.get("/productos/NR-TEST-INACTIVO")
-    assert resp_det.status_code == 404
-
-    # Limpieza
-    with app.app_context():
-        d = Disco.query.filter_by(codigo="NR-TEST-INACTIVO").first()
-        if d:
-            db.session.delete(d)
-            db.session.commit()
+        # Al intentar ver su detalle debe dar 404
+        resp_det = client.get("/productos/NR-TEST-INACTIVO")
+        assert resp_det.status_code == 404
+    finally:
+        # Limpieza garantizada
+        with app.app_context():
+            d = Disco.query.filter_by(codigo="NR-TEST-INACTIVO").first()
+            if d:
+                db.session.delete(d)
+                db.session.commit()

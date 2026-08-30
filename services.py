@@ -156,3 +156,138 @@ def obtener_pedido_por_numero(numero, usuario):
         return pedido
 
     return None
+
+
+def obtener_estadisticas_dashboard():
+    """Calcula métricas clave para el panel de control administrativo."""
+    from models import Categoria
+
+    total_discos = Disco.query.count()
+    discos_activos = Disco.query.filter_by(activo=True).count()
+    total_categorias = Categoria.query.filter_by(activo=True).count()
+    pedidos_pendientes = Pedido.query.filter_by(estado="PENDIENTE").count()
+    pedidos_aprobados = Pedido.query.filter_by(estado="APROBADO").count()
+    pedidos_rechazados = Pedido.query.filter_by(estado="RECHAZADO").count()
+    total_facturado = (
+        db.session.query(db.func.sum(Pedido.total))
+        .filter(Pedido.estado == "APROBADO")
+        .scalar()
+        or 0
+    )
+
+    return {
+        "total_discos": total_discos,
+        "discos_activos": discos_activos,
+        "total_categorias": total_categorias,
+        "pedidos_pendientes": pedidos_pendientes,
+        "pedidos_aprobados": pedidos_aprobados,
+        "pedidos_rechazados": pedidos_rechazados,
+        "total_facturado": float(total_facturado),
+    }
+
+
+def obtener_pedidos_admin(estado=None):
+    """Consulta la bandeja de pedidos con filtro opcional por estado."""
+    query = Pedido.query
+    if estado and estado.upper() in ("PENDIENTE", "APROBADO", "RECHAZADO"):
+        query = query.filter_by(estado=estado.upper())
+    return query.order_by(Pedido.fecha_creacion.desc()).all()
+
+
+def aprobar_pedido(numero, admin_id):
+    """Ejecuta la aprobación atómica de un pedido descontando stock e emitiendo factura.
+
+    Flujo:
+    1. Verifica que el pedido esté en estado 'PENDIENTE'.
+    2. Revalida que cada disco en el pedido tenga existencias suficientes.
+    3. Descuenta las unidades del inventario físico.
+    4. Cambia el estado del pedido a 'APROBADO' y registra al revisor.
+    5. Cambia el estado de TransaccionPago a 'APROBADA'.
+    6. Emite la 'FACTURA_FINAL' y notifica al cliente por correo.
+    """
+    from mailer import notificar_cambio_estado
+    from pdf_generator import generar_pdf_pedido
+
+    pedido = Pedido.query.filter_by(numero=numero).first()
+    if not pedido:
+        return False, "Pedido no encontrado."
+
+    if pedido.estado != "PENDIENTE":
+        return False, f"El pedido ya fue procesado anteriormente (Estado: {pedido.estado})."
+
+    try:
+        # Validar existencias de todos los discos
+        for detalle in pedido.detalles:
+            disco = db.session.get(Disco, detalle.disco_id)
+            if not disco or disco.stock < detalle.cantidad:
+                stock_disp = disco.stock if disco else 0
+                return (
+                    False,
+                    f"No hay stock suficiente para '{detalle.album}'. "
+                    f"Requerido: {detalle.cantidad}, disponible en inventario: {stock_disp}.",
+                )
+
+        # Descontar existencias
+        for detalle in pedido.detalles:
+            disco = db.session.get(Disco, detalle.disco_id)
+            disco.stock -= detalle.cantidad
+
+        pedido.estado = "APROBADO"
+        pedido.administrador_revisor_id = admin_id
+        pedido.fecha_revision = ahora_utc()
+
+        if pedido.transaccion_pago:
+            pedido.transaccion_pago.estado = "APROBADA"
+            pedido.transaccion_pago.fecha_procesamiento = ahora_utc()
+
+        db.session.commit()
+
+        # Generar Factura Oficial Final (PDF)
+        try:
+            generar_pdf_pedido(pedido, tipo="FACTURA_FINAL")
+        except Exception:
+            pass
+
+        # Notificar por correo
+        notificar_cambio_estado(pedido)
+        return True, f"Pedido {pedido.numero} aprobado exitosamente. Stock actualizado y Factura Oficial emitida."
+
+    except Exception:
+        db.session.rollback()
+        return False, "Ocurrió un error inesperado al procesar la aprobación del pedido."
+
+
+def rechazar_pedido(numero, admin_id, motivo):
+    """Ejecuta el rechazo de un pedido registrando el motivo obligatorio sin alterar inventario."""
+    from mailer import notificar_cambio_estado
+
+    if not motivo or not motivo.strip():
+        return False, "Debes ingresar un motivo explícito para rechazar el pedido."
+
+    pedido = Pedido.query.filter_by(numero=numero).first()
+    if not pedido:
+        return False, "Pedido no encontrado."
+
+    if pedido.estado != "PENDIENTE":
+        return False, f"El pedido ya no se encuentra pendiente (Estado actual: {pedido.estado})."
+
+    try:
+        pedido.estado = "RECHAZADO"
+        pedido.motivo_rechazo = motivo.strip()
+        pedido.administrador_revisor_id = admin_id
+        pedido.fecha_revision = ahora_utc()
+
+        if pedido.transaccion_pago:
+            pedido.transaccion_pago.estado = "RECHAZADA"
+            pedido.transaccion_pago.fecha_procesamiento = ahora_utc()
+
+        db.session.commit()
+
+        # Notificar por correo
+        notificar_cambio_estado(pedido)
+        return True, f"Pedido {pedido.numero} rechazado correctamente."
+
+    except Exception:
+        db.session.rollback()
+        return False, "Ocurrió un error inesperado al rechazar el pedido."
+

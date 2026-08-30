@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block titulo %}Administración de Categorías{% endblock %}
+
+{% block contenido %}
+<main class="contacto-principal admin-seccion">
+  <div class="contenedor">
+    <div class="caja-formulario auth-caja admin-caja">
+      <section class="contenedor-formulario-contacto" aria-labelledby="titulo-categorias">
+        
+        <div class="admin-cabecera-con-accion">
+          <div>
+            <span class="material-symbols-outlined admin-icono" aria-hidden="true">category</span>
+            <h1 id="titulo-categorias" class="titulo-formulario-contacto">
+              Gestión de <span class="degradado">Categorías</span>
+            </h1>
+            <p class="admin-subtitulo">
+              Clasificación por géneros musicales y control de visibilidad.
+            </p>
+          </div>
+          <div class="admin-cabecera-botones">
+            <a class="boton boton-principal resplandor-neon" href="{{ url_for('admin_categorias_nueva') }}">
+              <span class="material-symbols-outlined" aria-hidden="true">add</span>
+              Nueva Categoría
+            </a>
+            <a class="boton boton-secundario" href="{{ url_for('admin_dashboard') }}">
+              <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+              Dashboard
+            </a>
+          </div>
+        </div>
+
+        <div class="tabla-carrito-contenedor">
+          <table class="tabla-carrito">
+            <thead>
+              <tr>
+                <th>Nombre del Género</th>
+                <th>Slug (URL)</th>
+                <th>Discos Vinculados</th>
+                <th>Descripción</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for cat in categorias %}
+                <tr class="{% if not cat.activo %}fila-inactiva{% endif %}">
+                  <td><strong>{{ cat.nombre }}</strong></td>
+                  <td><code>{{ cat.slug }}</code></td>
+                  <td>
+                    <span class="badge-contador-genero">
+                      {{ cat.discos | length }} disco(s)
+                    </span>
+                  </td>
+                  <td>{{ cat.descripcion or 'Sin descripción' }}</td>
+                  <td>
+                    {% if cat.activo %}
+                      <span class="badge-estado badge-estado-aprobado">Activa</span>
+                    {% else %}
+                      <span class="badge-estado badge-estado-rechazado">Inactiva</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <div class="acciones-pedido-lista">
+                      <a class="boton boton-secundario boton-chico" href="{{ url_for('admin_categorias_editar', id=cat.id) }}">
+                        <span class="material-symbols-outlined" aria-hidden="true">edit</span>
+                        Editar
+                      </a>
+                      {% if cat.activo %}
+                        <form action="{{ url_for('admin_categorias_desactivar', id=cat.id) }}" method="post" onsubmit="return confirm('¿Desactivar esta categoría del catálogo público?');">
+                          <button class="boton boton-chico boton-peligro" type="submit" title="Desactivar categoría">
+                            <span class="material-symbols-outlined" aria-hidden="true">visibility_off</span>
+                          </button>
+                        </form>
+                      {% else %}
+                        <form action="{{ url_for('admin_categorias_reactivar', id=cat.id) }}" method="post">
+                          <button class="boton boton-chico boton-exito" type="submit" title="Reactivar categoría">
+                            <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
+                          </button>
+                        </form>
+                      {% endif %}
+                    </div>
+                  </td>
+                </tr>
+              {% else %}
+                <tr>
+                  <td colspan="6" class="texto-centrado">No hay categorías registradas.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+      </section>
+    </div>
+  </div>
+</main>
+{% endblock %}

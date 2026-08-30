@@ -640,7 +640,7 @@ Resultado de ejecución:
 
 ### Fase 10 - Administración de catálogo y pedidos
 
-**Estado:** bloqueada.
+**Estado:** completada; pendiente de aprobación para iniciar la Fase 11.
 
 Tareas previstas:
 
@@ -659,6 +659,22 @@ Tareas previstas:
 - Proteger todas las rutas de creación, edición, desactivación, aprobación y rechazo con el rol administrador.
 - Implementar desactivación lógica mediante el estado activo, siguiendo la eliminación suave enseñada en la Semana 2.
 - Verificar con solicitudes directas que ocultar botones no sea el único control de seguridad.
+
+Resultado de ejecución:
+
+- Se actualizaron en `app.py` y `services.py` las rutas y funciones de administración:
+  - Dashboard administrativo (`/admin/dashboard`) con métricas KPI en tiempo real (discos activos, categorías, pedidos pendientes y facturación acumulada).
+  - CRUD completo de Discos (`/admin/discos`, `/admin/discos/nuevo`, `/admin/discos/<id>/editar`, `/admin/discos/<id>/desactivar`, `/admin/discos/<id>/reactivar`), con soporte polimórfico para `CD` y `Vinilo`.
+  - CRUD completo de Categorías (`/admin/categorias`, `/admin/categorias/nueva`, `/admin/categorias/<id>/editar`, `/admin/categorias/<id>/desactivar`, `/admin/categorias/<id>/reactivar`).
+  - Eliminación suave (Soft Delete) implementada mediante alternancia del campo booleano `activo`.
+  - Bandeja de pedidos con pestañas de filtrado por estado (`/admin/pedidos`).
+  - Auditoría técnica de pedido (`/admin/pedidos/<numero>`) con comprobación en vivo de existencias físicas disponibles.
+  - Aprobación atómica de pedidos (`/admin/pedidos/<numero>/aprobar`): descuenta stock del inventario, marca `APROBADO`, actualiza la transacción de pago, genera la `FACTURA_FINAL` en PDF y notifica al cliente.
+  - Rechazo de pedidos (`/admin/pedidos/<numero>/rechazar`): exige motivo explícito obligatorio, marca `RECHAZADO`, actualiza cobro a `RECHAZADA`, no altera existencias y notifica al cliente.
+- Todas las rutas administrativas están estrictamente protegidas con `@rol_requerido('administrador')`.
+- Se crearon las plantillas `templates/admin/discos/lista.html`, `templates/admin/discos/formulario.html`, `templates/admin/categorias/lista.html`, `templates/admin/categorias/formulario.html`, `templates/admin/pedidos/lista.html` y `templates/admin/pedidos/detalle.html`, y se actualizó `templates/admin/dashboard.html`.
+- Se añadieron estilos dedicados en `static/css/styles.css` para KPIs, tablas administrativas, badges de stock y decisiones.
+- Se agregaron 8 pruebas automatizadas en `tests/test_admin.py`, alcanzando un total de **72/72 pruebas pasando exitosamente**.
 
 ### Fase 11 - Reportes administrativos
 

@@ -2771,6 +2771,278 @@ img { max-width: 100%; height: auto; display: block; }
   padding: 0.35rem 0.5rem;
 }
 
+/* ===== Dashboard Administrativo - KPIs (Fase 10) ===== */
+.admin-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.admin-kpi-card {
+  background: rgba(18, 18, 18, 0.7);
+  border: 1px solid var(--border-light);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.admin-kpi-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary);
+}
+
+.admin-kpi-icono {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.icono-discos {
+  background: rgba(138, 44, 226, 0.15);
+  color: var(--primary);
+  border: 1px solid rgba(138, 44, 226, 0.3);
+}
+
+.icono-categorias {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.icono-pendientes {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.icono-facturado {
+  background: rgba(0, 255, 65, 0.15);
+  color: var(--accent);
+  border: 1px solid rgba(0, 255, 65, 0.3);
+}
+
+.admin-kpi-datos {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-kpi-numero {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-heading);
+  line-height: 1.2;
+}
+
+.admin-kpi-etiqueta {
+  font-size: 0.75rem;
+  color: var(--text-muted-page);
+  font-weight: 600;
+}
+
+.badge-activo-admin {
+  background: rgba(0, 255, 65, 0.12);
+  color: var(--accent);
+  border: 1px solid rgba(0, 255, 65, 0.3);
+  font-size: 0.75rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 9999px;
+  align-self: flex-start;
+  margin-top: 0.5rem;
+}
+
+.enlace-modulo {
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.enlace-modulo:hover {
+  transform: translateY(-3px);
+  border-color: var(--accent);
+}
+
+.admin-seccion-bloque {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-light);
+}
+
+.admin-subtitulo-bloque {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--text-heading);
+}
+
+/* ===== Cabeceras y Acciones Admin ===== */
+.admin-cabecera-con-accion {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.admin-cabecera-botones {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.admin-caja-form {
+  max-width: 44rem;
+  margin: 0 auto;
+}
+
+/* ===== Badges de Stock y Estado ===== */
+.badge-stock-agotado {
+  color: var(--error);
+  font-weight: 700;
+  font-size: 0.8125rem;
+}
+
+.badge-stock-bajo {
+  color: #f59e0b;
+  font-weight: 700;
+  font-size: 0.8125rem;
+}
+
+.badge-contador-genero {
+  font-size: 0.8125rem;
+  color: var(--text-page);
+  font-weight: 600;
+}
+
+.fila-inactiva {
+  opacity: 0.6;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.boton-peligro {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--error);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.boton-peligro:hover {
+  background: rgba(239, 68, 68, 0.3);
+  color: #fff;
+}
+
+.boton-exito {
+  background: rgba(0, 255, 65, 0.15);
+  color: var(--accent);
+  border: 1px solid rgba(0, 255, 65, 0.3);
+}
+
+.boton-exito:hover {
+  background: rgba(0, 255, 65, 0.3);
+  color: #fff;
+}
+
+/* ===== Filtros de Pedidos ===== */
+.admin-filtros-pedidos {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.boton-filtro-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--text-muted-page);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-light);
+  transition: all 0.2s;
+}
+
+.boton-filtro-tab:hover {
+  color: var(--text-heading);
+  border-color: var(--primary);
+}
+
+.boton-filtro-tab.activo {
+  background: rgba(138, 44, 226, 0.18);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.icono-tab {
+  font-size: 1.1rem;
+}
+
+/* ===== Panel de Decisión y Rechazo ===== */
+.admin-panel-decision {
+  background: rgba(18, 18, 18, 0.8);
+  border: 1px solid var(--border-light);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.admin-texto-decision {
+  font-size: 0.875rem;
+  color: var(--text-muted-page);
+  margin: 0 0 1.25rem 0;
+}
+
+.admin-grid-decisiones {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .admin-grid-decisiones {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+.boton-aprobar {
+  width: 100%;
+  padding: 0.9rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.form-rechazo-caja {
+  padding: 1rem;
+  background: rgba(239, 68, 68, 0.05);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.boton-rechazar {
+  width: 100%;
+  padding: 0.75rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+
 
 
 

@@ -33,7 +33,20 @@ from cart import (
 )
 from config import Config
 from mailer import enviar_pin, mail, notificar_creacion_pedido, smtp_configurado
-from models import Categoria, Disco, Factura, MetodoPago, VerificacionTarjeta, Usuario, db
+from models import (
+    CD,
+    Categoria,
+    DetallePedido,
+    Disco,
+    Factura,
+    MetodoPago,
+    Pedido,
+    TransaccionPago,
+    Usuario,
+    VerificacionTarjeta,
+    Vinilo,
+    db,
+)
 from payments import (
     crear_verificacion,
     desactivar_metodo_pago,
@@ -44,9 +57,13 @@ from payments import (
 )
 from pdf_generator import generar_pdf_pedido
 from services import (
+    aprobar_pedido,
+    obtener_estadisticas_dashboard,
     obtener_pedido_por_numero,
+    obtener_pedidos_admin,
     obtener_pedidos_cliente,
     procesar_checkout,
+    rechazar_pedido,
 )
 
 app = Flask(__name__)
@@ -633,8 +650,380 @@ def pago_eliminar(metodo_id):
 @app.route("/admin/dashboard")
 @rol_requerido("administrador")
 def admin_dashboard():
-    """Panel de administración restringido exclusivamente a administradores."""
-    return render_template("admin/dashboard.html")
+    """Panel de administración con métricas clave y accesos directos."""
+    stats = obtener_estadisticas_dashboard()
+    ultimos_pedidos = obtener_pedidos_admin()[:5]
+    return render_template(
+        "admin/dashboard.html",
+        stats=stats,
+        ultimos_pedidos=ultimos_pedidos,
+    )
+
+
+# ── Administración de Discos ─────────────────────────────────────────────────
+
+@app.route("/admin/discos")
+@rol_requerido("administrador")
+def admin_discos_lista():
+    """Lista completa de discos para gestión administrativa."""
+    discos = Disco.query.order_by(Disco.activo.desc(), Disco.fecha_creacion.desc()).all()
+    return render_template("admin/discos/lista.html", discos=discos)
+
+
+@app.route("/admin/discos/nuevo", methods=["GET", "POST"])
+@rol_requerido("administrador")
+def admin_discos_nuevo():
+    """Formulario para agregar un nuevo disco al catálogo."""
+    categorias = Categoria.query.filter_by(activo=True).order_by(Categoria.nombre).all()
+
+    if request.method == "POST":
+        formato = request.form.get("formato", "").upper().strip()
+        codigo = request.form.get("codigo", "").strip()
+        album = request.form.get("album", "").strip()
+        artista = request.form.get("artista", "").strip()
+        descripcion = request.form.get("descripcion", "").strip()
+        categoria_id = request.form.get("categoria_id")
+        precio_base = request.form.get("precio_base", "0")
+        stock = request.form.get("stock", "0")
+        peso_kg = request.form.get("peso_kg", "0")
+        costo_envio = request.form.get("costo_envio_por_kg", "0")
+        costo_embalaje = request.form.get("costo_embalaje", "0")
+        imagen = request.form.get("imagen", "").strip()
+
+        errores = []
+        if formato not in ("CD", "VINILO"):
+            errores.append("Selecciona un formato válido (CD o VINILO).")
+        if not codigo or len(codigo) < 3:
+            errores.append("El código del producto es obligatorio (mínimo 3 caracteres).")
+        elif Disco.query.filter_by(codigo=codigo).first() is not None:
+            errores.append(f"Ya existe un disco registrado con el código '{codigo}'.")
+        if not album:
+            errores.append("El nombre del álbum es obligatorio.")
+        if not artista:
+            errores.append("El nombre del artista es obligatorio.")
+
+        try:
+            precio_val = float(precio_base)
+            stock_val = int(stock)
+            peso_val = float(peso_kg)
+            envio_val = float(costo_envio)
+            embalaje_val = float(costo_embalaje) if formato == "VINILO" else 0.0
+            cat_id_val = int(categoria_id)
+            if precio_val <= 0 or stock_val < 0 or peso_val <= 0:
+                raise ValueError
+        except (ValueError, TypeError):
+            errores.append("Verifica los valores numéricos: precio, stock y peso deben ser válidos y positivos.")
+
+        if errores:
+            for e in errores:
+                flash(e, "error")
+            return render_template(
+                "admin/discos/formulario.html",
+                categorias=categorias,
+                disco=None,
+                formato=formato,
+                codigo=codigo,
+                album=album,
+                artista=artista,
+                descripcion=descripcion,
+                categoria_id=categoria_id,
+                precio_base=precio_base,
+                stock=stock,
+                peso_kg=peso_kg,
+                costo_envio_por_kg=costo_envio,
+                costo_embalaje=costo_embalaje,
+                imagen=imagen,
+            )
+
+        try:
+            datos_comunes = {
+                "categoria_id": cat_id_val,
+                "codigo": codigo,
+                "album": album,
+                "artista": artista,
+                "descripcion": descripcion,
+                "precio_base": precio_val,
+                "stock": stock_val,
+                "peso_kg": peso_val,
+                "costo_envio_por_kg": envio_val,
+                "imagen": imagen or None,
+                "activo": True,
+            }
+
+            if formato == "VINILO":
+                nuevo_disco = Vinilo(
+                    **datos_comunes,
+                    formato="VINILO",
+                    costo_embalaje=embalaje_val,
+                )
+            else:
+                nuevo_disco = CD(
+                    **datos_comunes,
+                    formato="CD",
+                    costo_embalaje=0.0,
+                )
+
+            db.session.add(nuevo_disco)
+            db.session.commit()
+            flash(f"Disco '{album}' creado exitosamente en el catálogo.", "success")
+            return redirect(url_for("admin_discos_lista"))
+        except Exception:
+            db.session.rollback()
+            flash("Error al guardar el disco en la base de datos.", "error")
+
+    return render_template("admin/discos/formulario.html", categorias=categorias, disco=None)
+
+
+@app.route("/admin/discos/<int:id>/editar", methods=["GET", "POST"])
+@rol_requerido("administrador")
+def admin_discos_editar(id):
+    """Formulario de edición de disco existente."""
+    disco = Disco.query.get_or_404(id)
+    categorias = Categoria.query.filter_by(activo=True).order_by(Categoria.nombre).all()
+
+    if request.method == "POST":
+        album = request.form.get("album", "").strip()
+        artista = request.form.get("artista", "").strip()
+        descripcion = request.form.get("descripcion", "").strip()
+        categoria_id = request.form.get("categoria_id")
+        precio_base = request.form.get("precio_base", "0")
+        stock = request.form.get("stock", "0")
+        peso_kg = request.form.get("peso_kg", "0")
+        costo_envio = request.form.get("costo_envio_por_kg", "0")
+        costo_embalaje = request.form.get("costo_embalaje", "0")
+        imagen = request.form.get("imagen", "").strip()
+
+        errores = []
+        if not album:
+            errores.append("El nombre del álbum es obligatorio.")
+        if not artista:
+            errores.append("El nombre del artista es obligatorio.")
+
+        try:
+            precio_val = float(precio_base)
+            stock_val = int(stock)
+            peso_val = float(peso_kg)
+            envio_val = float(costo_envio)
+            embalaje_val = float(costo_embalaje) if disco.formato == "VINILO" else 0.0
+            cat_id_val = int(categoria_id)
+            if precio_val <= 0 or stock_val < 0 or peso_val <= 0:
+                raise ValueError
+        except (ValueError, TypeError):
+            errores.append("Verifica los valores numéricos: precio, stock y peso deben ser válidos y positivos.")
+
+        if errores:
+            for e in errores:
+                flash(e, "error")
+            return render_template("admin/discos/formulario.html", categorias=categorias, disco=disco)
+
+        try:
+            disco.categoria_id = cat_id_val
+            disco.album = album
+            disco.artista = artista
+            disco.descripcion = descripcion
+            disco.precio_base = precio_val
+            disco.stock = stock_val
+            disco.peso_kg = peso_val
+            disco.costo_envio_por_kg = envio_val
+            if disco.formato == "VINILO":
+                disco.costo_embalaje = embalaje_val
+            disco.imagen = imagen or None
+
+            db.session.commit()
+            flash(f"Disco '{album}' actualizado correctamente.", "success")
+            return redirect(url_for("admin_discos_lista"))
+        except Exception:
+            db.session.rollback()
+            flash("Error al actualizar el disco.", "error")
+
+    return render_template("admin/discos/formulario.html", categorias=categorias, disco=disco)
+
+
+@app.route("/admin/discos/<int:id>/desactivar", methods=["POST"])
+@rol_requerido("administrador")
+def admin_discos_desactivar(id):
+    """Desactiva lógicamente un disco del catálogo público."""
+    disco = Disco.query.get_or_404(id)
+    disco.activo = False
+    db.session.commit()
+    flash(f"Disco '{disco.album}' desactivado del catálogo público.", "info")
+    return redirect(url_for("admin_discos_lista"))
+
+
+@app.route("/admin/discos/<int:id>/reactivar", methods=["POST"])
+@rol_requerido("administrador")
+def admin_discos_reactivar(id):
+    """Reactiva un disco en el catálogo público."""
+    disco = Disco.query.get_or_404(id)
+    disco.activo = True
+    db.session.commit()
+    flash(f"Disco '{disco.album}' reactivado exitosamente.", "success")
+    return redirect(url_for("admin_discos_lista"))
+
+
+# ── Administración de Categorías ─────────────────────────────────────────────
+
+@app.route("/admin/categorias")
+@rol_requerido("administrador")
+def admin_categorias_lista():
+    """Lista de categorías con conteo de discos."""
+    categorias = Categoria.query.order_by(Categoria.activo.desc(), Categoria.nombre).all()
+    return render_template("admin/categorias/lista.html", categorias=categorias)
+
+
+@app.route("/admin/categorias/nueva", methods=["GET", "POST"])
+@rol_requerido("administrador")
+def admin_categorias_nueva():
+    """Formulario para crear una nueva categoría musical."""
+    if request.method == "POST":
+        nombre = request.form.get("nombre", "").strip()
+        slug = request.form.get("slug", "").strip().lower()
+        descripcion = request.form.get("descripcion", "").strip()
+        imagen = request.form.get("imagen", "").strip()
+
+        if not slug and nombre:
+            import re
+            slug = re.sub(r"[^\w\s-]", "", nombre.lower()).strip()
+            slug = re.sub(r"[-\s]+", "-", slug)
+
+        errores = []
+        if not nombre or len(nombre) < 2:
+            errores.append("El nombre de la categoría es obligatorio (mínimo 2 caracteres).")
+        if not slug:
+            errores.append("El slug de la categoría es obligatorio.")
+        elif Categoria.query.filter_by(slug=slug).first() is not None:
+            errores.append(f"Ya existe una categoría con el slug '{slug}'.")
+
+        if errores:
+            for e in errores:
+                flash(e, "error")
+            return render_template("admin/categorias/formulario.html", categoria=None, nombre=nombre, slug=slug, descripcion=descripcion, imagen=imagen)
+
+        try:
+            nueva_cat = Categoria(
+                nombre=nombre,
+                slug=slug,
+                descripcion=descripcion or None,
+                imagen=imagen or None,
+                activo=True,
+            )
+            db.session.add(nueva_cat)
+            db.session.commit()
+            flash(f"Categoría '{nombre}' creada exitosamente.", "success")
+            return redirect(url_for("admin_categorias_lista"))
+        except Exception:
+            db.session.rollback()
+            flash("Error al crear la categoría.", "error")
+
+    return render_template("admin/categorias/formulario.html", categoria=None)
+
+
+@app.route("/admin/categorias/<int:id>/editar", methods=["GET", "POST"])
+@rol_requerido("administrador")
+def admin_categorias_editar(id):
+    """Formulario de edición de categoría."""
+    categoria = Categoria.query.get_or_404(id)
+
+    if request.method == "POST":
+        nombre = request.form.get("nombre", "").strip()
+        slug = request.form.get("slug", "").strip().lower()
+        descripcion = request.form.get("descripcion", "").strip()
+        imagen = request.form.get("imagen", "").strip()
+
+        errores = []
+        if not nombre or len(nombre) < 2:
+            errores.append("El nombre de la categoría es obligatorio.")
+        if not slug:
+            errores.append("El slug de la categoría es obligatorio.")
+        else:
+            cat_existente = Categoria.query.filter_by(slug=slug).first()
+            if cat_existente and cat_existente.id != categoria.id:
+                errores.append(f"El slug '{slug}' ya está en uso por otra categoría.")
+
+        if errores:
+            for e in errores:
+                flash(e, "error")
+            return render_template("admin/categorias/formulario.html", categoria=categoria)
+
+        try:
+            categoria.nombre = nombre
+            categoria.slug = slug
+            categoria.descripcion = descripcion or None
+            categoria.imagen = imagen or None
+            db.session.commit()
+            flash(f"Categoría '{nombre}' actualizada correctamente.", "success")
+            return redirect(url_for("admin_categorias_lista"))
+        except Exception:
+            db.session.rollback()
+            flash("Error al actualizar la categoría.", "error")
+
+    return render_template("admin/categorias/formulario.html", categoria=categoria)
+
+
+@app.route("/admin/categorias/<int:id>/desactivar", methods=["POST"])
+@rol_requerido("administrador")
+def admin_categorias_desactivar(id):
+    """Desactiva lógicamente una categoría."""
+    categoria = Categoria.query.get_or_404(id)
+    categoria.activo = False
+    db.session.commit()
+    flash(f"Categoría '{categoria.nombre}' desactivada.", "info")
+    return redirect(url_for("admin_categorias_lista"))
+
+
+@app.route("/admin/categorias/<int:id>/reactivar", methods=["POST"])
+@rol_requerido("administrador")
+def admin_categorias_reactivar(id):
+    """Reactiva una categoría."""
+    categoria = Categoria.query.get_or_404(id)
+    categoria.activo = True
+    db.session.commit()
+    flash(f"Categoría '{categoria.nombre}' reactivada exitosamente.", "success")
+    return redirect(url_for("admin_categorias_lista"))
+
+
+# ── Administración de Pedidos ────────────────────────────────────────────────
+
+@app.route("/admin/pedidos")
+@rol_requerido("administrador")
+def admin_pedidos_lista():
+    """Bandeja administrativa de pedidos con filtros por estado."""
+    estado = request.args.get("estado", "").strip().upper()
+    pedidos = obtener_pedidos_admin(estado=estado if estado in ("PENDIENTE", "APROBADO", "RECHAZADO") else None)
+    return render_template("admin/pedidos/lista.html", pedidos=pedidos, estado_filtro=estado)
+
+
+@app.route("/admin/pedidos/<numero>")
+@rol_requerido("administrador")
+def admin_pedido_detalle(numero):
+    """Auditoría y detalle administrativo de un pedido con comprobación de stock."""
+    pedido = Pedido.query.filter_by(numero=numero).first_or_404()
+    return render_template("admin/pedidos/detalle.html", pedido=pedido)
+
+
+@app.route("/admin/pedidos/<numero>/aprobar", methods=["POST"])
+@rol_requerido("administrador")
+def admin_pedido_aprobar(numero):
+    """Ejecuta la aprobación atómica de un pedido descontando existencias físicas."""
+    exito, mensaje = aprobar_pedido(numero, session["usuario_id"])
+    if exito:
+        flash(mensaje, "success")
+    else:
+        flash(mensaje, "error")
+    return redirect(url_for("admin_pedido_detalle", numero=numero))
+
+
+@app.route("/admin/pedidos/<numero>/rechazar", methods=["POST"])
+@rol_requerido("administrador")
+def admin_pedido_rechazar(numero):
+    """Ejecuta el rechazo de un pedido con registro obligatorio de motivo."""
+    motivo = request.form.get("motivo", "").strip()
+    exito, mensaje = rechazar_pedido(numero, session["usuario_id"], motivo)
+    if exito:
+        flash(mensaje, "info")
+    else:
+        flash(mensaje, "error")
+    return redirect(url_for("admin_pedido_detalle", numero=numero))
 
 
 @app.errorhandler(403)

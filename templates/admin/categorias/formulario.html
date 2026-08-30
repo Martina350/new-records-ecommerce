@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block titulo %}{% if categoria %}Editar Categoría: {{ categoria.nombre }}{% else %}Nueva Categoría{% endif %}{% endblock %}
+
+{% block contenido %}
+<main class="contacto-principal auth-seccion">
+  <div class="contenedor">
+    <div class="caja-formulario auth-caja admin-caja-form">
+      <section class="contenedor-formulario-contacto" aria-labelledby="titulo-form-cat">
+        
+        <div class="auth-cabecera">
+          <span class="material-symbols-outlined auth-icono" aria-hidden="true">category</span>
+          <h1 id="titulo-form-cat" class="titulo-formulario-contacto">
+            {% if categoria %}
+              Editar <span class="degradado">Categoría</span>
+            {% else %}
+              Nueva <span class="degradado">Categoría</span>
+            {% endif %}
+          </h1>
+          <p class="auth-subtitulo">
+            {% if categoria %}
+              Modifica la información y slug del género musical.
+            {% else %}
+              Registra un nuevo género musical para organizar el catálogo.
+            {% endif %}
+          </p>
+        </div>
+
+        <form class="formulario-contacto" method="post" novalidate>
+          <div class="campo-formulario">
+            <label class="etiqueta-formulario" for="nombre">Nombre de la Categoría <span class="requerido">*</span></label>
+            <input
+              class="entrada-formulario"
+              type="text"
+              id="nombre"
+              name="nombre"
+              value="{{ categoria.nombre if categoria else nombre | default('') }}"
+              placeholder="Ej. Heavy Metal, Jazz Fusión..."
+              required
+            />
+          </div>
+
+          <div class="campo-formulario">
+            <label class="etiqueta-formulario" for="slug">Slug URL <span class="requerido">*</span></label>
+            <input
+              class="entrada-formulario"
+              type="text"
+              id="slug"
+              name="slug"
+              value="{{ categoria.slug if categoria else slug | default('') }}"
+              placeholder="Ej. heavy-metal"
+              required
+            />
+            <span class="nota-campo">Identificador en la URL (solo letras minúsculas, números y guiones).</span>
+          </div>
+
+          <div class="campo-formulario">
+            <label class="etiqueta-formulario" for="descripcion">Descripción</label>
+            <textarea
+              class="entrada-formulario"
+              id="descripcion"
+              name="descripcion"
+              rows="3"
+              placeholder="Breve reseña del género musical..."
+            >{{ categoria.descripcion if categoria else descripcion | default('') }}</textarea>
+          </div>
+
+          <div class="campo-formulario">
+            <label class="etiqueta-formulario" for="imagen">Ruta de Imagen (opcional)</label>
+            <input
+              class="entrada-formulario"
+              type="text"
+              id="imagen"
+              name="imagen"
+              value="{{ categoria.imagen if categoria else imagen | default('') }}"
+              placeholder="Ej. /static/img/genero.jpg"
+            />
+          </div>
+
+          <div class="grupo-botones-formulario">
+            <button class="boton boton-principal resplandor-neon" type="submit">
+              <span class="material-symbols-outlined" aria-hidden="true">save</span>
+              {% if categoria %}Guardar Cambios{% else %}Crear Categoría{% endif %}
+            </button>
+            <a class="boton boton-secundario" href="{{ url_for('admin_categorias_lista') }}">
+              <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+              Cancelar
+            </a>
+          </div>
+        </form>
+
+      </section>
+    </div>
+  </div>
+</main>
+{% endblock %}
