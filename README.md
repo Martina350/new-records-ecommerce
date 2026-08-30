@@ -4,9 +4,9 @@ New Records es un proyecto académico de comercio electrónico para la venta de 
 
 ## Estado actual
 
-Las fases 1 a 10 están implementadas y verificadas. El proyecto incluye la base Flask, PostgreSQL, autenticación y roles, perfil, catálogo dinámico, carrito, métodos de pago con PIN, pedidos, comprobantes y facturas PDF, notificaciones y administración de catálogo y pedidos.
+Las fases 1 a 11 están implementadas y verificadas. El proyecto incluye la base Flask, PostgreSQL, autenticación y roles, perfil, catálogo dinámico, carrito, métodos de pago con PIN, pedidos, comprobantes y facturas PDF, notificaciones, administración de catálogo y pedidos, y reportes analíticos de ventas (diario, semanal, mensual, ranking de discos y ranking de categorías).
 
-La aprobación de pedidos y el descuento concurrente de stock se realizan mediante un procedimiento almacenado de PostgreSQL. La suite automatizada contiene 78 pruebas aisladas que no persisten información ni escriben PDFs en el repositorio. Los reportes de ventas pertenecen a la Fase 11.
+La aprobación de pedidos y el descuento concurrente de stock se realizan mediante un procedimiento almacenado de PostgreSQL. La suite automatizada contiene 85 pruebas aisladas que no persisten información ni escriben PDFs en el repositorio. La integridad avanzada, seguridad y respaldos pertenecen a la Fase 12.
 
 El alcance completo y la regla de aprobación entre fases están documentados en `PLAN_IMPLEMENTACION.md`, que también puede ser entregado por separado a cada colaborador.
 
@@ -36,7 +36,7 @@ Los módulos nuevos de la aplicación se crearán únicamente cuando se aprueben
 
 ## Guía para clonar el repositorio y continuar el desarrollo
 
-El repositorio queda preparado hasta la **Fase 10**. La siguiente persona debe completar estos pasos desde la raíz del proyecto antes de comenzar la Fase 11.
+El repositorio queda preparado hasta la **Fase 11**. La siguiente persona debe completar estos pasos desde la raíz del proyecto antes de comenzar la Fase 12.
 
 ### 1. Clonar el repositorio
 
@@ -151,7 +151,7 @@ La dirección predeterminada es `http://127.0.0.1:5000`.
 
 ### 9. Continuar con las fases restantes
 
-El desarrollo debe continuar desde la **Fase 11**, siguiendo la copia actualizada de `PLAN_IMPLEMENTACION.md` proporcionada por la persona responsable del proyecto. El plan puede entregarse por separado y no contiene credenciales.
+El desarrollo debe continuar desde la **Fase 12**, siguiendo la copia actualizada de `PLAN_IMPLEMENTACION.md` proporcionada por la persona responsable del proyecto. El plan puede entregarse por separado y no contiene credenciales.
 
 Antes de implementar una fase nueva, se debe confirmar que la fase anterior esté aprobada, trabajar en una rama propia y evitar modificar o eliminar las funcionalidades y pruebas ya terminadas.
 

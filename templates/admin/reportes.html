@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+
+{% block titulo %}Reportes de Ventas — Panel de Administración{% endblock %}
+
+{% block contenido %}
+<main class="contacto-principal admin-seccion reportes-seccion">
+  <div class="contenedor">
+    <div class="caja-formulario auth-caja admin-caja reportes-caja">
+      <section class="contenedor-formulario-contacto" aria-labelledby="titulo-reportes">
+        
+        <!-- Cabecera de Reportes -->
+        <div class="admin-cabecera">
+          <div class="admin-migajas">
+            <a href="{{ url_for('admin_dashboard') }}" class="enlace-migaja">
+              <span class="material-symbols-outlined icono-migaja" aria-hidden="true">arrow_back</span>
+              Volver al Dashboard
+            </a>
+          </div>
+          <span class="material-symbols-outlined admin-icono" aria-hidden="true">monitoring</span>
+          <h1 id="titulo-reportes" class="titulo-formulario-contacto">
+            Reportes y Analítica de <span class="degradado">Ventas</span>
+          </h1>
+          <p class="admin-subtitulo">
+            Métricas consolidadas y rankings generados exclusivamente a partir de pedidos <strong>APROBADOS</strong> en PostgreSQL.
+          </p>
+        </div>
+
+        <!-- Tarjetas KPI Resumen Global -->
+        <div class="admin-kpi-grid reportes-kpi-grid">
+          <div class="admin-kpi-card">
+            <div class="admin-kpi-icono icono-facturado">
+              <span class="material-symbols-outlined" aria-hidden="true">payments</span>
+            </div>
+            <div class="admin-kpi-datos">
+              <span class="admin-kpi-numero">${{ "%.2f"|format(resumen.total_facturado) }}</span>
+              <span class="admin-kpi-etiqueta">Facturación Neta Aprobada</span>
+            </div>
+          </div>
+
+          <div class="admin-kpi-card">
+            <div class="admin-kpi-icono icono-pendientes">
+              <span class="material-symbols-outlined" aria-hidden="true">shopping_bag</span>
+            </div>
+            <div class="admin-kpi-datos">
+              <span class="admin-kpi-numero">{{ resumen.total_unidades }}</span>
+              <span class="admin-kpi-etiqueta">Discos Físicos Vendidos</span>
+            </div>
+          </div>
+
+          <div class="admin-kpi-card">
+            <div class="admin-kpi-icono icono-discos">
+              <span class="material-symbols-outlined" aria-hidden="true">task_alt</span>
+            </div>
+            <div class="admin-kpi-datos">
+              <span class="admin-kpi-numero">{{ resumen.total_pedidos }}</span>
+              <span class="admin-kpi-etiqueta">Órdenes Aprobadas</span>
+            </div>
+          </div>
+
+          <div class="admin-kpi-card">
+            <div class="admin-kpi-icono icono-categorias">
+              <span class="material-symbols-outlined" aria-hidden="true">calculate</span>
+            </div>
+            <div class="admin-kpi-datos">
+              <span class="admin-kpi-numero">${{ "%.2f"|format(resumen.ticket_promedio) }}</span>
+              <span class="admin-kpi-etiqueta">Ticket Promedio por Pedido</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bloque 1: Reporte Temporal de Ventas -->
+        <div class="admin-seccion-bloque">
+          <div class="reportes-cabecera-bloque">
+            <div class="reportes-titulo-grupo">
+              <h2 class="admin-subtitulo-bloque">
+                <span class="material-symbols-outlined" aria-hidden="true">timeline</span>
+                Evolución de Ventas por Período
+              </h2>
+              <p class="reportes-descripcion-bloque">
+                Agrupación cronológica de ingresos y volumen de pedidos.
+              </p>
+            </div>
+
+            <!-- Filtros por Período -->
+            <div class="reportes-pestanas-periodo" role="tablist" aria-label="Filtro de período">
+              <a href="{{ url_for('admin_reportes', periodo='diario') }}"
+                 class="boton-periodo{% if periodo == 'diario' %} activo{% endif %}"
+                 role="tab"
+                 aria-selected="{{ 'true' if periodo == 'diario' else 'false' }}">
+                <span class="material-symbols-outlined icono-chico" aria-hidden="true">today</span>
+                Diario
+              </a>
+              <a href="{{ url_for('admin_reportes', periodo='semanal') }}"
+                 class="boton-periodo{% if periodo == 'semanal' %} activo{% endif %}"
+                 role="tab"
+                 aria-selected="{{ 'true' if periodo == 'semanal' else 'false' }}">
+                <span class="material-symbols-outlined icono-chico" aria-hidden="true">date_range</span>
+                Semanal
+              </a>
+              <a href="{{ url_for('admin_reportes', periodo='mensual') }}"
+                 class="boton-periodo{% if periodo == 'mensual' %} activo{% endif %}"
+                 role="tab"
+                 aria-selected="{{ 'true' if periodo == 'mensual' else 'false' }}">
+                <span class="material-symbols-outlined icono-chico" aria-hidden="true">calendar_month</span>
+                Mensual / Anual
+              </a>
+            </div>
+          </div>
+
+          {% if reporte_temporal %}
+            <div class="tabla-carrito-contenedor reportes-tabla-contenedor">
+              <table class="tabla-carrito">
+                <thead>
+                  <tr>
+                    <th>Período</th>
+                    <th>Pedidos Aprobados</th>
+                    <th>Unidades Vendidas</th>
+                    <th>Total Facturado</th>
+                    <th>% del Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for fila in reporte_temporal %}
+                    <tr>
+                      <td>
+                        <strong>{{ fila.etiqueta }}</strong>
+                      </td>
+                      <td>
+                        <span class="badge badge-pedidos-count">
+                          {{ fila.total_pedidos }} orden(es)
+                        </span>
+                      </td>
+                      <td>
+                        <span class="reporte-unidades-dato">
+                          {{ fila.total_unidades }} disco(s)
+                        </span>
+                      </td>
+                      <td>
+                        <span class="precio-subtotal">${{ "%.2f"|format(fila.total_facturado) }}</span>
+                      </td>
+                      <td>
+                        {% set pct = (fila.total_facturado / resumen.total_facturado * 100) if resumen.total_facturado > 0 else 0 %}
+                        <div class="reportes-barra-celda">
+                          <div class="reportes-barra-progreso" style="width: {{ pct|round(1) }}%;"></div>
+                          <span class="reportes-porcentaje-texto">{{ "%.1f"|format(pct) }}%</span>
+                        </div>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <div class="reportes-estado-vacio">
+              <span class="material-symbols-outlined icono-vacio" aria-hidden="true">query_stats</span>
+              <h3>No hay ventas registradas en este período</h3>
+              <p>Las métricas se generarán automáticamente cuando se aprueben pedidos de clientes.</p>
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Bloque 2: Rankings (Discos y Categorías) -->
+        <div class="reportes-grid-rankings">
+          
+          <!-- Ranking de Discos Más Vendidos -->
+          <div class="admin-seccion-bloque reportes-tarjeta-ranking">
+            <h2 class="admin-subtitulo-bloque">
+              <span class="material-symbols-outlined" aria-hidden="true">leaderboard</span>
+              Top Discos Más Vendidos
+            </h2>
+            <p class="reportes-descripcion-bloque">
+              Álbumes con mayor demanda en unidades y recaudación.
+            </p>
+
+            {% if ranking_discos %}
+              <div class="reportes-lista-ranking">
+                {% for disco in ranking_discos %}
+                  <div class="reporte-item-ranking">
+                    <div class="reporte-ranking-posicion posicion-{{ disco.posicion }}">
+                      #{{ disco.posicion }}
+                    </div>
+
+                    <div class="reporte-ranking-disco-info">
+                      <div class="reporte-ranking-cabecera-item">
+                        <div class="reporte-ranking-titulos">
+                          <strong>{{ disco.album }}</strong>
+                          <span class="reporte-ranking-artista">{{ disco.artista }}</span>
+                        </div>
+                        <div class="reporte-ranking-badges">
+                          <span class="badge-formato badge-formato-{{ disco.formato|lower }}">
+                            {{ disco.formato }}
+                          </span>
+                          <span class="badge-categoria-mini">{{ disco.categoria_nombre }}</span>
+                        </div>
+                      </div>
+
+                      <div class="reportes-barra-contenedor-ranking">
+                        <div class="reportes-barra-progreso-ranking" style="width: {{ disco.porcentaje_relativo }}%;"></div>
+                      </div>
+
+                      <div class="reporte-ranking-metricas">
+                        <span><strong>{{ disco.total_unidades }}</strong> unidades vendidas</span>
+                        <span class="precio-subtotal">${{ "%.2f"|format(disco.total_facturado) }}</span>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="reportes-estado-vacio">
+                <span class="material-symbols-outlined icono-vacio" aria-hidden="true">album</span>
+                <p>No hay datos de discos vendidos aún.</p>
+              </div>
+            {% endif %}
+          </div>
+
+          <!-- Ranking de Géneros / Categorías -->
+          <div class="admin-seccion-bloque reportes-tarjeta-ranking">
+            <h2 class="admin-subtitulo-bloque">
+              <span class="material-symbols-outlined" aria-hidden="true">pie_chart</span>
+              Ventas por Género Musical
+            </h2>
+            <p class="reportes-descripcion-bloque">
+              Distribución de ingresos y volumen por categoría.
+            </p>
+
+            {% if ranking_categorias %}
+              <div class="reportes-lista-ranking">
+                {% for cat in ranking_categorias %}
+                  <div class="reporte-item-ranking">
+                    <div class="reporte-ranking-posicion posicion-{{ cat.posicion }}">
+                      #{{ cat.posicion }}
+                    </div>
+
+                    <div class="reporte-ranking-disco-info">
+                      <div class="reporte-ranking-cabecera-item">
+                        <div class="reporte-ranking-titulos">
+                          <strong>{{ cat.categoria_nombre }}</strong>
+                          <span class="reporte-ranking-artista">{{ cat.total_pedidos }} pedido(s) asociados</span>
+                        </div>
+                        <div class="reporte-ranking-badges">
+                          <span class="badge badge-activo-admin">{{ "%.1f"|format(cat.porcentaje_participacion) }}% cuota</span>
+                        </div>
+                      </div>
+
+                      <div class="reportes-barra-contenedor-ranking">
+                        <div class="reportes-barra-progreso-categoria" style="width: {{ cat.porcentaje_participacion }}%;"></div>
+                      </div>
+
+                      <div class="reporte-ranking-metricas">
+                        <span><strong>{{ cat.total_unidades }}</strong> discos despachados</span>
+                        <span class="precio-subtotal">${{ "%.2f"|format(cat.total_facturado) }}</span>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="reportes-estado-vacio">
+                <span class="material-symbols-outlined icono-vacio" aria-hidden="true">category</span>
+                <p>No hay datos de categorías vendidas aún.</p>
+              </div>
+            {% endif %}
+          </div>
+
+        </div>
+
+        <!-- Acciones del pie -->
+        <div class="admin-acciones-pie reportes-pie">
+          <a class="boton boton-secundario" href="{{ url_for('admin_dashboard') }}">
+            <span class="material-symbols-outlined" aria-hidden="true">dashboard</span>
+            Panel Principal
+          </a>
+          <a class="boton boton-destacado" href="{{ url_for('admin_pedidos_lista') }}">
+            <span class="material-symbols-outlined" aria-hidden="true">shopping_cart_checkout</span>
+            Bandeja de Pedidos
+          </a>
+        </div>
+
+      </section>
+    </div>
+  </div>
+</main>
+{% endblock %}

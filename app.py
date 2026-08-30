@@ -64,6 +64,10 @@ from services import (
     obtener_pedido_por_numero,
     obtener_pedidos_admin,
     obtener_pedidos_cliente,
+    obtener_ranking_categorias,
+    obtener_ranking_discos,
+    obtener_reporte_ventas_temporal,
+    obtener_resumen_metricas_ventas,
     procesar_checkout,
     rechazar_pedido,
 )
@@ -702,6 +706,29 @@ def admin_dashboard():
         "admin/dashboard.html",
         stats=stats,
         ultimos_pedidos=ultimos_pedidos,
+    )
+
+
+@app.route("/admin/reportes")
+@rol_requerido("administrador")
+def admin_reportes():
+    """Módulo de analítica y reportes de ventas con filtros temporales y rankings."""
+    periodo = request.args.get("periodo", "diario").strip().lower()
+    if periodo not in ("diario", "semanal", "mensual"):
+        periodo = "diario"
+
+    resumen = obtener_resumen_metricas_ventas()
+    reporte_temporal = obtener_reporte_ventas_temporal(agrupacion=periodo)
+    ranking_discos = obtener_ranking_discos(limite=10)
+    ranking_categorias = obtener_ranking_categorias()
+
+    return render_template(
+        "admin/reportes.html",
+        periodo=periodo,
+        resumen=resumen,
+        reporte_temporal=reporte_temporal,
+        ranking_discos=ranking_discos,
+        ranking_categorias=ranking_categorias,
     )
 
 

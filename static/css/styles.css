@@ -3042,6 +3042,295 @@ img { max-width: 100%; height: auto; display: block; }
   gap: 0.4rem;
 }
 
+/* ===== Módulo de Reportes y Analítica de Ventas (Fase 11) ===== */
+.reportes-seccion {
+  padding-top: 1rem;
+}
+
+.reportes-caja {
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+.reportes-kpi-grid {
+  margin-bottom: 2.5rem;
+}
+
+.reportes-cabecera-bloque {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .reportes-cabecera-bloque {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+}
+
+.reportes-titulo-grupo {
+  flex: 1;
+}
+
+.reportes-descripcion-bloque {
+  font-size: 0.875rem;
+  color: var(--text-muted-page);
+  margin: 0.25rem 0 0 0;
+}
+
+.reportes-pestanas-periodo {
+  display: inline-flex;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 0.75rem;
+  padding: 0.25rem;
+  gap: 0.25rem;
+}
+
+.boton-periodo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted-page);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.boton-periodo:hover {
+  color: var(--text-heading);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.boton-periodo.activo {
+  background: var(--primary);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(138, 44, 226, 0.35);
+}
+
+.badge-pedidos-count {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.reporte-unidades-dato {
+  font-weight: 700;
+  color: var(--text-heading);
+}
+
+.reportes-barra-celda {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 7rem;
+}
+
+.reportes-barra-progreso {
+  height: 0.5rem;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  border-radius: 9999px;
+  min-width: 4px;
+}
+
+.reportes-porcentaje-texto {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted-page);
+  min-width: 2.5rem;
+}
+
+.reportes-grid-rankings {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .reportes-grid-rankings {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.reportes-tarjeta-ranking {
+  margin-bottom: 0;
+}
+
+.reportes-lista-ranking {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-top: 1.25rem;
+}
+
+.reporte-item-ranking {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-light);
+  border-radius: 0.75rem;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.reporte-item-ranking:hover {
+  transform: translateY(-2px);
+  border-color: rgba(138, 44, 226, 0.4);
+}
+
+.reporte-ranking-posicion {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted-page);
+  flex-shrink: 0;
+}
+
+.reporte-ranking-posicion.posicion-1 {
+  background: linear-gradient(135deg, #fbbf24, #d97706);
+  color: #1e1b4b;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
+}
+
+.reporte-ranking-posicion.posicion-2 {
+  background: linear-gradient(135deg, #e2e8f0, #94a3b8);
+  color: #0f172a;
+  box-shadow: 0 0 10px rgba(148, 163, 184, 0.3);
+}
+
+.reporte-ranking-posicion.posicion-3 {
+  background: linear-gradient(135deg, #f97316, #b45309);
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(249, 115, 22, 0.3);
+}
+
+.reporte-ranking-disco-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.reporte-ranking-cabecera-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.reporte-ranking-titulos {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.reporte-ranking-titulos strong {
+  font-size: 0.95rem;
+  color: var(--text-heading);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reporte-ranking-artista {
+  font-size: 0.8rem;
+  color: var(--text-muted-page);
+}
+
+.reporte-ranking-badges {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.badge-categoria-mini {
+  font-size: 0.7rem;
+  padding: 0.15rem 0.45rem;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 0.25rem;
+  color: var(--text-muted-page);
+}
+
+.reportes-barra-contenedor-ranking {
+  width: 100%;
+  height: 0.35rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.reportes-barra-progreso-ranking {
+  height: 100%;
+  background: linear-gradient(90deg, #ec4899, #8b5cf6);
+  border-radius: 9999px;
+}
+
+.reportes-barra-progreso-categoria {
+  height: 100%;
+  background: linear-gradient(90deg, #06b6d4, #3b82f6);
+  border-radius: 9999px;
+}
+
+.reporte-ranking-metricas {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--text-muted-page);
+}
+
+.reportes-estado-vacio {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px dashed var(--border-light);
+  border-radius: 0.75rem;
+  color: var(--text-muted-page);
+}
+
+.reportes-estado-vacio .icono-vacio {
+  font-size: 3rem;
+  color: var(--text-muted-page);
+  opacity: 0.5;
+  margin-bottom: 0.75rem;
+}
+
+.reportes-estado-vacio h3 {
+  font-size: 1.1rem;
+  color: var(--text-heading);
+  margin: 0 0 0.5rem 0;
+}
+
+.reportes-estado-vacio p {
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.reportes-pie {
+  margin-top: 2rem;
+}
+
+
 
 
 

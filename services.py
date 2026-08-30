@@ -310,3 +310,225 @@ def rechazar_pedido(numero, admin_id, motivo):
         db.session.rollback()
         return False, "Ocurrió un error inesperado al rechazar el pedido."
 
+
+# ── Reportes y Analítica de Ventas (Fase 11) ──────────────────────────────────
+
+def obtener_resumen_metricas_ventas():
+    """Calcula métricas consolidadas de ventas aprobadas (ticket promedio, ítems, ingresos)."""
+    resultado = db.session.execute(
+        text(
+            """
+            SELECT
+                COALESCE(COUNT(DISTINCT p.id), 0) AS total_pedidos,
+                COALESCE(SUM(dp.cantidad), 0) AS total_unidades,
+                COALESCE(SUM(dp.cantidad * dp.precio_unitario), 0.00) AS total_facturado
+            FROM pedidos p
+            JOIN detalles_pedido dp ON dp.pedido_id = p.id
+            WHERE p.estado = 'APROBADO'
+            """
+        )
+    ).mappings().first()
+
+    total_pedidos = int(resultado["total_pedidos"]) if resultado else 0
+    total_unidades = int(resultado["total_unidades"]) if resultado else 0
+    total_facturado = float(resultado["total_facturado"]) if resultado else 0.0
+    ticket_promedio = (
+        round(total_facturado / total_pedidos, 2) if total_pedidos > 0 else 0.0
+    )
+
+    return {
+        "total_pedidos": total_pedidos,
+        "total_unidades": total_unidades,
+        "total_facturado": total_facturado,
+        "ticket_promedio": ticket_promedio,
+    }
+
+
+def obtener_reporte_ventas_temporal(agrupacion="diario"):
+    """Genera el reporte de ventas cronológico agrupado por día, semana o mes/año.
+    
+    agrupacion: 'diario', 'semanal' o 'mensual'.
+    """
+    if agrupacion == "semanal":
+        sql = """
+            WITH ventas_base AS (
+                SELECT
+                    p.id AS pedido_id,
+                    DATE_TRUNC('week', p.fecha_creacion)::date AS fecha_semana,
+                    dp.cantidad AS cantidad,
+                    (dp.cantidad * dp.precio_unitario) AS subtotal
+                FROM pedidos p
+                JOIN detalles_pedido dp ON dp.pedido_id = p.id
+                WHERE p.estado = 'APROBADO'
+            )
+            SELECT
+                fecha_semana AS fecha_inicio,
+                EXTRACT(YEAR FROM fecha_semana)::integer AS anio,
+                EXTRACT(WEEK FROM fecha_semana)::integer AS periodo_num,
+                'Semana ' || EXTRACT(WEEK FROM fecha_semana)::text || ' (' || EXTRACT(YEAR FROM fecha_semana)::text || ')' AS etiqueta,
+                COUNT(DISTINCT pedido_id) AS total_pedidos,
+                SUM(cantidad) AS total_unidades,
+                SUM(subtotal) AS total_facturado
+            FROM ventas_base
+            GROUP BY fecha_semana
+            ORDER BY fecha_inicio DESC
+        """
+    elif agrupacion == "mensual":
+        sql = """
+            WITH ventas_base AS (
+                SELECT
+                    p.id AS pedido_id,
+                    DATE_TRUNC('month', p.fecha_creacion)::date AS fecha_mes,
+                    dp.cantidad AS cantidad,
+                    (dp.cantidad * dp.precio_unitario) AS subtotal
+                FROM pedidos p
+                JOIN detalles_pedido dp ON dp.pedido_id = p.id
+                WHERE p.estado = 'APROBADO'
+            )
+            SELECT
+                fecha_mes AS fecha_inicio,
+                EXTRACT(YEAR FROM fecha_mes)::integer AS anio,
+                EXTRACT(MONTH FROM fecha_mes)::integer AS periodo_num,
+                TO_CHAR(fecha_mes, 'YYYY-MM') AS etiqueta,
+                COUNT(DISTINCT pedido_id) AS total_pedidos,
+                SUM(cantidad) AS total_unidades,
+                SUM(subtotal) AS total_facturado
+            FROM ventas_base
+            GROUP BY fecha_mes
+            ORDER BY fecha_inicio DESC
+        """
+    else:  # diario por defecto
+        sql = """
+            WITH ventas_base AS (
+                SELECT
+                    p.id AS pedido_id,
+                    DATE_TRUNC('day', p.fecha_creacion)::date AS fecha_dia,
+                    dp.cantidad AS cantidad,
+                    (dp.cantidad * dp.precio_unitario) AS subtotal
+                FROM pedidos p
+                JOIN detalles_pedido dp ON dp.pedido_id = p.id
+                WHERE p.estado = 'APROBADO'
+            )
+            SELECT
+                fecha_dia AS fecha_inicio,
+                EXTRACT(YEAR FROM fecha_dia)::integer AS anio,
+                EXTRACT(DOY FROM fecha_dia)::integer AS periodo_num,
+                TO_CHAR(fecha_dia, 'YYYY-MM-DD') AS etiqueta,
+                COUNT(DISTINCT pedido_id) AS total_pedidos,
+                SUM(cantidad) AS total_unidades,
+                SUM(subtotal) AS total_facturado
+            FROM ventas_base
+            GROUP BY fecha_dia
+            ORDER BY fecha_inicio DESC
+        """
+
+    filas = db.session.execute(text(sql)).mappings().all()
+    resultado = []
+    for f in filas:
+        resultado.append(
+            {
+                "fecha_inicio": f["fecha_inicio"],
+                "etiqueta": f["etiqueta"],
+                "total_pedidos": int(f["total_pedidos"]),
+                "total_unidades": int(f["total_unidades"]),
+                "total_facturado": float(f["total_facturado"]),
+            }
+        )
+    return resultado
+
+
+def obtener_ranking_discos(limite=10):
+    """Obtiene los discos más vendidos filtrando exclusivamente por pedidos aprobados."""
+    sql = """
+        SELECT
+            d.id AS disco_id,
+            dp.album,
+            dp.artista,
+            dp.formato,
+            d.imagen,
+            d.stock AS stock_actual,
+            c.nombre AS categoria_nombre,
+            SUM(dp.cantidad) AS total_unidades,
+            SUM(dp.cantidad * dp.precio_unitario) AS total_facturado,
+            COUNT(DISTINCT p.id) AS total_pedidos
+        FROM detalles_pedido dp
+        JOIN pedidos p ON p.id = dp.pedido_id
+        JOIN discos d ON d.id = dp.disco_id
+        JOIN categorias c ON c.id = d.categoria_id
+        WHERE p.estado = 'APROBADO'
+        GROUP BY d.id, dp.album, dp.artista, dp.formato, d.imagen, d.stock, c.nombre
+        ORDER BY total_unidades DESC, total_facturado DESC
+        LIMIT :limite
+    """
+    filas = db.session.execute(text(sql), {"limite": limite}).mappings().all()
+    resultado = []
+    max_unidades = max((int(f["total_unidades"]) for f in filas), default=1)
+    for index, f in enumerate(filas, start=1):
+        unidades = int(f["total_unidades"])
+        porcentaje = (
+            round((unidades / max_unidades) * 100, 1) if max_unidades > 0 else 0.0
+        )
+        resultado.append(
+            {
+                "posicion": index,
+                "disco_id": f["disco_id"],
+                "album": f["album"],
+                "artista": f["artista"],
+                "formato": f["formato"],
+                "imagen": f["imagen"],
+                "stock_actual": f["stock_actual"],
+                "categoria_nombre": f["categoria_nombre"],
+                "total_unidades": unidades,
+                "total_facturado": float(f["total_facturado"]),
+                "total_pedidos": int(f["total_pedidos"]),
+                "porcentaje_relativo": porcentaje,
+            }
+        )
+    return resultado
+
+
+def obtener_ranking_categorias():
+    """Obtiene los géneros/categorías más vendidos con participación relativa."""
+    sql = """
+        SELECT
+            c.id AS categoria_id,
+            c.nombre AS categoria_nombre,
+            c.slug AS categoria_slug,
+            c.imagen AS categoria_imagen,
+            COUNT(DISTINCT p.id) AS total_pedidos,
+            SUM(dp.cantidad) AS total_unidades,
+            SUM(dp.cantidad * dp.precio_unitario) AS total_facturado
+        FROM detalles_pedido dp
+        JOIN pedidos p ON p.id = dp.pedido_id
+        JOIN discos d ON d.id = dp.disco_id
+        JOIN categorias c ON c.id = d.categoria_id
+        WHERE p.estado = 'APROBADO'
+        GROUP BY c.id, c.nombre, c.slug, c.imagen
+        ORDER BY total_facturado DESC, total_unidades DESC
+    """
+    filas = db.session.execute(text(sql)).mappings().all()
+    resultado = []
+    gran_total_facturado = sum((float(f["total_facturado"]) for f in filas), 0.0)
+    for index, f in enumerate(filas, start=1):
+        facturado = float(f["total_facturado"])
+        porcentaje = (
+            round((facturado / gran_total_facturado) * 100, 1)
+            if gran_total_facturado > 0
+            else 0.0
+        )
+        resultado.append(
+            {
+                "posicion": index,
+                "categoria_id": f["categoria_id"],
+                "categoria_nombre": f["categoria_nombre"],
+                "categoria_slug": f["categoria_slug"],
+                "categoria_imagen": f["categoria_imagen"],
+                "total_pedidos": int(f["total_pedidos"]),
+                "total_unidades": int(f["total_unidades"]),
+                "total_facturado": facturado,
+                "porcentaje_participacion": porcentaje,
+            }
+        )
+    return resultado
+
+
