@@ -1,20 +1,11 @@
 """Pruebas de métodos de pago y verificación por PIN — Fase 7."""
 
 import os
-from datetime import timedelta
-
-import pytest
+from datetime import date, timedelta
 
 from app import app
 from models import MetodoPago, VerificacionTarjeta, ahora_utc, db
 from payments import crear_verificacion, verificar_pin, DURACION_PIN_MINUTOS, MAX_INTENTOS_PIN
-
-
-@pytest.fixture()
-def client():
-    app.config.update(TESTING=True)
-    return app.test_client()
-
 
 def pass_cliente():
     return os.getenv("CLIENTE_DEMO_PASSWORD", "5c45d1a0df71bcead793c6d654a14cbf")
@@ -69,7 +60,7 @@ def test_agregar_crea_verificacion_pendiente(client):
             data={
                 "titular": "Cliente Demo",
                 "marca": "VISA",
-                "numero": "4111111111111234",
+                "numero": "4111111111111111",
                 "mes_vencimiento": "12",
                 "anio_vencimiento": "2030",
             },
@@ -81,11 +72,63 @@ def test_agregar_crea_verificacion_pendiente(client):
 
         with app.app_context():
             verificacion = VerificacionTarjeta.query.filter_by(
-                ultimos4="1234", marca="VISA"
+                ultimos4="1111", marca="VISA"
             ).order_by(VerificacionTarjeta.id.desc()).first()
             assert verificacion is not None
             assert verificacion.verificada is False
             assert verificacion.intentos == 0
+
+
+def test_agregar_rechaza_tarjeta_vencida(client):
+    with client:
+        autenticar_cliente(client)
+        hoy = date.today()
+        mes_vencido = 12 if hoy.month == 1 else hoy.month - 1
+        anio_vencido = hoy.year - 1 if hoy.month == 1 else hoy.year
+
+        with app.app_context():
+            cantidad_inicial = VerificacionTarjeta.query.count()
+
+        respuesta = client.post(
+            "/pago/agregar",
+            data={
+                "titular": "Cliente Demo",
+                "marca": "VISA",
+                "numero": "4111111111111111",
+                "mes_vencimiento": str(mes_vencido),
+                "anio_vencimiento": str(anio_vencido),
+            },
+            follow_redirects=True,
+        )
+
+        assert respuesta.status_code == 200
+        assert "vigente y válida" in respuesta.data.decode("utf-8")
+        with app.app_context():
+            assert VerificacionTarjeta.query.count() == cantidad_inicial
+
+
+def test_pin_se_bloquea_exactamente_al_tercer_intento(client):
+    with client:
+        autenticar_cliente(client)
+        with app.app_context():
+            from models import Usuario
+
+            usuario_id = Usuario.query.filter_by(
+                email="cliente@newrecords.local"
+            ).first().id
+            verificacion, pin_correcto = crear_verificacion(
+                usuario_id, datos_tarjeta_demo()
+            )
+            token = verificacion.token_verificacion
+            pin_incorrecto = "000000" if pin_correcto != "000000" else "111111"
+
+        for _ in range(MAX_INTENTOS_PIN):
+            exito, _ = verificar_pin(token, pin_incorrecto)
+            assert exito is False
+
+        exito, mensaje = verificar_pin(token, pin_correcto)
+        assert exito is False
+        assert "máximo de intentos" in mensaje
 
 
 def test_pin_incorrecto_incrementa_intentos(client):

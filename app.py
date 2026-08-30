@@ -1,5 +1,8 @@
 """Punto de entrada de la aplicación New Records."""
 
+from datetime import date
+from decimal import Decimal, InvalidOperation
+
 import click
 from email_validator import EmailNotValidError, validate_email
 from flask import (
@@ -32,16 +35,13 @@ from cart import (
     vaciar_carrito,
 )
 from config import Config
-from mailer import enviar_pin, mail, notificar_creacion_pedido, smtp_configurado
+from mailer import enviar_pin, mail, notificar_creacion_pedido
 from models import (
     CD,
     Categoria,
-    DetallePedido,
     Disco,
-    Factura,
     MetodoPago,
     Pedido,
-    TransaccionPago,
     Usuario,
     VerificacionTarjeta,
     Vinilo,
@@ -52,7 +52,9 @@ from payments import (
     desactivar_metodo_pago,
     establecer_predeterminado,
     obtener_metodos_pago_activos,
+    numero_tarjeta_valido,
     verificar_pin,
+    vencimiento_tarjeta_valido,
     MARCAS_VALIDAS,
 )
 from pdf_generator import generar_pdf_pedido
@@ -481,7 +483,15 @@ def descargar_comprobante(numero):
     if not pedido:
         return render_template("errors/404.html"), 404
 
-    pdf_bytes, nombre_archivo, _ = generar_pdf_pedido(pedido, tipo="COMPROBANTE_PENDIENTE")
+    try:
+        pdf_bytes, nombre_archivo, _ = generar_pdf_pedido(
+            pedido, tipo="COMPROBANTE_PENDIENTE"
+        )
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        flash("No se pudo generar el comprobante. Inténtalo nuevamente.", "error")
+        return redirect(url_for("ver_pedido", numero=numero))
     return Response(
         pdf_bytes,
         mimetype="application/pdf",
@@ -502,7 +512,15 @@ def descargar_factura(numero):
         flash("La Factura Oficial de venta solo está disponible una vez que el pedido haya sido APROBADO.", "warning")
         return redirect(url_for("ver_pedido", numero=numero))
 
-    pdf_bytes, nombre_archivo, _ = generar_pdf_pedido(pedido, tipo="FACTURA_FINAL")
+    try:
+        pdf_bytes, nombre_archivo, _ = generar_pdf_pedido(
+            pedido, tipo="FACTURA_FINAL"
+        )
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        flash("No se pudo generar la factura. Inténtalo nuevamente.", "error")
+        return redirect(url_for("ver_pedido", numero=numero))
     return Response(
         pdf_bytes,
         mimetype="application/pdf",
@@ -534,17 +552,19 @@ def pago_agregar():
             errores.append("El nombre del titular es obligatorio (mínimo 3 caracteres).")
         if marca not in MARCAS_VALIDAS:
             errores.append("Selecciona una marca de tarjeta válida.")
-        if not numero_completo.isdigit() or len(numero_completo) < 13 or len(numero_completo) > 19:
-            errores.append("El número de tarjeta debe tener entre 13 y 19 dígitos.")
+        if not numero_tarjeta_valido(numero_completo):
+            errores.append("El número de tarjeta no es válido.")
         try:
             mes_int = int(mes)
             anio_int = int(anio)
             if not (1 <= mes_int <= 12):
                 raise ValueError
-            if anio_int < 2026:
+            if not vencimiento_tarjeta_valido(mes_int, anio_int):
                 raise ValueError
         except (ValueError, TypeError):
-            errores.append("Ingresa un mes (1-12) y año de vencimiento válidos.")
+            errores.append(
+                "Ingresa una fecha de vencimiento vigente y válida."
+            )
 
         if errores:
             for e in errores:
@@ -556,6 +576,8 @@ def pago_agregar():
                 marca=marca,
                 mes=mes,
                 anio=anio,
+                anio_actual=date.today().year,
+                mes_actual=date.today().month,
             )
 
         ultimos4 = numero_completo[-4:]
@@ -569,10 +591,28 @@ def pago_agregar():
 
         try:
             verificacion, pin = crear_verificacion(session["usuario_id"], datos)
+        except ValueError as error:
+            db.session.rollback()
+            flash(str(error), "error")
+            return render_template(
+                "pago/agregar.html",
+                marcas=MARCAS_VALIDAS,
+                titular=titular,
+                marca=marca,
+                mes=mes,
+                anio=anio,
+                anio_actual=date.today().year,
+                mes_actual=date.today().month,
+            )
         except Exception:
             db.session.rollback()
             flash("Error al procesar la tarjeta. Inténtalo de nuevo.", "error")
-            return render_template("pago/agregar.html", marcas=MARCAS_VALIDAS)
+            return render_template(
+                "pago/agregar.html",
+                marcas=MARCAS_VALIDAS,
+                anio_actual=date.today().year,
+                mes_actual=date.today().month,
+            )
 
         usuario = obtener_usuario_actual()
         enviado = enviar_pin(usuario.email, usuario.nombre, pin)
@@ -591,7 +631,12 @@ def pago_agregar():
 
         return redirect(url_for("pago_verificar", token=verificacion.token_verificacion))
 
-    return render_template("pago/agregar.html", marcas=MARCAS_VALIDAS)
+    return render_template(
+        "pago/agregar.html",
+        marcas=MARCAS_VALIDAS,
+        anio_actual=date.today().year,
+        mes_actual=date.today().month,
+    )
 
 
 @app.route("/pago/verificar/<token>", methods=["GET", "POST"])
@@ -701,18 +746,33 @@ def admin_discos_nuevo():
             errores.append("El nombre del álbum es obligatorio.")
         if not artista:
             errores.append("El nombre del artista es obligatorio.")
+        if not descripcion:
+            errores.append("La descripción del álbum es obligatoria.")
 
         try:
-            precio_val = float(precio_base)
+            precio_val = Decimal(precio_base)
             stock_val = int(stock)
-            peso_val = float(peso_kg)
-            envio_val = float(costo_envio)
-            embalaje_val = float(costo_embalaje) if formato == "VINILO" else 0.0
+            peso_val = Decimal(peso_kg)
+            envio_val = Decimal(costo_envio)
+            embalaje_val = Decimal(costo_embalaje) if formato == "VINILO" else Decimal("0")
             cat_id_val = int(categoria_id)
-            if precio_val <= 0 or stock_val < 0 or peso_val <= 0:
+            categoria_valida = Categoria.query.filter_by(
+                id=cat_id_val, activo=True
+            ).first()
+            if (
+                precio_val <= 0
+                or stock_val < 0
+                or peso_val <= 0
+                or envio_val < 0
+                or embalaje_val < 0
+                or categoria_valida is None
+            ):
                 raise ValueError
-        except (ValueError, TypeError):
-            errores.append("Verifica los valores numéricos: precio, stock y peso deben ser válidos y positivos.")
+        except (InvalidOperation, ValueError, TypeError):
+            errores.append(
+                "Verifica la categoría y los valores numéricos: precio y peso deben "
+                "ser positivos; stock, envío y embalaje no pueden ser negativos."
+            )
 
         if errores:
             for e in errores:
@@ -760,7 +820,7 @@ def admin_discos_nuevo():
                 nuevo_disco = CD(
                     **datos_comunes,
                     formato="CD",
-                    costo_embalaje=0.0,
+                    costo_embalaje=Decimal("0"),
                 )
 
             db.session.add(nuevo_disco)
@@ -778,7 +838,7 @@ def admin_discos_nuevo():
 @rol_requerido("administrador")
 def admin_discos_editar(id):
     """Formulario de edición de disco existente."""
-    disco = Disco.query.get_or_404(id)
+    disco = db.get_or_404(Disco, id)
     categorias = Categoria.query.filter_by(activo=True).order_by(Categoria.nombre).all()
 
     if request.method == "POST":
@@ -798,18 +858,33 @@ def admin_discos_editar(id):
             errores.append("El nombre del álbum es obligatorio.")
         if not artista:
             errores.append("El nombre del artista es obligatorio.")
+        if not descripcion:
+            errores.append("La descripción del álbum es obligatoria.")
 
         try:
-            precio_val = float(precio_base)
+            precio_val = Decimal(precio_base)
             stock_val = int(stock)
-            peso_val = float(peso_kg)
-            envio_val = float(costo_envio)
-            embalaje_val = float(costo_embalaje) if disco.formato == "VINILO" else 0.0
+            peso_val = Decimal(peso_kg)
+            envio_val = Decimal(costo_envio)
+            embalaje_val = Decimal(costo_embalaje) if disco.formato == "VINILO" else Decimal("0")
             cat_id_val = int(categoria_id)
-            if precio_val <= 0 or stock_val < 0 or peso_val <= 0:
+            categoria_valida = Categoria.query.filter_by(
+                id=cat_id_val, activo=True
+            ).first()
+            if (
+                precio_val <= 0
+                or stock_val < 0
+                or peso_val <= 0
+                or envio_val < 0
+                or embalaje_val < 0
+                or categoria_valida is None
+            ):
                 raise ValueError
-        except (ValueError, TypeError):
-            errores.append("Verifica los valores numéricos: precio, stock y peso deben ser válidos y positivos.")
+        except (InvalidOperation, ValueError, TypeError):
+            errores.append(
+                "Verifica la categoría y los valores numéricos: precio y peso deben "
+                "ser positivos; stock, envío y embalaje no pueden ser negativos."
+            )
 
         if errores:
             for e in errores:
@@ -843,10 +918,14 @@ def admin_discos_editar(id):
 @rol_requerido("administrador")
 def admin_discos_desactivar(id):
     """Desactiva lógicamente un disco del catálogo público."""
-    disco = Disco.query.get_or_404(id)
-    disco.activo = False
-    db.session.commit()
-    flash(f"Disco '{disco.album}' desactivado del catálogo público.", "info")
+    disco = db.get_or_404(Disco, id)
+    try:
+        disco.activo = False
+        db.session.commit()
+        flash(f"Disco '{disco.album}' desactivado del catálogo público.", "info")
+    except Exception:
+        db.session.rollback()
+        flash("No se pudo desactivar el disco.", "error")
     return redirect(url_for("admin_discos_lista"))
 
 
@@ -854,10 +933,17 @@ def admin_discos_desactivar(id):
 @rol_requerido("administrador")
 def admin_discos_reactivar(id):
     """Reactiva un disco en el catálogo público."""
-    disco = Disco.query.get_or_404(id)
-    disco.activo = True
-    db.session.commit()
-    flash(f"Disco '{disco.album}' reactivado exitosamente.", "success")
+    disco = db.get_or_404(Disco, id)
+    if not disco.categoria.activo:
+        flash("Reactiva primero la categoría del disco.", "warning")
+        return redirect(url_for("admin_discos_lista"))
+    try:
+        disco.activo = True
+        db.session.commit()
+        flash(f"Disco '{disco.album}' reactivado exitosamente.", "success")
+    except Exception:
+        db.session.rollback()
+        flash("No se pudo reactivar el disco.", "error")
     return redirect(url_for("admin_discos_lista"))
 
 
@@ -922,7 +1008,7 @@ def admin_categorias_nueva():
 @rol_requerido("administrador")
 def admin_categorias_editar(id):
     """Formulario de edición de categoría."""
-    categoria = Categoria.query.get_or_404(id)
+    categoria = db.get_or_404(Categoria, id)
 
     if request.method == "POST":
         nombre = request.form.get("nombre", "").strip()
@@ -963,11 +1049,34 @@ def admin_categorias_editar(id):
 @app.route("/admin/categorias/<int:id>/desactivar", methods=["POST"])
 @rol_requerido("administrador")
 def admin_categorias_desactivar(id):
-    """Desactiva lógicamente una categoría."""
-    categoria = Categoria.query.get_or_404(id)
-    categoria.activo = False
-    db.session.commit()
-    flash(f"Categoría '{categoria.nombre}' desactivada.", "info")
+    """Desactiva una categoría y exige confirmar la cascada sobre sus discos."""
+    categoria = db.get_or_404(Categoria, id)
+    discos_activos = Disco.query.filter_by(categoria_id=id, activo=True).count()
+    confirmacion = request.form.get("confirmar_con_discos") == "si"
+
+    if discos_activos and not confirmacion:
+        flash(
+            f"La categoría tiene {discos_activos} disco(s) activo(s). "
+            "Confirma explícitamente la desactivación conjunta.",
+            "warning",
+        )
+        return redirect(url_for("admin_categorias_lista"))
+
+    try:
+        if discos_activos:
+            Disco.query.filter_by(categoria_id=id, activo=True).update(
+                {"activo": False}, synchronize_session=False
+            )
+        categoria.activo = False
+        db.session.commit()
+        flash(
+            f"Categoría '{categoria.nombre}' desactivada junto con "
+            f"{discos_activos} disco(s) activo(s).",
+            "info",
+        )
+    except Exception:
+        db.session.rollback()
+        flash("No se pudo desactivar la categoría.", "error")
     return redirect(url_for("admin_categorias_lista"))
 
 
@@ -975,10 +1084,18 @@ def admin_categorias_desactivar(id):
 @rol_requerido("administrador")
 def admin_categorias_reactivar(id):
     """Reactiva una categoría."""
-    categoria = Categoria.query.get_or_404(id)
-    categoria.activo = True
-    db.session.commit()
-    flash(f"Categoría '{categoria.nombre}' reactivada exitosamente.", "success")
+    categoria = db.get_or_404(Categoria, id)
+    try:
+        categoria.activo = True
+        db.session.commit()
+        flash(
+            f"Categoría '{categoria.nombre}' reactivada. "
+            "Sus discos deben reactivarse individualmente.",
+            "success",
+        )
+    except Exception:
+        db.session.rollback()
+        flash("No se pudo reactivar la categoría.", "error")
     return redirect(url_for("admin_categorias_lista"))
 
 

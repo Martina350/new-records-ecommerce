@@ -67,7 +67,15 @@
                         Editar
                       </a>
                       {% if cat.activo %}
-                        <form action="{{ url_for('admin_categorias_desactivar', id=cat.id) }}" method="post" onsubmit="return confirm('¿Desactivar esta categoría del catálogo público?');">
+                        {% set discos_activos = cat.discos | selectattr('activo') | list | length %}
+                        <form
+                          action="{{ url_for('admin_categorias_desactivar', id=cat.id) }}"
+                          method="post"
+                          onsubmit="return confirm('{% if discos_activos %}Esta categoría tiene {{ discos_activos }} disco(s) activo(s). También serán desactivados. {% endif %}¿Confirmas esta operación?');"
+                        >
+                          {% if discos_activos %}
+                            <input type="hidden" name="confirmar_con_discos" value="si" />
+                          {% endif %}
                           <button class="boton boton-chico boton-peligro" type="submit" title="Desactivar categoría">
                             <span class="material-symbols-outlined" aria-hidden="true">visibility_off</span>
                           </button>

@@ -1,9 +1,8 @@
 """Módulo de lógica de negocio para métodos de pago y verificación por PIN en New Records."""
 
-import random
 import secrets
 import string
-from datetime import timedelta
+from datetime import date, timedelta
 
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -15,6 +14,22 @@ MAX_INTENTOS_PIN = 3
 MARCAS_VALIDAS = ("VISA", "MASTERCARD", "AMEX")
 
 
+def numero_tarjeta_valido(numero):
+    """Valida longitud, caracteres y dígito de control con el algoritmo de Luhn."""
+    if not numero.isdigit() or not 13 <= len(numero) <= 19:
+        return False
+
+    total = 0
+    for indice, caracter in enumerate(reversed(numero)):
+        digito = int(caracter)
+        if indice % 2 == 1:
+            digito *= 2
+            if digito > 9:
+                digito -= 9
+        total += digito
+    return total % 10 == 0
+
+
 def generar_token_tarjeta():
     """Genera un token único UUID para identificar la tarjeta sin almacenar su número."""
     return secrets.token_hex(24)
@@ -22,7 +37,47 @@ def generar_token_tarjeta():
 
 def generar_pin_temporal():
     """Genera un PIN numérico de 6 dígitos como cadena de texto."""
-    return "".join(random.choices(string.digits, k=6))
+    return "".join(secrets.choice(string.digits) for _ in range(6))
+
+
+def vencimiento_tarjeta_valido(mes, anio, fecha_actual=None):
+    """Valida que la tarjeta siga vigente y no exceda veinte años."""
+    hoy = fecha_actual or date.today()
+    if not isinstance(mes, int) or not isinstance(anio, int):
+        return False
+    if not 1 <= mes <= 12:
+        return False
+    return (hoy.year, hoy.month) <= (anio, mes) <= (hoy.year + 20, 12)
+
+
+def validar_datos_tarjeta(datos_tarjeta):
+    """Valida los datos mínimos antes de crear una verificación persistente."""
+    marca = str(datos_tarjeta.get("marca", "")).upper().strip()
+    ultimos4 = str(datos_tarjeta.get("ultimos4", "")).strip()
+    titular = str(datos_tarjeta.get("titular", "")).strip()
+
+    try:
+        mes = int(datos_tarjeta.get("mes_vencimiento"))
+        anio = int(datos_tarjeta.get("anio_vencimiento"))
+    except (TypeError, ValueError) as error:
+        raise ValueError("El vencimiento de la tarjeta no es válido.") from error
+
+    if marca not in MARCAS_VALIDAS:
+        raise ValueError("La marca de la tarjeta no es válida.")
+    if len(titular) < 3 or len(titular) > 120:
+        raise ValueError("El nombre del titular debe tener entre 3 y 120 caracteres.")
+    if len(ultimos4) != 4 or not ultimos4.isdigit():
+        raise ValueError("Los últimos cuatro dígitos de la tarjeta no son válidos.")
+    if not vencimiento_tarjeta_valido(mes, anio):
+        raise ValueError("La tarjeta está vencida o su fecha no es válida.")
+
+    return {
+        "marca": marca,
+        "ultimos4": ultimos4,
+        "titular": titular,
+        "mes_vencimiento": mes,
+        "anio_vencimiento": anio,
+    }
 
 
 def crear_verificacion(usuario_id, datos_tarjeta):
@@ -34,6 +89,7 @@ def crear_verificacion(usuario_id, datos_tarjeta):
     Retorna (verificacion, pin_plano) donde pin_plano se usa únicamente para
     enviar por correo y nunca se persiste.
     """
+    datos_validados = validar_datos_tarjeta(datos_tarjeta)
     pin = generar_pin_temporal()
     pin_hash = generate_password_hash(pin)
     token_verificacion = secrets.token_urlsafe(32)
@@ -47,11 +103,11 @@ def crear_verificacion(usuario_id, datos_tarjeta):
         token_verificacion=token_verificacion,
         pin_hash=pin_hash,
         token_tarjeta=token_tarjeta,
-        marca=datos_tarjeta["marca"].upper(),
-        ultimos4=datos_tarjeta["ultimos4"],
-        titular=datos_tarjeta["titular"].strip(),
-        mes_vencimiento=int(datos_tarjeta["mes_vencimiento"]),
-        anio_vencimiento=int(datos_tarjeta["anio_vencimiento"]),
+        marca=datos_validados["marca"],
+        ultimos4=datos_validados["ultimos4"],
+        titular=datos_validados["titular"],
+        mes_vencimiento=datos_validados["mes_vencimiento"],
+        anio_vencimiento=datos_validados["anio_vencimiento"],
         fecha_creacion=ahora,
         fecha_expiracion=expiracion,
         intentos=0,
@@ -74,9 +130,11 @@ def verificar_pin(token_verificacion, pin_ingresado):
 
     Retorna (True, metodo_pago) en éxito, o (False, mensaje_error) en fallo.
     """
-    verificacion = VerificacionTarjeta.query.filter_by(
-        token_verificacion=token_verificacion
-    ).first()
+    verificacion = (
+        VerificacionTarjeta.query.filter_by(token_verificacion=token_verificacion)
+        .with_for_update()
+        .first()
+    )
 
     if verificacion is None:
         return False, "El enlace de verificación no es válido."
@@ -100,11 +158,22 @@ def verificar_pin(token_verificacion, pin_ingresado):
 
     # PIN correcto: crear el MetodoPago definitivo
     # Si ya existe un método predeterminado, el nuevo no será predeterminado
-    tiene_predeterminado = MetodoPago.query.filter_by(
+    metodos_predeterminados = MetodoPago.query.filter_by(
         usuario_id=verificacion.usuario_id,
         activo=True,
         predeterminado=True,
-    ).first() is not None
+    ).all()
+    metodos_predeterminados_validos = []
+    for metodo_predeterminado in metodos_predeterminados:
+        if vencimiento_tarjeta_valido(
+            metodo_predeterminado.mes_vencimiento,
+            metodo_predeterminado.anio_vencimiento,
+        ):
+            metodos_predeterminados_validos.append(metodo_predeterminado)
+        else:
+            metodo_predeterminado.predeterminado = False
+
+    tiene_predeterminado = bool(metodos_predeterminados_validos)
 
     metodo = MetodoPago(
         usuario_id=verificacion.usuario_id,
@@ -127,11 +196,18 @@ def verificar_pin(token_verificacion, pin_ingresado):
 
 def obtener_metodos_pago_activos(usuario_id):
     """Retorna los métodos de pago verificados y activos del usuario."""
-    return (
+    metodos = (
         MetodoPago.query.filter_by(usuario_id=usuario_id, activo=True)
         .order_by(MetodoPago.predeterminado.desc(), MetodoPago.fecha_verificacion.desc())
         .all()
     )
+    return [
+        metodo
+        for metodo in metodos
+        if vencimiento_tarjeta_valido(
+            metodo.mes_vencimiento, metodo.anio_vencimiento
+        )
+    ]
 
 
 def desactivar_metodo_pago(metodo_id, usuario_id):
@@ -151,9 +227,7 @@ def desactivar_metodo_pago(metodo_id, usuario_id):
 
     # Si era el predeterminado, promover automáticamente el siguiente activo
     if era_predeterminado:
-        siguiente = MetodoPago.query.filter_by(
-            usuario_id=usuario_id, activo=True
-        ).order_by(MetodoPago.fecha_verificacion.desc()).first()
+        siguiente = next(iter(obtener_metodos_pago_activos(usuario_id)), None)
         if siguiente:
             siguiente.predeterminado = True
 
@@ -168,6 +242,11 @@ def establecer_predeterminado(metodo_id, usuario_id):
     """
     metodo = MetodoPago.query.filter_by(id=metodo_id, usuario_id=usuario_id, activo=True).first()
     if not metodo:
+        return False
+
+    if not vencimiento_tarjeta_valido(
+        metodo.mes_vencimiento, metodo.anio_vencimiento
+    ):
         return False
 
     MetodoPago.query.filter_by(usuario_id=usuario_id, activo=True).update(

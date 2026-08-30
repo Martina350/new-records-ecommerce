@@ -7,17 +7,25 @@ from models import db
 
 
 @pytest.fixture()
-def client():
+def client(tmp_path):
     """Ejecuta cada prueba web dentro de una transacción reversible."""
-    app.config.update(TESTING=True, WTF_CSRF_ENABLED=False)
+    app.config.update(
+        TESTING=True,
+        WTF_CSRF_ENABLED=False,
+        MAIL_SUPPRESS_SEND=True,
+        PDF_OUTPUT_DIR=str(tmp_path / "comprobantes"),
+    )
 
     with app.app_context():
-        conexion = db.engine.connect()
+        motores = db.engines
+        motor_original = motores[None]
+        conexion = motor_original.connect()
         transaccion = conexion.begin()
-        bind_original = db.session.session_factory.kw.get("bind")
 
         db.session.remove()
-        db.session.configure(bind=conexion)
+        motores[None] = conexion
+        db.session.configure(join_transaction_mode="create_savepoint")
+        assert db.session().get_bind() is conexion
 
         try:
             yield app.test_client()
@@ -26,4 +34,5 @@ def client():
             if transaccion.is_active:
                 transaccion.rollback()
             conexion.close()
-            db.session.configure(bind=bind_original)
+            motores[None] = motor_original
+            db.session.configure(join_transaction_mode="conditional_savepoint")

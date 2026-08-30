@@ -217,7 +217,12 @@ class MetodoPago(db.Model):
             name="ck_metodos_pago_mes_vencimiento",
         ),
         db.CheckConstraint(
-            "anio_vencimiento >= 2026", name="ck_metodos_pago_anio_vencimiento"
+            "anio_vencimiento BETWEEN 2020 AND 2100",
+            name="ck_metodos_pago_anio_vencimiento",
+        ),
+        db.CheckConstraint(
+            "marca IN ('VISA', 'MASTERCARD', 'AMEX')",
+            name="ck_metodos_pago_marca",
         ),
     )
 
@@ -249,7 +254,7 @@ class VerificacionTarjeta(db.Model):
     __tablename__ = "verificaciones_tarjeta"
     __table_args__ = (
         db.CheckConstraint(
-            "intentos BETWEEN 0 AND 5", name="ck_verificaciones_intentos"
+            "intentos BETWEEN 0 AND 3", name="ck_verificaciones_intentos"
         ),
         db.CheckConstraint(
             "ultimos4 ~ '^[0-9]{4}$'", name="ck_verificaciones_ultimos4"
@@ -257,6 +262,14 @@ class VerificacionTarjeta(db.Model):
         db.CheckConstraint(
             "mes_vencimiento BETWEEN 1 AND 12",
             name="ck_verificaciones_mes_vencimiento",
+        ),
+        db.CheckConstraint(
+            "anio_vencimiento BETWEEN 2020 AND 2100",
+            name="ck_verificaciones_anio_vencimiento",
+        ),
+        db.CheckConstraint(
+            "marca IN ('VISA', 'MASTERCARD', 'AMEX')",
+            name="ck_verificaciones_marca",
         ),
     )
 

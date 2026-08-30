@@ -6,6 +6,7 @@ y nunca elimina tablas ni datos existentes.
 
 import os
 from decimal import Decimal
+from pathlib import Path
 
 from sqlalchemy import text
 
@@ -230,6 +231,11 @@ RESTRICCIONES_USUARIO = {
 }
 
 
+RUTA_REGLAS_FASES_7_10 = (
+    Path(__file__).resolve().parent / "database" / "rules_fases7_10.sql"
+)
+
+
 def actualizar_reglas_schema():
     """Aplica de forma idempotente reglas añadidas después de la creación inicial."""
     for tabla, columna in DEFAULTS_FECHA:
@@ -255,6 +261,11 @@ def actualizar_reglas_schema():
                     f"ALTER TABLE usuarios ADD CONSTRAINT {nombre} {expresion}"
                 )
             )
+
+    reglas_fases_7_10 = RUTA_REGLAS_FASES_7_10.read_text(encoding="utf-8")
+    conexion = db.session.connection().connection
+    with conexion.cursor() as cursor:
+        cursor.execute(reglas_fases_7_10)
 
 
 def obtener_password(nombre_variable):

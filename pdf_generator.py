@@ -2,8 +2,10 @@
 
 import io
 import os
-from datetime import datetime, timezone
+import tempfile
+from pathlib import Path
 
+from flask import current_app
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
@@ -12,13 +14,37 @@ from reportlab.platypus import HRFlowable, Paragraph, SimpleDocTemplate, Spacer,
 
 from models import Factura, ahora_utc, db
 
-CARPETA_COMPROBANTES = os.path.join(os.path.dirname(__file__), "docs", "comprobantes")
+CARPETA_COMPROBANTES = Path(__file__).resolve().parent / "docs" / "comprobantes"
 
 
 def asegurar_directorio():
     """Crea la carpeta de comprobantes si no existe."""
-    if not os.path.exists(CARPETA_COMPROBANTES):
-        os.makedirs(CARPETA_COMPROBANTES, exist_ok=True)
+    carpeta_configurada = current_app.config.get("PDF_OUTPUT_DIR")
+    carpeta = Path(carpeta_configurada) if carpeta_configurada else CARPETA_COMPROBANTES
+    carpeta.mkdir(parents=True, exist_ok=True)
+    return carpeta
+
+
+def ruta_pdf_pedido(pedido, tipo):
+    """Calcula la ruta determinística de un documento del pedido."""
+    prefijo = "FAC" if tipo == "FACTURA_FINAL" else "COMP"
+    return asegurar_directorio() / f"{prefijo}-{pedido.numero}.pdf"
+
+
+def eliminar_pdf_pedido(pedido, tipo):
+    """Elimina un documento incompleto cuando su transacción no pudo confirmarse."""
+    try:
+        ruta = ruta_pdf_pedido(pedido, tipo)
+        if ruta.exists():
+            ruta.unlink()
+        return True
+    except OSError as error:
+        current_app.logger.warning(
+            "No se pudo eliminar el PDF incompleto de %s: %s",
+            pedido.numero,
+            error,
+        )
+        return False
 
 
 def generar_pdf_pedido(pedido, tipo="COMPROBANTE_PENDIENTE"):
@@ -30,22 +56,29 @@ def generar_pdf_pedido(pedido, tipo="COMPROBANTE_PENDIENTE"):
 
     Retorna una tupla: (bytes_pdf, nombre_archivo, factura)
     """
-    asegurar_directorio()
+    if tipo not in ("COMPROBANTE_PENDIENTE", "FACTURA_FINAL"):
+        raise ValueError("El tipo de documento solicitado no es válido.")
+    if tipo == "FACTURA_FINAL" and pedido.estado != "APROBADO":
+        raise ValueError("La factura final requiere un pedido aprobado.")
+
+    carpeta_comprobantes = asegurar_directorio()
 
     if tipo == "FACTURA_FINAL":
         prefijo = "FAC"
         titulo_doc = "FACTURA OFICIAL DE VENTA"
         subtitulo_doc = "Documento mercantil y tributario emitido tras aprobación"
     else:
-        tipo = "COMPROBANTE_PENDIENTE"
         prefijo = "COMP"
         titulo_doc = "COMPROBANTE DE PEDIDO"
         subtitulo_doc = "Comprobante de orden en revisión administrativa"
 
     numero_documento = f"{prefijo}-{pedido.numero}"
     nombre_archivo = f"{numero_documento}.pdf"
-    ruta_completa = os.path.join(CARPETA_COMPROBANTES, nombre_archivo)
-    ruta_relativa = os.path.join("docs", "comprobantes", nombre_archivo)
+    ruta_completa = carpeta_comprobantes / nombre_archivo
+    try:
+        ruta_relativa = str(ruta_completa.relative_to(Path(current_app.root_path)))
+    except ValueError:
+        ruta_relativa = str(ruta_completa)
 
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(
@@ -286,12 +319,25 @@ def generar_pdf_pedido(pedido, tipo="COMPROBANTE_PENDIENTE"):
     pdf_bytes = buffer.getvalue()
     buffer.close()
 
-    # Guardar en archivo en disco
+    # Guardar de forma atómica: nunca se deja un PDF parcial como documento válido.
+    ruta_temporal = None
     try:
-        with open(ruta_completa, "wb") as f:
-            f.write(pdf_bytes)
-    except Exception:
-        pass
+        with tempfile.NamedTemporaryFile(
+            mode="wb",
+            dir=carpeta_comprobantes,
+            prefix=f".{numero_documento}-",
+            suffix=".tmp",
+            delete=False,
+        ) as archivo_temporal:
+            ruta_temporal = Path(archivo_temporal.name)
+            archivo_temporal.write(pdf_bytes)
+            archivo_temporal.flush()
+            os.fsync(archivo_temporal.fileno())
+        os.replace(ruta_temporal, ruta_completa)
+    except OSError as error:
+        if ruta_temporal and ruta_temporal.exists():
+            ruta_temporal.unlink()
+        raise RuntimeError("No se pudo guardar el documento PDF.") from error
 
     # Registrar o actualizar Factura en base de datos PostgreSQL
     factura = Factura.query.filter_by(pedido_id=pedido.id, tipo=tipo).first()
@@ -304,6 +350,11 @@ def generar_pdf_pedido(pedido, tipo="COMPROBANTE_PENDIENTE"):
             ruta_pdf=ruta_relativa,
         )
         db.session.add(factura)
-        db.session.commit()
+    else:
+        factura.numero = numero_documento
+        factura.fecha_emision = ahora_utc()
+        factura.ruta_pdf = ruta_relativa
+
+    db.session.flush()
 
     return pdf_bytes, nombre_archivo, factura

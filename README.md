@@ -4,9 +4,9 @@ New Records es un proyecto académico de comercio electrónico para la venta de 
 
 ## Estado actual
 
-Las fases 1 a 6 están implementadas y verificadas. El proyecto incluye la base Flask, conexión y modelo PostgreSQL, autenticación y roles, perfil, catálogo dinámico, detalle y recomendaciones de discos, carrito por sesión y resumen previo de checkout.
+Las fases 1 a 10 están implementadas y verificadas. El proyecto incluye la base Flask, PostgreSQL, autenticación y roles, perfil, catálogo dinámico, carrito, métodos de pago con PIN, pedidos, comprobantes y facturas PDF, notificaciones y administración de catálogo y pedidos.
 
-Todavía no contiene registro y verificación de tarjetas, creación definitiva de pedidos, aprobación administrativa, facturas PDF ni reportes de ventas. Esas funcionalidades pertenecen a las fases 7 y posteriores.
+La aprobación de pedidos y el descuento concurrente de stock se realizan mediante un procedimiento almacenado de PostgreSQL. La suite automatizada contiene 78 pruebas aisladas que no persisten información ni escriben PDFs en el repositorio. Los reportes de ventas pertenecen a la Fase 11.
 
 El alcance completo y la regla de aprobación entre fases están documentados en `PLAN_IMPLEMENTACION.md`, que también puede ser entregado por separado a cada colaborador.
 
@@ -36,7 +36,7 @@ Los módulos nuevos de la aplicación se crearán únicamente cuando se aprueben
 
 ## Guía para clonar el repositorio y continuar el desarrollo
 
-El repositorio queda preparado hasta la **Fase 6**. La siguiente persona debe completar estos pasos desde la raíz del proyecto antes de comenzar la Fase 7.
+El repositorio queda preparado hasta la **Fase 10**. La siguiente persona debe completar estos pasos desde la raíz del proyecto antes de comenzar la Fase 11.
 
 ### 1. Clonar el repositorio
 
@@ -45,7 +45,7 @@ git clone --branch origin/martina-implementations --single-branch https://github
 cd new-records-ecommerce
 ```
 
-El comando anterior clona directamente la rama de continuidad utilizada por el equipo. Debe ejecutarse después de que los cambios de la Fase 6 hayan sido confirmados y publicados en el remoto.
+El comando anterior clona directamente la rama de continuidad utilizada por el equipo. Debe ejecutarse después de que los cambios de la Fase 10 hayan sido confirmados y publicados en el remoto.
 
 ### 2. Crear y activar el entorno virtual
 
@@ -151,7 +151,7 @@ La dirección predeterminada es `http://127.0.0.1:5000`.
 
 ### 9. Continuar con las fases restantes
 
-El desarrollo debe continuar desde la **Fase 7**, siguiendo la copia actualizada de `PLAN_IMPLEMENTACION.md` proporcionada por la persona responsable del proyecto. El plan puede entregarse por separado y no contiene credenciales.
+El desarrollo debe continuar desde la **Fase 11**, siguiendo la copia actualizada de `PLAN_IMPLEMENTACION.md` proporcionada por la persona responsable del proyecto. El plan puede entregarse por separado y no contiene credenciales.
 
 Antes de implementar una fase nueva, se debe confirmar que la fase anterior esté aprobada, trabajar en una rama propia y evitar modificar o eliminar las funcionalidades y pruebas ya terminadas.
 

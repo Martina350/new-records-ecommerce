@@ -48,7 +48,7 @@
 - `ultimos4`: exactamente cuatro dígitos; nunca contiene el número completo.
 - `titular`: nombre impreso o asociado a la tarjeta.
 - `mes_vencimiento`: entero entre 1 y 12.
-- `anio_vencimiento`: año válido desde 2026.
+- `anio_vencimiento`: entero entre 2020 y 2100; un trigger exige que la tarjeta siga vigente y no supere veinte años desde la fecha actual.
 - `predeterminado`: indica si se precarga en checkout.
 - `activo`: permite desactivar el método sin borrar el historial.
 - `fecha_verificacion`: fecha UTC en la que se confirmó el PIN.
@@ -62,7 +62,7 @@
 - `token_tarjeta`: token temporal; no contiene PAN ni CVV.
 - `marca`, `ultimos4`, `titular`, `mes_vencimiento`, `anio_vencimiento`: datos enmascarados pendientes de verificación.
 - `fecha_creacion`, `fecha_expiracion`: delimitan la vigencia; la fecha de creación tiene valor predeterminado en PostgreSQL.
-- `intentos`: entero entre 0 y 5, inicialmente cero.
+- `intentos`: entero entre 0 y 3, inicialmente cero.
 - `verificada`: confirma que el PIN fue utilizado correctamente.
 
 ## `pedidos`

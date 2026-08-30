@@ -35,7 +35,66 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  configurarFormularioTarjeta();
 });
+
+function configurarFormularioTarjeta() {
+  const formularioTarjeta = document.getElementById('form-tarjeta');
+  if (!formularioTarjeta) return;
+
+  const numero = document.getElementById('numero');
+  const mes = document.getElementById('mes_vencimiento');
+  const anio = document.getElementById('anio_vencimiento');
+
+  numero.addEventListener('input', () => {
+    const digitos = numero.value.replace(/\D/g, '').slice(0, 19);
+    numero.value = digitos.replace(/(.{4})/g, '$1 ').trim();
+    numero.setCustomValidity('');
+  });
+
+  formularioTarjeta.addEventListener('submit', (evento) => {
+    const digitos = numero.value.replace(/\D/g, '');
+    numero.setCustomValidity(
+      validarNumeroLuhn(digitos) ? '' : 'Ingresa un número de tarjeta válido.'
+    );
+
+    const anioActual = Number(formularioTarjeta.dataset.anioActual);
+    const mesActual = Number(formularioTarjeta.dataset.mesActual);
+    const mesIngresado = Number(mes.value);
+    const anioIngresado = Number(anio.value);
+    const vencimientoValido =
+      mesIngresado >= 1 &&
+      mesIngresado <= 12 &&
+      (anioIngresado > anioActual ||
+        (anioIngresado === anioActual && mesIngresado >= mesActual)) &&
+      anioIngresado <= anioActual + 20;
+
+    anio.setCustomValidity(
+      vencimientoValido ? '' : 'La tarjeta está vencida o su fecha no es válida.'
+    );
+
+    if (!formularioTarjeta.checkValidity()) {
+      evento.preventDefault();
+      formularioTarjeta.reportValidity();
+    }
+  });
+}
+
+function validarNumeroLuhn(numero) {
+  if (!/^\d{13,19}$/.test(numero)) return false;
+
+  let total = 0;
+  [...numero].reverse().forEach((caracter, indice) => {
+    let digito = Number(caracter);
+    if (indice % 2 === 1) {
+      digito *= 2;
+      if (digito > 9) digito -= 9;
+    }
+    total += digito;
+  });
+  return total % 10 === 0;
+}
 
 function validarFormulario() {
   let esValido = true;

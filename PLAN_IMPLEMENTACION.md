@@ -559,7 +559,7 @@ Resultado de ejecución:
 
 ### Fase 7 - Métodos de pago y verificación por PIN
 
-**Estado:** completada; pendiente de aprobación para iniciar la Fase 8.
+**Estado:** completada y verificada.
 
 Tareas previstas:
 
@@ -576,18 +576,18 @@ Resultado de ejecución:
 - Se instaló `Flask-Mail 0.10.0` y se actualizaron `requirements.txt` y `config.py` con los parámetros SMTP.
 - Se creó `mailer.py` con la función `enviar_pin()` y detección automática de SMTP configurado; en modo desarrollo el PIN se muestra en un mensaje flash.
 - Se creó `payments.py` con las funciones `crear_verificacion()`, `verificar_pin()`, `obtener_metodos_pago_activos()`, `desactivar_metodo_pago()` y `establecer_predeterminado()`.
-- El PIN se genera como 6 dígitos numéricos, se almacena únicamente como hash Werkzeug en `verificaciones_tarjeta.pin_hash` y caduca en 5 minutos con un máximo de 3 intentos.
+- El PIN se genera con `secrets` como 6 dígitos numéricos, se almacena únicamente como hash Werkzeug en `verificaciones_tarjeta.pin_hash` y caduca en 5 minutos con un máximo de 3 intentos, replicado en PostgreSQL.
 - Solo se persisten: marca, últimos 4 dígitos, titular, mes/año de vencimiento y un token UUID simulado. Nunca el número completo ni el CVV.
 - Se incorporaron en `app.py` las rutas `/pago/metodos` (`GET`), `/pago/agregar` (`GET`, `POST`), `/pago/verificar/<token>` (`GET`, `POST`), `/pago/predeterminado/<id>` (`POST`) y `/pago/eliminar/<id>` (`POST`), todas protegidas con `@rol_requerido('cliente')`.
 - Se actualizó `/checkout/resumen` para mostrar los métodos de pago verificados del usuario o un aviso con enlace a registro si no tiene ninguno.
 - Se crearon las plantillas `templates/pago/metodos.html`, `templates/pago/agregar.html` y `templates/pago/verificar_pin.html`.
 - Se eliminó el aviso placeholder de Fase 7 de `templates/checkout_resumen.html`.
 - Se añadieron estilos CSS dedicados en `static/css/styles.css` para tarjetas de crédito, badge predeterminada, campo PIN, indicador de intentos y aviso de caducidad.
-- Se agregaron 8 pruebas automatizadas en `tests/test_pagos.py`, alcanzando un total de **50/50 pruebas pasando exitosamente**.
+- Se agregaron 10 pruebas automatizadas en `tests/test_pagos.py`, incluyendo vencimiento dinámico y bloqueo exacto del PIN, alcanzando un total acumulado de **52 pruebas**.
 
 ### Fase 8 - Pedidos, stock y cobro simulado
 
-**Estado:** completada; pendiente de aprobación para iniciar la Fase 9.
+**Estado:** completada y verificada.
 
 Tareas previstas:
 
@@ -604,6 +604,7 @@ Resultado de ejecución:
 
 - Se creó el módulo `services.py` con las funciones transaccionales `procesar_checkout()`, `generar_numero_pedido()`, `generar_referencia_pago()`, `obtener_pedidos_cliente()` y `obtener_pedido_por_numero()`.
 - La creación de `Pedido`, `DetallePedido` y `TransaccionPago` se ejecuta dentro de una transacción atómica con `db.session.commit()` y `rollback()` automático ante cualquier error o inconsistencia de stock.
+- Se incorporó `aprobar_pedido_new_records` como procedimiento almacenado idempotente. Bloquea el pedido y los discos en orden estable, evita aprobaciones duplicadas y descuenta stock sin carreras concurrentes.
 - Cada línea de `DetallePedido` almacena una copia histórica inmutable de álbum, artista, formato, precio unitario (`disco.precio_final()`) y cantidad.
 - El carrito en sesión solo se vacía una vez confirmado el guardado exitoso en base de datos.
 - Se incorporaron en `app.py` las rutas `/checkout/confirmar` (`POST`), `/pedidos` (`GET`) y `/pedidos/<numero>` (`GET`).
@@ -611,11 +612,11 @@ Resultado de ejecución:
 - Se actualizó `templates/checkout_resumen.html` para incluir el selector de método de pago verificado y el botón de confirmación de pedido.
 - Se actualizó `templates/base.html` con enlaces directos a "Mis Pedidos" y "Métodos de Pago" en el menú de navegación.
 - Se añadieron estilos CSS dedicados en `static/css/styles.css` para badges de estado (`PENDIENTE`, `APROBADO`, `RECHAZADO`), tarjetas de detalle de compra e historial.
-- Se agregaron 8 pruebas automatizadas en `tests/test_pedidos.py`, alcanzando un total de **58/58 pruebas pasando exitosamente**.
+- Se agregaron 9 pruebas automatizadas en `tests/test_pedidos.py`, incluyendo rollback cuando falla el comprobante, alcanzando un total acumulado de **61 pruebas**.
 
 ### Fase 9 - Comprobantes PDF y notificaciones
 
-**Estado:** completada; pendiente de aprobación para iniciar la Fase 10.
+**Estado:** completada y verificada.
 
 Tareas previstas:
 
@@ -629,18 +630,18 @@ Tareas previstas:
 Resultado de ejecución:
 
 - Se creó el módulo `pdf_generator.py` utilizando ReportLab (`SimpleDocTemplate`, `Table`, `Paragraph`, `TableStyle`, `colors`) para la maquetación estética de documentos imprimibles y descargables.
-- Se implementó la generación de dos tipos de documentos: `COMPROBANTE_PENDIENTE` (emitido tras el checkout) y `FACTURA_FINAL` (emitido tras la aprobación de la orden).
+- Se implementó la generación automática y transaccional de dos tipos de documentos: `COMPROBANTE_PENDIENTE` durante el checkout y `FACTURA_FINAL` durante la aprobación administrativa.
 - Cada emisión registra o actualiza la entidad `Factura` en PostgreSQL con su número único (`COMP-<numero>` o `FAC-<numero>`), tipo, fecha de emisión y ruta del archivo en `docs/comprobantes/`.
 - Se incorporaron en `app.py` los endpoints de descarga `/pedidos/<numero>/comprobante` y `/pedidos/<numero>/factura`, restringiendo el acceso exclusivamente al cliente propietario o a un administrador.
 - La descarga de la Factura Final valida estrictamente que el pedido se encuentre en estado `APROBADO`.
 - Se añadieron en `mailer.py` las funciones `notificar_creacion_pedido()` y `notificar_cambio_estado()`, integradas en el flujo de confirmación de checkout.
 - Se actualizaron las plantillas `templates/pedidos/detalle.html` y `templates/pedidos/lista.html` con botones y accesos rápidos de descarga en formato PDF.
 - Se agregaron estilos CSS en `static/css/styles.css` para los botones y notas de documentos PDF.
-- Se agregaron 6 pruebas automatizadas en `tests/test_pdf_notificaciones.py`, alcanzando un total de **64/64 pruebas pasando exitosamente**.
+- Se agregaron 6 pruebas automatizadas en `tests/test_pdf_notificaciones.py`, alcanzando un total acumulado de **67 pruebas**.
 
 ### Fase 10 - Administración de catálogo y pedidos
 
-**Estado:** completada; pendiente de aprobación para iniciar la Fase 11.
+**Estado:** completada y verificada; preparada para iniciar la Fase 11.
 
 Tareas previstas:
 
@@ -667,6 +668,7 @@ Resultado de ejecución:
   - CRUD completo de Discos (`/admin/discos`, `/admin/discos/nuevo`, `/admin/discos/<id>/editar`, `/admin/discos/<id>/desactivar`, `/admin/discos/<id>/reactivar`), con soporte polimórfico para `CD` y `Vinilo`.
   - CRUD completo de Categorías (`/admin/categorias`, `/admin/categorias/nueva`, `/admin/categorias/<id>/editar`, `/admin/categorias/<id>/desactivar`, `/admin/categorias/<id>/reactivar`).
   - Eliminación suave (Soft Delete) implementada mediante alternancia del campo booleano `activo`.
+  - Las categorías con discos activos exigen confirmación explícita y desactivan lógicamente sus discos para mantener un catálogo coherente.
   - Bandeja de pedidos con pestañas de filtrado por estado (`/admin/pedidos`).
   - Auditoría técnica de pedido (`/admin/pedidos/<numero>`) con comprobación en vivo de existencias físicas disponibles.
   - Aprobación atómica de pedidos (`/admin/pedidos/<numero>/aprobar`): descuenta stock del inventario, marca `APROBADO`, actualiza la transacción de pago, genera la `FACTURA_FINAL` en PDF y notifica al cliente.
@@ -674,7 +676,7 @@ Resultado de ejecución:
 - Todas las rutas administrativas están estrictamente protegidas con `@rol_requerido('administrador')`.
 - Se crearon las plantillas `templates/admin/discos/lista.html`, `templates/admin/discos/formulario.html`, `templates/admin/categorias/lista.html`, `templates/admin/categorias/formulario.html`, `templates/admin/pedidos/lista.html` y `templates/admin/pedidos/detalle.html`, y se actualizó `templates/admin/dashboard.html`.
 - Se añadieron estilos dedicados en `static/css/styles.css` para KPIs, tablas administrativas, badges de stock y decisiones.
-- Se agregaron 8 pruebas automatizadas en `tests/test_admin.py`, alcanzando un total de **72/72 pruebas pasando exitosamente**.
+- Se agregaron 11 pruebas automatizadas en `tests/test_admin.py`, incluyendo procedimiento PostgreSQL, aprobación duplicada, cascada explícita y rollback de factura. La suite completa alcanza **78/78 pruebas pasando exitosamente** sin persistir datos de prueba.
 
 ### Fase 11 - Reportes administrativos
 
@@ -698,7 +700,7 @@ Tareas previstas:
 
 - Replicar validaciones críticas mediante restricciones PostgreSQL.
 - Incorporar solamente los triggers estrictamente necesarios.
-- Finalizar los procedimientos almacenados de stock y aprobación.
+- Verificar y reutilizar el procedimiento almacenado de stock y aprobación implementado en la Fase 8.
 - Definir roles mínimos para aplicación, administración y respaldo.
 - Revisar protección de rutas, sesiones, secretos y formularios.
 - Configurar respaldos con `pg_dump` y restauración con `pg_restore`.

@@ -24,7 +24,14 @@
           <span>Proceso seguro — verifica tu identidad con un PIN enviado a tu correo.</span>
         </div>
 
-        <form class="formulario-contacto" action="{{ url_for('pago_agregar') }}" method="post" novalidate>
+        <form
+          class="formulario-contacto"
+          id="form-tarjeta"
+          action="{{ url_for('pago_agregar') }}"
+          method="post"
+          data-anio-actual="{{ anio_actual }}"
+          data-mes-actual="{{ mes_actual }}"
+        >
           <div class="campo-formulario">
             <label class="etiqueta-formulario" for="titular">Nombre del titular <span class="requerido">*</span></label>
             <input
@@ -61,7 +68,8 @@
               placeholder="0000 0000 0000 0000"
               required
               minlength="13"
-              maxlength="19"
+              maxlength="23"
+              pattern="[0-9 ]{13,23}"
               autocomplete="cc-number"
               inputmode="numeric"
             />
@@ -96,8 +104,8 @@
                 name="anio_vencimiento"
                 value="{{ anio | default('') }}"
                 placeholder="AAAA"
-                min="2026"
-                max="2040"
+                min="{{ anio_actual }}"
+                max="{{ anio_actual + 20 }}"
                 required
                 autocomplete="cc-exp-year"
               />
