@@ -234,6 +234,9 @@ RESTRICCIONES_USUARIO = {
 RUTA_REGLAS_FASES_7_10 = (
     Path(__file__).resolve().parent / "database" / "rules_fases7_10.sql"
 )
+RUTA_REGLAS_FASE_12 = (
+    Path(__file__).resolve().parent / "database" / "rules_fases12.sql"
+)
 
 
 def actualizar_reglas_schema():
@@ -266,6 +269,11 @@ def actualizar_reglas_schema():
     conexion = db.session.connection().connection
     with conexion.cursor() as cursor:
         cursor.execute(reglas_fases_7_10)
+
+    if RUTA_REGLAS_FASE_12.exists():
+        reglas_fase_12 = RUTA_REGLAS_FASE_12.read_text(encoding="utf-8")
+        with conexion.cursor() as cursor:
+            cursor.execute(reglas_fase_12)
 
 
 def obtener_password(nombre_variable):

@@ -1170,6 +1170,16 @@ def admin_pedido_rechazar(numero):
     return redirect(url_for("admin_pedido_detalle", numero=numero))
 
 
+@app.after_request
+def agregar_cabeceras_seguridad(response):
+    """Inyecta cabeceras HTTP de seguridad para mitigar ataques comunes (XSS, Clickjacking, MIME sniffing)."""
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    return response
+
+
 @app.errorhandler(403)
 def acceso_denegado(_error):
     return render_template("errors/403.html"), 403
@@ -1209,5 +1219,30 @@ def check_db():
         ) from error
 
 
+@app.cli.command("crear-backup")
+@click.option(
+    "--formato",
+    type=click.Choice(["plain", "custom"], case_sensitive=False),
+    default="plain",
+    help="Formato de salida: 'plain' (.sql) o 'custom' (.dump).",
+)
+def crear_backup(formato):
+    """Genera un respaldo de la base de datos PostgreSQL en la carpeta backups/."""
+    from backup_manager import ejecutar_backup_pg_dump
+
+    click.echo(f"Iniciando respaldo en formato {formato.upper()}...")
+    exito, resultado, tamano = ejecutar_backup_pg_dump(formato=formato)
+    if exito:
+        click.echo("¡Respaldo creado exitosamente!")
+        click.echo(f"Archivo: {resultado}")
+        click.echo(f"Tamaño: {round(tamano / 1024, 2)} KB")
+    else:
+        click.echo(f"Aviso: {resultado}")
+        click.echo(
+            "Consulta docs/SEGURIDAD_Y_RESPALDOS.md para instrucciones de respaldo manual."
+        )
+
+
 if __name__ == "__main__":
     app.run(debug=app.config["DEBUG"])
+
