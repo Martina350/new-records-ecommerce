@@ -1,5 +1,6 @@
 """Pruebas de navegación parcial y prevención del pantallazo blanco."""
 
+import re
 from pathlib import Path
 
 from app import app
@@ -78,3 +79,42 @@ def test_recursos_contienen_respaldo_oscuro_y_reinicializacion():
     assert "window.location.reload()" not in javascript
     assert ".requestSubmit()" in catalogo
     assert "formFiltroProductos').submit()" not in catalogo
+
+
+def test_submenu_admin_permanece_visible_al_expandirse():
+    estilos = (RAIZ_PROYECTO / "static" / "css" / "styles.css").read_text(
+        encoding="utf-8"
+    )
+
+    regla_expandida = re.search(
+        r"\.sidebar:hover \.submodulo-sidebar\.abierto > \.sublista-sidebar,\s*"
+        r"\.sidebar:focus-within \.submodulo-sidebar\.abierto > \.sublista-sidebar\s*"
+        r"\{(?P<declaraciones>[^}]*)\}",
+        estilos,
+    )
+
+    assert regla_expandida is not None
+    declaraciones = regla_expandida.group("declaraciones")
+    assert "display: flex" in declaraciones
+    assert "opacity: 1" in declaraciones
+    assert "pointer-events: auto" in declaraciones
+
+
+def test_badge_formato_solo_es_absoluto_sobre_portadas():
+    estilos = (RAIZ_PROYECTO / "static" / "css" / "styles.css").read_text(
+        encoding="utf-8"
+    )
+
+    badge_general = re.search(
+        r"\.badge-formato-tarjeta\s*\{(?P<declaraciones>[^}]*)\}", estilos
+    )
+    badge_portada = re.search(
+        r"\.tarjeta-producto-imagen > \.badge-formato-tarjeta\s*"
+        r"\{(?P<declaraciones>[^}]*)\}",
+        estilos,
+    )
+
+    assert badge_general is not None
+    assert "position: static" in badge_general.group("declaraciones")
+    assert badge_portada is not None
+    assert "position: absolute" in badge_portada.group("declaraciones")

@@ -3,175 +3,175 @@
 {% block titulo %}{% if disco %}Editar Disco: {{ disco.album }}{% else %}Nuevo Disco{% endif %}{% endblock %}
 
 {% block contenido %}
-<main class="contacto-principal auth-seccion">
+<main class="seccion-admin">
   <div class="contenedor">
-    <div class="caja-formulario auth-caja admin-caja-form">
-      <section class="contenedor-formulario-contacto" aria-labelledby="titulo-form-disco">
-        
-        <div class="auth-cabecera">
-          <span class="material-symbols-outlined auth-icono" aria-hidden="true">album</span>
-          <h1 id="titulo-form-disco" class="titulo-formulario-contacto">
+    <div class="caja-formulario-admin-amplia">
+      <div class="admin-cabecera-info" style="margin-bottom: 2rem;">
+        <div class="admin-icono-grande">
+          <span class="material-symbols-outlined" aria-hidden="true">album</span>
+        </div>
+        <div>
+          <h1 id="titulo-form-disco" class="titulo-admin">
             {% if disco %}
               Editar <span class="degradado">Disco</span>
             {% else %}
               Nuevo <span class="degradado">Disco</span>
             {% endif %}
           </h1>
-          <p class="auth-subtitulo">
+          <p class="subtitulo-admin">
             {% if disco %}
-              Modifica los atributos comerciales y existencias del producto ({{ disco.codigo }}).
+              Modifica los atributos comerciales, existencias y configuración de envío del producto ({{ disco.codigo }}).
             {% else %}
-              Registra un nuevo álbum en formato físico CD o Vinilo.
+              Registra un nuevo álbum en formato físico CD o Vinilo para el catálogo público.
             {% endif %}
           </p>
         </div>
+      </div>
 
-        <form class="formulario-contacto" method="post">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-          <div class="grid-vencimiento">
-            {% if not disco %}
-              <div class="campo-formulario">
-                <label class="etiqueta-formulario" for="formato">Formato Físico <span class="requerido">*</span></label>
-                <select class="entrada-formulario" id="formato" name="formato" required onchange="toggleFormato(this.value)">
-                  <option value="CD" {% if formato == 'CD' %}selected{% endif %}>CD (Compact Disc)</option>
-                  <option value="VINILO" {% if formato == 'VINILO' %}selected{% endif %}>Vinilo (LP)</option>
-                </select>
-              </div>
+      <form class="formulario-admin-amplio" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-              <div class="campo-formulario">
-                <label class="etiqueta-formulario" for="codigo">Código Único <span class="requerido">*</span></label>
-                <input
-                  class="entrada-formulario"
-                  type="text"
-                  id="codigo"
-                  name="codigo"
-                  value="{{ codigo | default('') }}"
-                  placeholder="Ej. NR-ROC-002"
-                  required
-                />
-              </div>
-            {% else %}
-              <div class="campo-formulario">
-                <label class="etiqueta-formulario">Formato y Código</label>
-                <input class="entrada-formulario" type="text" value="{{ disco.formato }} | {{ disco.codigo }}" disabled />
-              </div>
-            {% endif %}
+        <div class="grid-form-admin-2col">
+          <!-- Columna 1: Información Básica del Álbum -->
+          <div class="campo-admin">
+            <label class="etiqueta-tarjeta" for="album">Nombre del Álbum <span class="requerido">*</span></label>
+            <input
+              class="entrada-formulario entrada-tarjeta"
+              type="text"
+              id="album"
+              name="album"
+              value="{{ disco.album if disco else album | default('') }}"
+              placeholder="Ej. Abbey Road, Starboy, The Dark Side of the Moon"
+              required
+            />
+          </div>
 
-            <div class="campo-formulario">
-              <label class="etiqueta-formulario" for="categoria_id">Género / Categoría <span class="requerido">*</span></label>
-              <select class="entrada-formulario" id="categoria_id" name="categoria_id" required>
-                {% for cat in categorias %}
-                  <option value="{{ cat.id }}" {% if (disco and disco.categoria_id == cat.id) or (categoria_id and categoria_id|int == cat.id) %}selected{% endif %}>
-                    {{ cat.nombre }}
-                  </option>
-                {% endfor %}
+          <div class="campo-admin">
+            <label class="etiqueta-tarjeta" for="artista">Artista o Banda <span class="requerido">*</span></label>
+            <input
+              class="entrada-formulario entrada-tarjeta"
+              type="text"
+              id="artista"
+              name="artista"
+              value="{{ disco.artista if disco else artista | default('') }}"
+              placeholder="Ej. The Beatles, The Weeknd, Pink Floyd"
+              required
+            />
+          </div>
+
+          <!-- Formato y Código -->
+          {% if not disco %}
+            <div class="campo-admin">
+              <label class="etiqueta-tarjeta" for="formato">Formato Físico <span class="requerido">*</span></label>
+              <select class="entrada-formulario select-custom" id="formato" name="formato" required onchange="toggleFormato(this.value)">
+                <option value="CD" {% if formato == 'CD' %}selected{% endif %}>CD (Compact Disc)</option>
+                <option value="VINILO" {% if formato == 'VINILO' %}selected{% endif %}>Vinilo (LP 12")</option>
               </select>
             </div>
-          </div>
 
-          <div class="grid-vencimiento">
-            <div class="campo-formulario">
-              <label class="etiqueta-formulario" for="album">Nombre del Álbum <span class="requerido">*</span></label>
+            <div class="campo-admin">
+              <label class="etiqueta-tarjeta" for="codigo">Código Único <span class="requerido">*</span></label>
               <input
-                class="entrada-formulario"
+                class="entrada-formulario entrada-tarjeta"
                 type="text"
-                id="album"
-                name="album"
-                value="{{ disco.album if disco else album | default('') }}"
-                placeholder="Nombre del disco"
+                id="codigo"
+                name="codigo"
+                value="{{ codigo | default('') }}"
+                placeholder="Ej. NR-ROC-002"
                 required
               />
             </div>
-
-            <div class="campo-formulario">
-              <label class="etiqueta-formulario" for="artista">Artista o Banda <span class="requerido">*</span></label>
-              <input
-                class="entrada-formulario"
-                type="text"
-                id="artista"
-                name="artista"
-                value="{{ disco.artista if disco else artista | default('') }}"
-                placeholder="Nombre del artista"
-                required
-              />
+          {% else %}
+            <div class="campo-admin col-span-2">
+              <label class="etiqueta-tarjeta">Formato y Código Único</label>
+              <input class="entrada-formulario entrada-tarjeta entrada-bloqueada" type="text" value="{{ disco.formato }} | {{ disco.codigo }}" disabled />
             </div>
+          {% endif %}
+
+          <div class="campo-admin col-span-2">
+            <label class="etiqueta-tarjeta" for="categoria_id">Género Musical / Categoría <span class="requerido">*</span></label>
+            <select class="entrada-formulario select-custom" id="categoria_id" name="categoria_id" required>
+              {% for cat in categorias %}
+                <option value="{{ cat.id }}" {% if (disco and disco.categoria_id == cat.id) or (categoria_id and categoria_id|int == cat.id) %}selected{% endif %}>
+                  {{ cat.nombre }}
+                </option>
+              {% endfor %}
+            </select>
           </div>
 
-          <div class="campo-formulario">
-            <label class="etiqueta-formulario" for="descripcion">Descripción del Álbum <span class="requerido">*</span></label>
+          <div class="campo-admin col-span-2">
+            <label class="etiqueta-tarjeta" for="descripcion">Descripción y Reseña del Álbum <span class="requerido">*</span></label>
             <textarea
-              class="entrada-formulario"
+              class="entrada-formulario entrada-tarjeta"
               id="descripcion"
               name="descripcion"
               rows="3"
-              placeholder="Reseña, pistas destacadas o notas técnicas..."
+              placeholder="Reseña del álbum, lista de temas destacados, edición especial..."
               required
             >{{ disco.descripcion if disco else descripcion | default('') }}</textarea>
           </div>
 
-          <div class="grid-vencimiento">
-            <div class="campo-formulario">
-              <label class="etiqueta-formulario" for="precio_base">Precio Base ($) <span class="requerido">*</span></label>
-              <input
-                class="entrada-formulario"
-                type="number"
-                step="0.01"
-                min="0.01"
-                id="precio_base"
-                name="precio_base"
-                value="{{ disco.precio_base if disco else precio_base | default('25.00') }}"
-                required
-              />
-            </div>
-
-            <div class="campo-formulario">
-              <label class="etiqueta-formulario" for="stock">Stock en Inventario <span class="requerido">*</span></label>
-              <input
-                class="entrada-formulario"
-                type="number"
-                min="0"
-                id="stock"
-                name="stock"
-                value="{{ disco.stock if disco else stock | default('10') }}"
-                required
-              />
-            </div>
-          </div>
-
-          <div class="grid-vencimiento">
-            <div class="campo-formulario">
-              <label class="etiqueta-formulario" for="peso_kg">Peso Físico (kg) <span class="requerido">*</span></label>
-              <input
-                class="entrada-formulario"
-                type="number"
-                step="0.001"
-                min="0.01"
-                id="peso_kg"
-                name="peso_kg"
-                value="{{ disco.peso_kg if disco else peso_kg | default('0.250') }}"
-                required
-              />
-            </div>
-
-            <div class="campo-formulario">
-              <label class="etiqueta-formulario" for="costo_envio_por_kg">Costo Envío por kg ($) <span class="requerido">*</span></label>
-              <input
-                class="entrada-formulario"
-                type="number"
-                step="0.01"
-                min="0"
-                id="costo_envio_por_kg"
-                name="costo_envio_por_kg"
-                value="{{ disco.costo_envio_por_kg if disco else costo_envio_por_kg | default('4.00') }}"
-                required
-              />
-            </div>
-          </div>
-
-          <div class="campo-formulario" id="grupo-costo-embalaje" {% if disco and disco.formato == 'CD' %}style="display: none;"{% endif %}>
-            <label class="etiqueta-formulario" for="costo_embalaje">Costo de Embalaje Protector Vinilo ($)</label>
+          <!-- Precios e Inventario -->
+          <div class="campo-admin">
+            <label class="etiqueta-tarjeta" for="precio_base">Precio Base ($ USD) <span class="requerido">*</span></label>
             <input
-              class="entrada-formulario"
+              class="entrada-formulario entrada-tarjeta"
+              type="number"
+              step="0.01"
+              min="0.01"
+              id="precio_base"
+              name="precio_base"
+              value="{{ disco.precio_base if disco else precio_base | default('25.00') }}"
+              required
+            />
+          </div>
+
+          <div class="campo-admin">
+            <label class="etiqueta-tarjeta" for="stock">Stock en Inventario <span class="requerido">*</span></label>
+            <input
+              class="entrada-formulario entrada-tarjeta"
+              type="number"
+              min="0"
+              id="stock"
+              name="stock"
+              value="{{ disco.stock if disco else stock | default('10') }}"
+              required
+            />
+          </div>
+
+          <!-- Logística y Pesaje -->
+          <div class="campo-admin">
+            <label class="etiqueta-tarjeta" for="peso_kg">Peso del Producto (kg) <span class="requerido">*</span></label>
+            <input
+              class="entrada-formulario entrada-tarjeta"
+              type="number"
+              step="0.001"
+              min="0.01"
+              id="peso_kg"
+              name="peso_kg"
+              value="{{ disco.peso_kg if disco else peso_kg | default('0.250') }}"
+              required
+            />
+          </div>
+
+          <div class="campo-admin">
+            <label class="etiqueta-tarjeta" for="costo_envio_por_kg">Costo Envío por kg ($ USD) <span class="requerido">*</span></label>
+            <input
+              class="entrada-formulario entrada-tarjeta"
+              type="number"
+              step="0.01"
+              min="0.01"
+              id="costo_envio_por_kg"
+              name="costo_envio_por_kg"
+              value="{{ disco.costo_envio_por_kg if disco else costo_envio_por_kg | default('4.00') }}"
+              required
+            />
+          </div>
+
+          <div class="campo-admin col-span-2" id="grupo-costo-embalaje" {% if disco and disco.formato == 'CD' %}style="display: none;"{% endif %}>
+            <label class="etiqueta-tarjeta" for="costo_embalaje">Costo de Embalaje Protector Especial Vinilo ($ USD)</label>
+            <input
+              class="entrada-formulario entrada-tarjeta"
               type="number"
               step="0.01"
               min="0"
@@ -182,31 +182,30 @@
             <span class="nota-campo">Aplica exclusivamente al formato Vinilo para el cálculo polimórfico de precio final.</span>
           </div>
 
-          <div class="campo-formulario">
-            <label class="etiqueta-formulario" for="imagen">Ruta de Portada (opcional)</label>
+          <div class="campo-admin col-span-2">
+            <label class="etiqueta-tarjeta" for="imagen">Ruta de Portada (Opcional)</label>
             <input
-              class="entrada-formulario"
+              class="entrada-formulario entrada-tarjeta"
               type="text"
               id="imagen"
               name="imagen"
               value="{{ disco.imagen if disco else imagen | default('') }}"
-              placeholder="Ej. /static/img/album.jpg"
+              placeholder="Ej. img/album.jpg"
             />
           </div>
+        </div>
 
-          <div class="grupo-botones-formulario">
-            <button class="boton boton-principal resplandor-neon" type="submit">
-              <span class="material-symbols-outlined" aria-hidden="true">save</span>
-              {% if disco %}Guardar Cambios{% else %}Registrar Disco{% endif %}
-            </button>
-            <a class="boton boton-secundario" href="{{ url_for('admin_discos_lista') }}">
-              <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
-              Cancelar
-            </a>
-          </div>
-        </form>
-
-      </section>
+        <div class="grupo-botones-tarjeta">
+          <button class="boton boton-principal resplandor-neon boton-accion-tarjeta" type="submit">
+            <span class="material-symbols-outlined" aria-hidden="true">save</span>
+            <span>{% if disco %}Guardar Cambios{% else %}Registrar Disco{% endif %}</span>
+          </button>
+          <a class="boton boton-secundario boton-accion-tarjeta" href="{{ url_for('admin_discos_lista') }}">
+            <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+            <span>Cancelar</span>
+          </a>
+        </div>
+      </form>
     </div>
   </div>
 </main>

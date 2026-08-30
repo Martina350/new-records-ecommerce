@@ -71,6 +71,20 @@ def test_admin_dashboard_metricas(client):
         assert b"Discos Activos" in resp.data
 
 
+def test_admin_lista_discos_muestra_formatos_en_sus_celdas(client):
+    """La tabla recibe y renderiza los formatos CD y VINILO desde PostgreSQL."""
+    with client:
+        autenticar_admin(client)
+        respuesta = client.get("/admin/discos")
+        contenido = respuesta.get_data(as_text=True)
+
+        assert respuesta.status_code == 200
+        assert "badge-formato-cd" in contenido
+        assert "badge-formato-vinilo" in contenido
+        assert ">\n                    CD\n" in contenido
+        assert ">\n                    VINILO\n" in contenido
+
+
 def test_procedimiento_aprobacion_instalado():
     """La aprobación crítica debe existir en PostgreSQL, no solo en Python."""
     with app.app_context():

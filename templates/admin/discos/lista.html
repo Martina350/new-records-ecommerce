@@ -3,114 +3,115 @@
 {% block titulo %}Administración de Discos{% endblock %}
 
 {% block contenido %}
-<main class="contacto-principal admin-seccion">
+<main class="seccion-admin">
   <div class="contenedor">
-    <div class="caja-formulario auth-caja admin-caja">
-      <section class="contenedor-formulario-contacto" aria-labelledby="titulo-discos">
-        
-        <div class="admin-cabecera-con-accion">
-          <div>
-            <span class="material-symbols-outlined admin-icono" aria-hidden="true">album</span>
-            <h1 id="titulo-discos" class="titulo-formulario-contacto">
-              Gestión de <span class="degradado">Discos</span>
-            </h1>
-            <p class="admin-subtitulo">
-              Catálogo completo de música en formato CD y Vinilo.
-            </p>
-          </div>
-          <div class="admin-cabecera-botones">
-            <a class="boton boton-principal resplandor-neon" href="{{ url_for('admin_discos_nuevo') }}">
-              <span class="material-symbols-outlined" aria-hidden="true">add</span>
-              Nuevo Disco
-            </a>
-            <a class="boton boton-secundario" href="{{ url_for('admin_dashboard') }}">
-              <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
-              Dashboard
-            </a>
-          </div>
+    <div class="admin-cabecera-principal">
+      <div class="admin-cabecera-info">
+        <div class="admin-icono-grande">
+          <span class="material-symbols-outlined" aria-hidden="true">album</span>
         </div>
+        <div>
+          <h1 id="titulo-discos" class="titulo-admin">
+            Gestión de <span class="degradado">Discos</span>
+          </h1>
+          <p class="subtitulo-admin">
+            Catálogo completo de música en formato CD y Vinilo con control de stock y precios.
+          </p>
+        </div>
+      </div>
 
-        <div class="tabla-carrito-contenedor">
-          <table class="tabla-carrito">
-            <thead>
-              <tr>
-                <th>Código</th>
-                <th>Álbum / Artista</th>
-                <th>Género</th>
-                <th>Formato</th>
-                <th>Precio Base</th>
-                <th>Precio Final</th>
-                <th>Stock</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for d in discos %}
-                <tr class="{% if not d.activo %}fila-inactiva{% endif %}">
-                  <td><code>{{ d.codigo }}</code></td>
-                  <td>
-                    <strong>{{ d.album }}</strong><br/>
-                    <small class="artista-disco-carrito">{{ d.artista }}</small>
-                  </td>
-                  <td>{{ d.categoria.nombre if d.categoria else 'Sin género' }}</td>
-                  <td>
-                    <span class="badge-formato-tarjeta badge-formato-{{ d.formato | lower }}">
-                      {{ d.formato }}
-                    </span>
-                  </td>
-                  <td>${{ "%.2f"|format(d.precio_base) }}</td>
-                  <td><strong>${{ "%.2f"|format(d.precio_final()) }}</strong></td>
-                  <td>
-                    {% if d.stock == 0 %}
-                      <span class="badge-stock-agotado">Agotado (0)</span>
-                    {% elif d.stock <= 3 %}
-                      <span class="badge-stock-bajo">{{ d.stock }} unid.</span>
-                    {% else %}
-                      <span>{{ d.stock }} unid.</span>
-                    {% endif %}
-                  </td>
-                  <td>
+      <div class="admin-cabecera-acciones">
+        <a class="boton boton-principal resplandor-neon" href="{{ url_for('admin_discos_nuevo') }}">
+          <span class="material-symbols-outlined" aria-hidden="true">add</span>
+          <span>Nuevo Disco</span>
+        </a>
+        <a class="boton boton-secundario" href="{{ url_for('admin_dashboard') }}">
+          <span class="material-symbols-outlined" aria-hidden="true">dashboard</span>
+          <span>Dashboard</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="admin-seccion-bloque">
+      <div class="tabla-carrito-contenedor">
+        <table class="tabla-carrito">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Álbum / Artista</th>
+              <th>Género</th>
+              <th>Formato</th>
+              <th>Precio Base</th>
+              <th>Precio Final</th>
+              <th>Stock</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for d in discos %}
+              <tr class="{% if not d.activo %}fila-inactiva{% endif %}">
+                <td><code>{{ d.codigo }}</code></td>
+                <td>
+                  <strong>{{ d.album }}</strong><br/>
+                  <small class="artista-disco-carrito">{{ d.artista }}</small>
+                </td>
+                <td>{{ d.categoria.nombre if d.categoria else 'Sin género' }}</td>
+                <td>
+                  <span class="badge-formato-tarjeta badge-formato-{{ d.formato | lower }}">
+                    {{ d.formato }}
+                  </span>
+                </td>
+                <td>${{ "%.2f"|format(d.precio_base) }}</td>
+                <td><strong>${{ "%.2f"|format(d.precio_final()) }}</strong></td>
+                <td>
+                  {% if d.stock == 0 %}
+                    <span class="badge-stock-agotado">Agotado (0)</span>
+                  {% elif d.stock <= 3 %}
+                    <span class="badge-stock-bajo">{{ d.stock }} unid.</span>
+                  {% else %}
+                    <span>{{ d.stock }} unid.</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if d.activo %}
+                    <span class="badge-estado badge-estado-aprobado">Activo</span>
+                  {% else %}
+                    <span class="badge-estado badge-estado-rechazado">Inactivo</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div class="acciones-pedido-lista">
+                    <a class="boton boton-secundario boton-chico" href="{{ url_for('admin_discos_editar', id=d.id) }}">
+                      <span class="material-symbols-outlined" aria-hidden="true">edit</span>
+                      <span>Editar</span>
+                    </a>
                     {% if d.activo %}
-                      <span class="badge-estado badge-estado-aprobado">Activo</span>
+                      <form action="{{ url_for('admin_discos_desactivar', id=d.id) }}" method="post" onsubmit="return confirm('¿Desactivar este disco del catálogo público?');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="boton boton-chico boton-peligro" type="submit" title="Desactivar del catálogo">
+                          <span class="material-symbols-outlined" aria-hidden="true">visibility_off</span>
+                        </button>
+                      </form>
                     {% else %}
-                      <span class="badge-estado badge-estado-rechazado">Inactivo</span>
+                      <form action="{{ url_for('admin_discos_reactivar', id=d.id) }}" method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="boton boton-chico boton-exito" type="submit" title="Reactivar en el catálogo">
+                          <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
+                        </button>
+                      </form>
                     {% endif %}
-                  </td>
-                  <td>
-                    <div class="acciones-pedido-lista">
-                      <a class="boton boton-secundario boton-chico" href="{{ url_for('admin_discos_editar', id=d.id) }}">
-                        <span class="material-symbols-outlined" aria-hidden="true">edit</span>
-                        Editar
-                      </a>
-                      {% if d.activo %}
-                        <form action="{{ url_for('admin_discos_desactivar', id=d.id) }}" method="post" onsubmit="return confirm('¿Desactivar este disco del catálogo público?');">
-                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                          <button class="boton boton-chico boton-peligro" type="submit" title="Desactivar del catálogo">
-                            <span class="material-symbols-outlined" aria-hidden="true">visibility_off</span>
-                          </button>
-                        </form>
-                      {% else %}
-                        <form action="{{ url_for('admin_discos_reactivar', id=d.id) }}" method="post">
-                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                          <button class="boton boton-chico boton-exito" type="submit" title="Reactivar en el catálogo">
-                            <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
-                          </button>
-                        </form>
-                      {% endif %}
-                    </div>
-                  </td>
-                </tr>
-              {% else %}
-                <tr>
-                  <td colspan="9" class="texto-centrado">No hay discos registrados en el catálogo.</td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-
-      </section>
+                  </div>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="9" class="texto-centrado">No hay discos registrados en el catálogo.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </main>

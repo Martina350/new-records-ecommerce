@@ -3,48 +3,52 @@
 {% block titulo %}{% if categoria %}Editar Categoría: {{ categoria.nombre }}{% else %}Nueva Categoría{% endif %}{% endblock %}
 
 {% block contenido %}
-<main class="contacto-principal auth-seccion">
+<main class="seccion-admin">
   <div class="contenedor">
-    <div class="caja-formulario auth-caja admin-caja-form">
-      <section class="contenedor-formulario-contacto" aria-labelledby="titulo-form-cat">
-        
-        <div class="auth-cabecera">
-          <span class="material-symbols-outlined auth-icono" aria-hidden="true">category</span>
-          <h1 id="titulo-form-cat" class="titulo-formulario-contacto">
+    <div class="caja-formulario-admin-amplia">
+      <div class="admin-cabecera-info" style="margin-bottom: 2rem;">
+        <div class="admin-icono-grande">
+          <span class="material-symbols-outlined" aria-hidden="true">category</span>
+        </div>
+        <div>
+          <h1 id="titulo-form-cat" class="titulo-admin">
             {% if categoria %}
               Editar <span class="degradado">Categoría</span>
             {% else %}
               Nueva <span class="degradado">Categoría</span>
             {% endif %}
           </h1>
-          <p class="auth-subtitulo">
+          <p class="subtitulo-admin">
             {% if categoria %}
-              Modifica la información y slug del género musical.
+              Modifica la información, slug URL y visualización del género musical.
             {% else %}
-              Registra un nuevo género musical para organizar el catálogo.
+              Registra un nuevo género musical para organizar el catálogo de álbumes.
             {% endif %}
           </p>
         </div>
+      </div>
 
-        <form class="formulario-contacto" method="post">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-          <div class="campo-formulario">
-            <label class="etiqueta-formulario" for="nombre">Nombre de la Categoría <span class="requerido">*</span></label>
+      <form class="formulario-admin-amplio" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="grid-form-admin-2col">
+          <div class="campo-admin">
+            <label class="etiqueta-tarjeta" for="nombre">Nombre de la Categoría <span class="requerido">*</span></label>
             <input
-              class="entrada-formulario"
+              class="entrada-formulario entrada-tarjeta"
               type="text"
               id="nombre"
               name="nombre"
               value="{{ categoria.nombre if categoria else nombre | default('') }}"
-              placeholder="Ej. Heavy Metal, Jazz Fusión..."
+              placeholder="Ej. Heavy Metal, Jazz Fusión, Synthpop..."
               required
             />
           </div>
 
-          <div class="campo-formulario">
-            <label class="etiqueta-formulario" for="slug">Slug URL <span class="requerido">*</span></label>
+          <div class="campo-admin">
+            <label class="etiqueta-tarjeta" for="slug">Slug URL <span class="requerido">*</span></label>
             <input
-              class="entrada-formulario"
+              class="entrada-formulario entrada-tarjeta"
               type="text"
               id="slug"
               name="slug"
@@ -52,45 +56,44 @@
               placeholder="Ej. heavy-metal"
               required
             />
-            <span class="nota-campo">Identificador en la URL (solo letras minúsculas, números y guiones).</span>
+            <span class="nota-campo">Identificador único en la URL (letras minúsculas, números y guiones).</span>
           </div>
 
-          <div class="campo-formulario">
-            <label class="etiqueta-formulario" for="descripcion">Descripción</label>
+          <div class="campo-admin col-span-2">
+            <label class="etiqueta-tarjeta" for="descripcion">Descripción del Género</label>
             <textarea
-              class="entrada-formulario"
+              class="entrada-formulario entrada-tarjeta"
               id="descripcion"
               name="descripcion"
               rows="3"
-              placeholder="Breve reseña del género musical..."
+              placeholder="Breve reseña e historia del género musical..."
             >{{ categoria.descripcion if categoria else descripcion | default('') }}</textarea>
           </div>
 
-          <div class="campo-formulario">
-            <label class="etiqueta-formulario" for="imagen">Ruta de Imagen (opcional)</label>
+          <div class="campo-admin col-span-2">
+            <label class="etiqueta-tarjeta" for="imagen">Ruta de Imagen Representativa (Opcional)</label>
             <input
-              class="entrada-formulario"
+              class="entrada-formulario entrada-tarjeta"
               type="text"
               id="imagen"
               name="imagen"
               value="{{ categoria.imagen if categoria else imagen | default('') }}"
-              placeholder="Ej. /static/img/genero.jpg"
+              placeholder="Ej. img/genero.jpg"
             />
           </div>
+        </div>
 
-          <div class="grupo-botones-formulario">
-            <button class="boton boton-principal resplandor-neon" type="submit">
-              <span class="material-symbols-outlined" aria-hidden="true">save</span>
-              {% if categoria %}Guardar Cambios{% else %}Crear Categoría{% endif %}
-            </button>
-            <a class="boton boton-secundario" href="{{ url_for('admin_categorias_lista') }}">
-              <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
-              Cancelar
-            </a>
-          </div>
-        </form>
-
-      </section>
+        <div class="grupo-botones-tarjeta">
+          <button class="boton boton-principal resplandor-neon boton-accion-tarjeta" type="submit">
+            <span class="material-symbols-outlined" aria-hidden="true">save</span>
+            <span>{% if categoria %}Guardar Cambios{% else %}Crear Categoría{% endif %}</span>
+          </button>
+          <a class="boton boton-secundario boton-accion-tarjeta" href="{{ url_for('admin_categorias_lista') }}">
+            <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+            <span>Cancelar</span>
+          </a>
+        </div>
+      </form>
     </div>
   </div>
 </main>

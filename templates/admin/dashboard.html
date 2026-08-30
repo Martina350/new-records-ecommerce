@@ -3,155 +3,170 @@
 {% block titulo %}Panel de Administración{% endblock %}
 
 {% block contenido %}
-<main class="contacto-principal admin-seccion">
+<main class="seccion-admin">
   <div class="contenedor">
-    <div class="caja-formulario auth-caja admin-caja">
-      <section class="contenedor-formulario-contacto" aria-labelledby="titulo-admin">
-        <div class="admin-cabecera">
-          <span class="material-symbols-outlined admin-icono" aria-hidden="true">admin_panel_settings</span>
-          <h1 id="titulo-admin" class="titulo-formulario-contacto">
+    <!-- Cabecera Principal del Dashboard -->
+    <div class="admin-cabecera-principal">
+      <div class="admin-cabecera-info">
+        <div class="admin-icono-grande">
+          <span class="material-symbols-outlined" aria-hidden="true">admin_panel_settings</span>
+        </div>
+        <div>
+          <h1 id="titulo-admin" class="titulo-admin">
             Panel de <span class="degradado">Administración</span>
           </h1>
-          <p class="admin-subtitulo">
+          <p class="subtitulo-admin">
             Bienvenido al centro de control de New Records, <strong>{{ session.usuario_nombre }}</strong>.
           </p>
         </div>
+      </div>
 
-        <!-- Tarjetas de Métricas KPI -->
-        <div class="admin-kpi-grid">
-          <div class="admin-kpi-card">
-            <div class="admin-kpi-icono icono-discos">
-              <span class="material-symbols-outlined" aria-hidden="true">album</span>
-            </div>
-            <div class="admin-kpi-datos">
-              <span class="admin-kpi-numero">{{ stats.discos_activos }}</span>
-              <span class="admin-kpi-etiqueta">Discos Activos ({{ stats.total_discos }} total)</span>
-            </div>
-          </div>
+      <div class="admin-cabecera-acciones">
+        <a class="boton boton-principal resplandor-neon" href="{{ url_for('admin_discos_nuevo') }}">
+          <span class="material-symbols-outlined" aria-hidden="true">add</span>
+          <span>Nuevo Disco</span>
+        </a>
+        <a class="boton boton-secundario" href="{{ url_for('productos') }}" target="_blank">
+          <span class="material-symbols-outlined" aria-hidden="true">storefront</span>
+          <span>Ver Tienda</span>
+        </a>
+      </div>
+    </div>
 
-          <div class="admin-kpi-card">
-            <div class="admin-kpi-icono icono-categorias">
-              <span class="material-symbols-outlined" aria-hidden="true">category</span>
-            </div>
-            <div class="admin-kpi-datos">
-              <span class="admin-kpi-numero">{{ stats.total_categorias }}</span>
-              <span class="admin-kpi-etiqueta">Géneros Activos</span>
-            </div>
-          </div>
-
-          <div class="admin-kpi-card">
-            <div class="admin-kpi-icono icono-pendientes">
-              <span class="material-symbols-outlined" aria-hidden="true">pending_actions</span>
-            </div>
-            <div class="admin-kpi-datos">
-              <span class="admin-kpi-numero">{{ stats.pedidos_pendientes }}</span>
-              <span class="admin-kpi-etiqueta">Pedidos por Revisar</span>
-            </div>
-          </div>
-
-          <div class="admin-kpi-card">
-            <div class="admin-kpi-icono icono-facturado">
-              <span class="material-symbols-outlined" aria-hidden="true">payments</span>
-            </div>
-            <div class="admin-kpi-datos">
-              <span class="admin-kpi-numero">${{ "%.2f"|format(stats.total_facturado) }}</span>
-              <span class="admin-kpi-etiqueta">Total Facturado</span>
-            </div>
-          </div>
+    <!-- Tarjetas de Métricas KPI -->
+    <div class="admin-kpi-grid">
+      <div class="admin-kpi-card">
+        <div class="admin-kpi-icono icono-discos">
+          <span class="material-symbols-outlined" aria-hidden="true">album</span>
         </div>
-
-        <!-- Accesos Directos a Módulos Administrativos -->
-        <div class="admin-grid-modulos">
-          <a class="admin-tarjeta-modulo enlace-modulo" href="{{ url_for('admin_discos_lista') }}">
-            <span class="material-symbols-outlined admin-modulo-icono" aria-hidden="true">album</span>
-            <h3>Gestión de Discos</h3>
-            <p>Crear, editar, controlar stock y desactivar CD o Vinilos.</p>
-            <span class="badge badge-activo-admin">Administrar catálogo</span>
-          </a>
-
-          <a class="admin-tarjeta-modulo enlace-modulo" href="{{ url_for('admin_categorias_lista') }}">
-            <span class="material-symbols-outlined admin-modulo-icono" aria-hidden="true">category</span>
-            <h3>Gestión de Categorías</h3>
-            <p>Crear y editar géneros musicales y sus enlaces slug.</p>
-            <span class="badge badge-activo-admin">Administrar géneros</span>
-          </a>
-
-          <a class="admin-tarjeta-modulo enlace-modulo" href="{{ url_for('admin_pedidos_lista') }}">
-            <span class="material-symbols-outlined admin-modulo-icono" aria-hidden="true">shopping_cart_checkout</span>
-            <h3>Bandeja de Pedidos</h3>
-            <p>Revisión transaccional, aprobación y control de stock.</p>
-            <span class="badge badge-activo-admin">
-              {% if stats.pedidos_pendientes > 0 %}
-                {{ stats.pedidos_pendientes }} pendiente(s)
-              {% else %}
-                Ver pedidos
-              {% endif %}
-            </span>
-          </a>
-
-          <a class="admin-tarjeta-modulo enlace-modulo" href="{{ url_for('admin_reportes') }}">
-            <span class="material-symbols-outlined admin-modulo-icono" aria-hidden="true">monitoring</span>
-            <h3>Reportes de Ventas</h3>
-            <p>Analítica temporal, rankings de discos y ventas por género.</p>
-            <span class="badge badge-activo-admin">Ver estadísticas</span>
-          </a>
+        <div class="admin-kpi-datos">
+          <span class="admin-kpi-numero">{{ stats.discos_activos }}</span>
+          <span class="admin-kpi-etiqueta">Discos Activos ({{ stats.total_discos }} total)</span>
         </div>
+      </div>
 
-        <!-- Últimos Pedidos Registrados -->
-        {% if ultimos_pedidos %}
-          <div class="admin-seccion-bloque">
-            <h3 class="admin-subtitulo-bloque">
-              <span class="material-symbols-outlined" aria-hidden="true">history</span>
-              Últimos Pedidos Registrados
-            </h3>
-            <div class="tabla-carrito-contenedor">
-              <table class="tabla-carrito">
-                <thead>
-                  <tr>
-                    <th>N° Pedido</th>
-                    <th>Cliente</th>
-                    <th>Fecha</th>
-                    <th>Total</th>
-                    <th>Estado</th>
-                    <th>Acción</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for p in ultimos_pedidos %}
-                    <tr>
-                      <td><strong>{{ p.numero }}</strong></td>
-                      <td>{{ p.cliente.nombre }}</td>
-                      <td>{{ p.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}</td>
-                      <td><span class="precio-subtotal">${{ "%.2f"|format(p.total) }}</span></td>
-                      <td>
-                        <span class="badge-estado badge-estado-{{ p.estado | lower }}">
-                          {{ p.estado }}
-                        </span>
-                      </td>
-                      <td>
-                        <a class="boton boton-secundario boton-chico" href="{{ url_for('admin_pedido_detalle', numero=p.numero) }}">
-                          Revisar
-                        </a>
-                      </td>
-                    </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        {% endif %}
-
-        <div class="admin-acciones-pie">
-          <a class="boton boton-secundario" href="{{ url_for('inicio') }}">
-            <span class="material-symbols-outlined" aria-hidden="true">storefront</span>
-            Ver Tienda Pública
-          </a>
-          <a class="boton boton-destacado" href="{{ url_for('perfil') }}">
-            <span class="material-symbols-outlined" aria-hidden="true">person</span>
-            Mi Perfil
-          </a>
+      <div class="admin-kpi-card">
+        <div class="admin-kpi-icono icono-categorias">
+          <span class="material-symbols-outlined" aria-hidden="true">category</span>
         </div>
-      </section>
+        <div class="admin-kpi-datos">
+          <span class="admin-kpi-numero">{{ stats.total_categorias }}</span>
+          <span class="admin-kpi-etiqueta">Géneros Activos</span>
+        </div>
+      </div>
+
+      <div class="admin-kpi-card">
+        <div class="admin-kpi-icono icono-pendientes">
+          <span class="material-symbols-outlined" aria-hidden="true">pending_actions</span>
+        </div>
+        <div class="admin-kpi-datos">
+          <span class="admin-kpi-numero">{{ stats.pedidos_pendientes }}</span>
+          <span class="admin-kpi-etiqueta">Pedidos por Revisar</span>
+        </div>
+      </div>
+
+      <div class="admin-kpi-card">
+        <div class="admin-kpi-icono icono-facturado">
+          <span class="material-symbols-outlined" aria-hidden="true">payments</span>
+        </div>
+        <div class="admin-kpi-datos">
+          <span class="admin-kpi-numero">${{ "%.2f"|format(stats.total_facturado) }}</span>
+          <span class="admin-kpi-etiqueta">Total Facturado</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Accesos Directos a Módulos Administrativos -->
+    <div class="admin-grid-modulos">
+      <a class="admin-tarjeta-modulo enlace-modulo" href="{{ url_for('admin_discos_lista') }}">
+        <span class="material-symbols-outlined admin-modulo-icono" aria-hidden="true">album</span>
+        <h3>Gestión de Discos</h3>
+        <p>Crear, editar, controlar stock físico y desactivar CD o Vinilos del catálogo.</p>
+        <span class="badge-activo-admin">Administrar catálogo</span>
+      </a>
+
+      <a class="admin-tarjeta-modulo enlace-modulo" href="{{ url_for('admin_categorias_lista') }}">
+        <span class="material-symbols-outlined admin-modulo-icono" aria-hidden="true">category</span>
+        <h3>Gestión de Categorías</h3>
+        <p>Crear y editar géneros musicales, slugs URL y organización general.</p>
+        <span class="badge-activo-admin">Administrar géneros</span>
+      </a>
+
+      <a class="admin-tarjeta-modulo enlace-modulo" href="{{ url_for('admin_pedidos_lista') }}">
+        <span class="material-symbols-outlined admin-modulo-icono" aria-hidden="true">shopping_cart_checkout</span>
+        <h3>Bandeja de Pedidos</h3>
+        <p>Revisión transaccional, aprobación y control de stock en tiempo real.</p>
+        <span class="badge-activo-admin">
+          {% if stats.pedidos_pendientes > 0 %}
+            {{ stats.pedidos_pendientes }} pendiente(s)
+          {% else %}
+            Ver pedidos
+          {% endif %}
+        </span>
+      </a>
+
+      <a class="admin-tarjeta-modulo enlace-modulo" href="{{ url_for('admin_reportes') }}">
+        <span class="material-symbols-outlined admin-modulo-icono" aria-hidden="true">monitoring</span>
+        <h3>Reportes de Ventas</h3>
+        <p>Analítica temporal, rankings de discos y cuota de ventas por género.</p>
+        <span class="badge-activo-admin">Ver estadísticas</span>
+      </a>
+    </div>
+
+    <!-- Últimos Pedidos Registrados -->
+    {% if ultimos_pedidos %}
+      <div class="admin-seccion-bloque">
+        <h3 class="admin-subtitulo-bloque">
+          <span class="material-symbols-outlined" aria-hidden="true">history</span>
+          <span>Últimos Pedidos Registrados</span>
+        </h3>
+        <div class="tabla-carrito-contenedor">
+          <table class="tabla-carrito">
+            <thead>
+              <tr>
+                <th>N° Pedido</th>
+                <th>Cliente</th>
+                <th>Fecha</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in ultimos_pedidos %}
+                <tr>
+                  <td><strong>{{ p.numero }}</strong></td>
+                  <td>{{ p.cliente.nombre }}</td>
+                  <td>{{ p.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}</td>
+                  <td><span class="precio-subtotal">${{ "%.2f"|format(p.total) }}</span></td>
+                  <td>
+                    <span class="badge-estado badge-estado-{{ p.estado | lower }}">
+                      {{ p.estado }}
+                    </span>
+                  </td>
+                  <td>
+                    <a class="boton boton-secundario boton-chico" href="{{ url_for('admin_pedido_detalle', numero=p.numero) }}">
+                      <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
+                      <span>Revisar</span>
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% endif %}
+
+    <div class="admin-acciones-pie">
+      <a class="boton boton-secundario" href="{{ url_for('inicio') }}">
+        <span class="material-symbols-outlined" aria-hidden="true">storefront</span>
+        <span>Ver Tienda Pública</span>
+      </a>
+      <a class="boton boton-destacado" href="{{ url_for('perfil') }}">
+        <span class="material-symbols-outlined" aria-hidden="true">person</span>
+        <span>Mi Perfil</span>
+      </a>
     </div>
   </div>
 </main>

@@ -3,98 +3,99 @@
 {% block titulo %}Bandeja de Pedidos — Administración{% endblock %}
 
 {% block contenido %}
-<main class="contacto-principal admin-seccion">
+<main class="seccion-admin">
   <div class="contenedor">
-    <div class="caja-formulario auth-caja admin-caja">
-      <section class="contenedor-formulario-contacto" aria-labelledby="titulo-admin-pedidos">
-        
-        <div class="admin-cabecera-con-accion">
-          <div>
-            <span class="material-symbols-outlined admin-icono" aria-hidden="true">shopping_cart_checkout</span>
-            <h1 id="titulo-admin-pedidos" class="titulo-formulario-contacto">
-              Bandeja de <span class="degradado">Pedidos</span>
-            </h1>
-            <p class="admin-subtitulo">
-              Control transaccional, validación de stock físico, aprobación y rechazo.
-            </p>
-          </div>
-          <div class="admin-cabecera-botones">
-            <a class="boton boton-secundario" href="{{ url_for('admin_dashboard') }}">
-              <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
-              Dashboard
-            </a>
-          </div>
+    <div class="admin-cabecera-principal">
+      <div class="admin-cabecera-info">
+        <div class="admin-icono-grande">
+          <span class="material-symbols-outlined" aria-hidden="true">shopping_cart_checkout</span>
         </div>
-
-        <!-- Pestañas de Filtro por Estado -->
-        <div class="admin-filtros-pedidos">
-          <a class="boton-filtro-tab {% if not estado_filtro %}activo{% endif %}" href="{{ url_for('admin_pedidos_lista') }}">
-            Todos
-          </a>
-          <a class="boton-filtro-tab {% if estado_filtro == 'PENDIENTE' %}activo{% endif %}" href="{{ url_for('admin_pedidos_lista', estado='PENDIENTE') }}">
-            <span class="material-symbols-outlined icono-tab" aria-hidden="true">schedule</span>
-            Pendientes
-          </a>
-          <a class="boton-filtro-tab {% if estado_filtro == 'APROBADO' %}activo{% endif %}" href="{{ url_for('admin_pedidos_lista', estado='APROBADO') }}">
-            <span class="material-symbols-outlined icono-tab" aria-hidden="true">check_circle</span>
-            Aprobados
-          </a>
-          <a class="boton-filtro-tab {% if estado_filtro == 'RECHAZADO' %}activo{% endif %}" href="{{ url_for('admin_pedidos_lista', estado='RECHAZADO') }}">
-            <span class="material-symbols-outlined icono-tab" aria-hidden="true">cancel</span>
-            Rechazados
-          </a>
+        <div>
+          <h1 id="titulo-admin-pedidos" class="titulo-admin">
+            Bandeja de <span class="degradado">Pedidos</span>
+          </h1>
+          <p class="subtitulo-admin">
+            Control transaccional, validación de stock físico, auditoría, aprobación y facturación.
+          </p>
         </div>
+      </div>
 
-        <div class="tabla-carrito-contenedor">
-          <table class="tabla-carrito">
-            <thead>
+      <div class="admin-cabecera-acciones">
+        <a class="boton boton-secundario" href="{{ url_for('admin_dashboard') }}">
+          <span class="material-symbols-outlined" aria-hidden="true">dashboard</span>
+          <span>Dashboard</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Pestañas de Filtro por Estado -->
+    <div class="admin-filtros-pedidos">
+      <a class="boton-filtro-tab {% if not estado_filtro %}activo{% endif %}" href="{{ url_for('admin_pedidos_lista') }}">
+        <span>Todos</span>
+      </a>
+      <a class="boton-filtro-tab {% if estado_filtro == 'PENDIENTE' %}activo{% endif %}" href="{{ url_for('admin_pedidos_lista', estado='PENDIENTE') }}">
+        <span class="material-symbols-outlined" aria-hidden="true">schedule</span>
+        <span>Pendientes</span>
+      </a>
+      <a class="boton-filtro-tab {% if estado_filtro == 'APROBADO' %}activo{% endif %}" href="{{ url_for('admin_pedidos_lista', estado='APROBADO') }}">
+        <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+        <span>Aprobados</span>
+      </a>
+      <a class="boton-filtro-tab {% if estado_filtro == 'RECHAZADO' %}activo{% endif %}" href="{{ url_for('admin_pedidos_lista', estado='RECHAZADO') }}">
+        <span class="material-symbols-outlined" aria-hidden="true">cancel</span>
+        <span>Rechazados</span>
+      </a>
+    </div>
+
+    <div class="admin-seccion-bloque">
+      <div class="tabla-carrito-contenedor">
+        <table class="tabla-carrito">
+          <thead>
+            <tr>
+              <th>Número de Pedido</th>
+              <th>Cliente</th>
+              <th>Fecha de Compra</th>
+              <th>Método de Pago</th>
+              <th>Total</th>
+              <th>Estado</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in pedidos %}
               <tr>
-                <th>Número de Pedido</th>
-                <th>Cliente</th>
-                <th>Fecha de Compra</th>
-                <th>Método de Pago</th>
-                <th>Total</th>
-                <th>Estado</th>
-                <th>Acción</th>
+                <td><strong>{{ p.numero }}</strong></td>
+                <td>
+                  <span>{{ p.cliente.nombre }}</span><br/>
+                  <small class="artista-disco-carrito">{{ p.cliente.email }}</small>
+                </td>
+                <td>{{ p.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}</td>
+                <td>
+                  <span class="metodo-tarjeta-resumen">
+                    {{ p.metodo_pago.marca }} **** {{ p.metodo_pago.ultimos4 }}
+                  </span>
+                </td>
+                <td><span class="precio-subtotal">${{ "%.2f"|format(p.total) }}</span></td>
+                <td>
+                  <span class="badge-estado badge-estado-{{ p.estado | lower }}">
+                    {{ p.estado }}
+                  </span>
+                </td>
+                <td>
+                  <a class="boton boton-secundario boton-chico" href="{{ url_for('admin_pedido_detalle', numero=p.numero) }}">
+                    <span class="material-symbols-outlined" aria-hidden="true">rate_review</span>
+                    <span>Auditar Pedido</span>
+                  </a>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {% for p in pedidos %}
-                <tr>
-                  <td><strong>{{ p.numero }}</strong></td>
-                  <td>
-                    <span>{{ p.cliente.nombre }}</span><br/>
-                    <small class="artista-disco-carrito">{{ p.cliente.email }}</small>
-                  </td>
-                  <td>{{ p.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}</td>
-                  <td>
-                    <span class="metodo-tarjeta-resumen">
-                      {{ p.metodo_pago.marca }} **** {{ p.metodo_pago.ultimos4 }}
-                    </span>
-                  </td>
-                  <td><span class="precio-subtotal">${{ "%.2f"|format(p.total) }}</span></td>
-                  <td>
-                    <span class="badge-estado badge-estado-{{ p.estado | lower }}">
-                      {{ p.estado }}
-                    </span>
-                  </td>
-                  <td>
-                    <a class="boton boton-secundario boton-chico" href="{{ url_for('admin_pedido_detalle', numero=p.numero) }}">
-                      <span class="material-symbols-outlined" aria-hidden="true">rate_review</span>
-                      Auditar Pedido
-                    </a>
-                  </td>
-                </tr>
-              {% else %}
-                <tr>
-                  <td colspan="7" class="texto-centrado">No hay pedidos registrados con el filtro seleccionado.</td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-
-      </section>
+            {% else %}
+              <tr>
+                <td colspan="7" class="texto-centrado">No hay pedidos registrados con el filtro seleccionado.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </main>
