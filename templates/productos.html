@@ -36,14 +36,14 @@
             </label>
             <div class="contenedor-select-estilizado">
               <select 
-                class="select-filtro-categoria" 
+                class="select-filtro-categoria select-custom" 
                 name="categoria" 
                 id="filtroCategoria"
                 onchange="document.getElementById('formFiltroProductos').requestSubmit()"
                 aria-label="Filtrar por género musical"
               >
                 <option value="todos"{% if categoria_slug == 'todos' or not categoria_slug %} selected{% endif %}>
-                  Todos los géneros ({{ categorias|length }} disponibles)
+                  Todos los géneros
                 </option>
                 {% for cat in categorias %}
                   <option value="{{ cat.slug }}"{% if categoria_slug == cat.slug %} selected{% endif %}>
@@ -51,7 +51,6 @@
                   </option>
                 {% endfor %}
               </select>
-              <span class="material-symbols-outlined icono-select-flecha" aria-hidden="true">expand_more</span>
             </div>
           </div>
 
@@ -71,10 +70,6 @@
               </a>
             {% endif %}
           </div>
-          <button class="boton boton-principal boton-chico" type="submit">
-            <span class="material-symbols-outlined" aria-hidden="true">search</span>
-            <span>Buscar</span>
-          </button>
         </form>
       </div>
 

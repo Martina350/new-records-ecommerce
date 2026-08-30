@@ -4,20 +4,7 @@ function inicializarAplicacion() {
   inicializarNavLanding();
   inicializarModalesAuth();
   inicializarValidacionesAuth();
-
-  const formulario = document.getElementById('contactForm');
-  if (formulario) {
-    formulario.addEventListener('submit', (e) => {
-      e.preventDefault();
-
-      if (validarFormulario()) {
-        mostrarExito(formulario);
-      } else {
-        alert('Por favor, corrige los errores en el formulario.');
-      }
-    }, { capture: true });
-  }
-
+  inicializarCustomSelects();
   configurarFormularioTarjeta();
 }
 
@@ -116,28 +103,11 @@ function inicializarNavLanding() {
 function inicializarSidebar() {
   const sidebar = document.getElementById('sidebar');
   const layoutApp = document.getElementById('layoutApp');
-  const btnColapso = document.getElementById('btnColapsoSidebar');
   const btnMobileToggle = document.getElementById('btnToggleSidebarMobile');
   const btnMobileClose = document.getElementById('btnCerrarSidebarMobile');
   const backdrop = document.getElementById('sidebarBackdrop');
 
   if (!sidebar) return;
-
-  // Restaurar estado de colapso en Desktop desde localStorage
-  const sidebarGuardadoColapsado = localStorage.getItem('sidebar_colapsado') === 'true';
-  if (sidebarGuardadoColapsado && window.innerWidth >= 1024) {
-    sidebar.classList.add('is-collapsed');
-    if (layoutApp) layoutApp.classList.add('sidebar-colapsada');
-  }
-
-  // Alternar Colapso en Desktop
-  if (btnColapso) {
-    btnColapso.addEventListener('click', () => {
-      const estaColapsado = sidebar.classList.toggle('is-collapsed');
-      if (layoutApp) layoutApp.classList.toggle('sidebar-colapsada', estaColapsado);
-      localStorage.setItem('sidebar_colapsado', String(estaColapsado));
-    });
-  }
 
   // Apertura y Cierre en Dispositivos Móviles
   const toggleMobileSidebar = (abrir) => {
@@ -693,3 +663,162 @@ function inicializarValidacionesAuth() {
     }, { capture: true });
   });
 }
+
+/**
+ * Sistema de Selects y Desplegables Personalizados con Estilos Neón / Dark
+ */
+function inicializarCustomSelects() {
+  const selects = document.querySelectorAll('select.select-custom, .contenedor-select-estilizado select, .campo-formulario select, select.select-filtro-categoria, select.entrada-formulario');
+
+  selects.forEach((select) => {
+    if (select.dataset.customized === 'true') {
+      const wrapper = select.closest('.custom-select-wrapper');
+      if (wrapper) {
+        const label = wrapper.querySelector('.custom-select-label');
+        const selectedOption = select.options[select.selectedIndex];
+        if (label && selectedOption) {
+          label.textContent = selectedOption.textContent.trim();
+        }
+      }
+      return;
+    }
+
+    select.dataset.customized = 'true';
+
+    // Crear Contenedor Wrapper
+    const wrapper = document.createElement('div');
+    wrapper.className = 'custom-select-wrapper';
+    select.parentNode.insertBefore(wrapper, select);
+    wrapper.appendChild(select);
+
+    // Botón Desplegable (Trigger)
+    const trigger = document.createElement('button');
+    trigger.type = 'button';
+    trigger.className = 'custom-select-trigger';
+    trigger.setAttribute('aria-haspopup', 'listbox');
+    trigger.setAttribute('aria-expanded', 'false');
+
+    const selectedOption = select.options[select.selectedIndex] || select.options[0];
+    const triggerLabel = document.createElement('span');
+    triggerLabel.className = 'custom-select-label';
+    triggerLabel.textContent = selectedOption ? selectedOption.textContent.trim() : '';
+
+    const triggerIcon = document.createElement('span');
+    triggerIcon.className = 'material-symbols-outlined icono-select-flecha';
+    triggerIcon.setAttribute('aria-hidden', 'true');
+    triggerIcon.textContent = 'expand_more';
+
+    trigger.appendChild(triggerLabel);
+    trigger.appendChild(triggerIcon);
+    wrapper.appendChild(trigger);
+
+    // Menú de Opciones Flotante
+    const menu = document.createElement('div');
+    menu.className = 'custom-select-menu';
+    menu.setAttribute('role', 'listbox');
+
+    const renderOptions = () => {
+      menu.innerHTML = '';
+      Array.from(select.options).forEach((opt, idx) => {
+        const optionEl = document.createElement('div');
+        optionEl.className = `custom-select-option ${opt.selected ? 'seleccionado' : ''}`;
+        optionEl.setAttribute('role', 'option');
+        optionEl.setAttribute('data-value', opt.value);
+        if (opt.disabled) optionEl.classList.add('deshabilitado');
+
+        const optionText = document.createElement('span');
+        optionText.textContent = opt.textContent.trim();
+        optionEl.appendChild(optionText);
+
+        if (opt.selected) {
+          const checkIcon = document.createElement('span');
+          checkIcon.className = 'material-symbols-outlined icono-check';
+          checkIcon.textContent = 'check';
+          optionEl.appendChild(checkIcon);
+        }
+
+        optionEl.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (opt.disabled) return;
+
+          select.selectedIndex = idx;
+          triggerLabel.textContent = opt.textContent.trim();
+
+          menu.querySelectorAll('.custom-select-option').forEach((el) => {
+            el.classList.remove('seleccionado');
+            const check = el.querySelector('.icono-check');
+            if (check) check.remove();
+          });
+          optionEl.classList.add('seleccionado');
+          const checkIcon = document.createElement('span');
+          checkIcon.className = 'material-symbols-outlined icono-check';
+          checkIcon.textContent = 'check';
+          optionEl.appendChild(checkIcon);
+
+          wrapper.classList.remove('abierto');
+          trigger.setAttribute('aria-expanded', 'false');
+
+          select.dispatchEvent(new Event('change', { bubbles: true }));
+          select.dispatchEvent(new Event('input', { bubbles: true }));
+
+          if (typeof select.onchange === 'function') {
+            select.onchange();
+          }
+        });
+
+        menu.appendChild(optionEl);
+      });
+    };
+
+    renderOptions();
+    wrapper.appendChild(menu);
+
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const estaAbierto = wrapper.classList.contains('abierto');
+      document.querySelectorAll('.custom-select-wrapper.abierto').forEach((w) => {
+        if (w !== wrapper) {
+          w.classList.remove('abierto');
+          const tr = w.querySelector('.custom-select-trigger');
+          if (tr) tr.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      if (estaAbierto) {
+        wrapper.classList.remove('abierto');
+        trigger.setAttribute('aria-expanded', 'false');
+      } else {
+        renderOptions();
+        wrapper.classList.add('abierto');
+        trigger.setAttribute('aria-expanded', 'true');
+      }
+    });
+
+    select.addEventListener('change', () => {
+      const actualOpt = select.options[select.selectedIndex];
+      if (actualOpt) {
+        triggerLabel.textContent = actualOpt.textContent.trim();
+        renderOptions();
+      }
+    });
+  });
+}
+
+document.addEventListener('click', () => {
+  document.querySelectorAll('.custom-select-wrapper.abierto').forEach((w) => {
+    w.classList.remove('abierto');
+    const tr = w.querySelector('.custom-select-trigger');
+    if (tr) tr.setAttribute('aria-expanded', 'false');
+  });
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.custom-select-wrapper.abierto').forEach((w) => {
+      w.classList.remove('abierto');
+      const tr = w.querySelector('.custom-select-trigger');
+      if (tr) tr.setAttribute('aria-expanded', 'false');
+    });
+  }
+});
+

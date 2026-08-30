@@ -221,12 +221,6 @@ def detalle_producto(codigo):
     )
 
 
-@app.route("/contacto")
-def contacto():
-    """Muestra el formulario de contacto del prototipo."""
-    return render_template("contacto.html")
-
-
 @app.route("/registro", methods=["GET", "POST"])
 def registro():
     """Registra una nueva cuenta pública asignando siempre el rol cliente."""

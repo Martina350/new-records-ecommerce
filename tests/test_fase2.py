@@ -7,7 +7,7 @@ from app import app
 
 @pytest.mark.parametrize(
     "ruta",
-    ["/", "/categorias", "/productos", "/contacto"],
+    ["/", "/categorias", "/productos"],
 )
 def test_paginas_publicas_responden(client, ruta):
     respuesta = client.get(ruta)

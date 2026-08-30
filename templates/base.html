@@ -103,14 +103,9 @@
         <!-- Encabezado del Sidebar -->
         <div class="sidebar-header">
           <a class="enlace-logo-sidebar" href="{{ url_for('admin_dashboard') if es_admin else (url_for('productos') if esta_autenticado else url_for('inicio')) }}">
-            <div class="contenedor-icono-logo">
-              <span class="material-symbols-outlined icono-logo-sidebar" aria-hidden="true">album</span>
-            </div>
+            <span class="material-symbols-outlined icono-logo-sidebar" aria-hidden="true">album</span>
             <span class="texto-logo-sidebar">New Records</span>
           </a>
-          <button class="btn-colapso-sidebar" id="btnColapsoSidebar" type="button" aria-label="Alternar tamaño del menú lateral" title="Colapsar / Expandir menú">
-            <span class="material-symbols-outlined icono-colapso" aria-hidden="true">menu_open</span>
-          </button>
           <button class="btn-cerrar-sidebar-mobile" id="btnCerrarSidebarMobile" type="button" aria-label="Cerrar menú lateral">
             <span class="material-symbols-outlined" aria-hidden="true">close</span>
           </button>
@@ -208,12 +203,6 @@
                     <span class="texto-item-sidebar">Catálogo Público</span>
                   </a>
                 </li>
-                <li class="item-menu-sidebar">
-                  <a class="enlace-sidebar{% if request.endpoint == 'perfil' %} activo{% endif %}" href="{{ url_for('perfil') }}" title="Mi Perfil">
-                    <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">account_circle</span>
-                    <span class="texto-item-sidebar">Mi Perfil</span>
-                  </a>
-                </li>
               </ul>
             </div>
 
@@ -264,24 +253,6 @@
               </ul>
             </div>
 
-            <div class="modulo-sidebar">
-              <span class="modulo-titulo">Cuenta y Ayuda</span>
-              <ul class="lista-menu-sidebar">
-                <li class="item-menu-sidebar">
-                  <a class="enlace-sidebar{% if request.endpoint == 'perfil' %} activo{% endif %}" href="{{ url_for('perfil') }}" title="Mi Perfil">
-                    <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">account_circle</span>
-                    <span class="texto-item-sidebar">Mi Perfil</span>
-                  </a>
-                </li>
-                <li class="item-menu-sidebar">
-                  <a class="enlace-sidebar{% if request.endpoint == 'contacto' %} activo{% endif %}" href="{{ url_for('contacto') }}" title="Contacto y Soporte">
-                    <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">mail</span>
-                    <span class="texto-item-sidebar">Contacto</span>
-                  </a>
-                </li>
-              </ul>
-            </div>
-
           {% else %}
             <!-- MENÚ USUARIO INVITADO (Vistas internas sin login) -->
             <div class="modulo-sidebar">
@@ -303,12 +274,6 @@
                   <a class="enlace-sidebar{% if request.endpoint in ['productos', 'detalle_producto'] %} activo{% endif %}" href="{{ url_for('productos') }}" title="Catálogo de Productos">
                     <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">album</span>
                     <span class="texto-item-sidebar">Productos</span>
-                  </a>
-                </li>
-                <li class="item-menu-sidebar">
-                  <a class="enlace-sidebar{% if request.endpoint == 'contacto' %} activo{% endif %}" href="{{ url_for('contacto') }}" title="Contacto y Soporte">
-                    <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">mail</span>
-                    <span class="texto-item-sidebar">Contacto</span>
                   </a>
                 </li>
               </ul>
