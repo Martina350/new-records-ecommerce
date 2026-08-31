@@ -9,6 +9,7 @@ function inicializarAplicacion() {
   inicializarResumenCarrito();
   inicializarCheckoutHorizontal();
   inicializarAcordeonPedidosMovil();
+  inicializarDropdownAdmin();
 }
 
 function sincronizarClaseBody(evento) {
@@ -936,5 +937,51 @@ function inicializarAcordeonPedidosMovil() {
   });
 }
 
+/**
+ * Control Interactivo y Accesible del Dropdown de Perfil en el Dashboard de Administración
+ */
+function inicializarDropdownAdmin() {
+  const dropdown = document.getElementById('dropdownUsuarioAdmin');
+  if (!dropdown) return;
 
+  const trigger = document.getElementById('btnTriggerUsuario');
+  const menu = document.getElementById('menuDropdownAdmin');
+  if (!trigger || !menu) return;
 
+  // Evitar vincular múltiples veces los mismos listeners si HTMX re-ejecuta
+  if (dropdown.dataset.inicializado === 'true') return;
+  dropdown.dataset.inicializado = 'true';
+
+  const abrirMenu = () => {
+    trigger.setAttribute('aria-expanded', 'true');
+    menu.classList.add('abierto');
+  };
+
+  const cerrarMenu = () => {
+    trigger.setAttribute('aria-expanded', 'false');
+    menu.classList.remove('abierto');
+  };
+
+  trigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const estaAbierto = trigger.getAttribute('aria-expanded') === 'true';
+    if (estaAbierto) {
+      cerrarMenu();
+    } else {
+      abrirMenu();
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!dropdown.contains(e.target)) {
+      cerrarMenu();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && trigger.getAttribute('aria-expanded') === 'true') {
+      cerrarMenu();
+      trigger.focus();
+    }
+  });
+}

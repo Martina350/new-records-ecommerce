@@ -8898,4 +8898,306 @@ select option {
   }
 }
 
+/* ==========================================================================
+   Consolidación y Dropdown de Usuario - Dashboard Admin
+   ========================================================================== */
+
+.admin-cabecera-principal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.75rem 2rem;
+  background: rgba(18, 18, 18, 0.7);
+  border: 1px solid rgba(138, 44, 226, 0.2);
+  border-radius: 1rem;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  margin-bottom: 2rem;
+}
+
+.admin-cabecera-info {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.admin-icono-grande {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, rgba(138, 44, 226, 0.25), rgba(0, 255, 65, 0.1));
+  border: 1px solid rgba(138, 44, 226, 0.3);
+  color: var(--accent, #00FF41);
+}
+
+.admin-icono-grande .material-symbols-outlined {
+  font-size: 2rem;
+}
+
+.titulo-admin {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.subtitulo-admin {
+  margin: 0.35rem 0 0;
+  font-size: 0.95rem;
+  color: var(--text-muted-dark, #94a3b8);
+}
+
+.admin-cabecera-acciones {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  position: relative;
+}
+
+/* Botón secundario con indicativo de enlace externo */
+.boton-vista-tienda {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-light, #f8fafc);
+  padding: 0.65rem 1rem;
+  border-radius: 0.6rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.boton-vista-tienda:hover {
+  background: rgba(138, 44, 226, 0.15);
+  border-color: var(--primary, #8a2ce2);
+  transform: translateY(-1px);
+}
+
+.icono-externo {
+  font-size: 1rem !important;
+  opacity: 0.7;
+}
+
+/* Contenedor del Dropdown de Perfil */
+.dropdown-usuario-admin {
+  position: relative;
+}
+
+/* Botón Trigger */
+.btn-trigger-usuario {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(138, 44, 226, 0.25);
+  border-radius: 2rem;
+  padding: 0.35rem 0.85rem 0.35rem 0.4rem;
+  color: var(--text-light, #f8fafc);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.btn-trigger-usuario:hover,
+.btn-trigger-usuario[aria-expanded="true"] {
+  background: rgba(138, 44, 226, 0.18);
+  border-color: var(--primary, #8a2ce2);
+  box-shadow: 0 0 14px rgba(138, 44, 226, 0.35);
+}
+
+/* Avatar con gradiente */
+.avatar-admin-badge {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary, #8a2ce2), #581c87);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.meta-usuario-cabecera {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  line-height: 1.15;
+}
+
+.nombre-admin {
+  font-size: 0.875rem;
+  font-weight: 600;
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rol-badge {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  color: var(--accent, #00FF41);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.icono-flecha-dropdown {
+  font-size: 1.2rem !important;
+  color: var(--text-muted-dark, #94a3b8);
+  transition: transform 0.25s ease;
+}
+
+.btn-trigger-usuario[aria-expanded="true"] .icono-flecha-dropdown {
+  transform: rotate(180deg);
+}
+
+/* Panel Desplegable */
+.menu-dropdown-admin {
+  position: absolute;
+  top: calc(100% + 0.65rem);
+  right: 0;
+  width: 240px;
+  background: #18181b;
+  border: 1px solid rgba(138, 44, 226, 0.35);
+  border-radius: 0.85rem;
+  padding: 0.5rem;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.65), 0 0 20px rgba(138, 44, 226, 0.15);
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px) scale(0.96);
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), 
+              transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), 
+              visibility 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.menu-dropdown-admin.abierto {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+/* Cabecera interna del Dropdown */
+.dropdown-header-info {
+  padding: 0.6rem 0.75rem;
+}
+
+.dropdown-usuario-nombre {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.dropdown-usuario-email {
+  margin: 0.2rem 0 0;
+  font-size: 0.75rem;
+  color: var(--text-muted-dark, #94a3b8);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropdown-divisor {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 0.35rem 0;
+}
+
+.dropdown-items-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dropdown-enlace,
+.dropdown-btn-logout {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-light, #f8fafc);
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.dropdown-enlace:hover,
+.dropdown-enlace:focus-visible {
+  background: rgba(138, 44, 226, 0.15);
+  color: #ffffff;
+  outline: none;
+}
+
+.form-logout-dropdown {
+  margin: 0;
+  padding: 0;
+}
+
+.dropdown-btn-logout {
+  color: #f87171;
+}
+
+.dropdown-btn-logout:hover,
+.dropdown-btn-logout:focus-visible {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  outline: none;
+}
+
+@media (max-width: 900px) {
+  .admin-cabecera-principal {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.25rem;
+  }
+  
+  .admin-cabecera-acciones {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 580px) {
+  .admin-cabecera-acciones {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-cabecera-acciones > * {
+    width: 100%;
+  }
+
+  .btn-trigger-usuario {
+    justify-content: space-between;
+  }
+
+  .menu-dropdown-admin {
+    width: 100%;
+    right: 0;
+  }
+}
+
+
 

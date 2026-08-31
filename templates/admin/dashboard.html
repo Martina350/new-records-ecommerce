@@ -23,13 +23,78 @@
 
       <div class="admin-cabecera-acciones">
         <a class="boton boton-principal resplandor-neon" href="{{ url_for('admin_discos_nuevo') }}">
-          <span class="material-symbols-outlined" aria-hidden="true">add</span>
+          <span class="material-symbols-outlined" aria-hidden="true">add_circle</span>
           <span>Nuevo Disco</span>
         </a>
-        <a class="boton boton-secundario" href="{{ url_for('productos') }}" target="_blank">
+        <a class="boton boton-secundario boton-vista-tienda" href="{{ url_for('productos') }}" target="_blank" rel="noopener noreferrer" title="Abrir tienda pública en nueva pestaña">
           <span class="material-symbols-outlined" aria-hidden="true">storefront</span>
           <span>Ver Tienda</span>
+          <span class="material-symbols-outlined icono-externo" aria-hidden="true">open_in_new</span>
         </a>
+
+        <!-- Dropdown de Perfil de Usuario Administrador -->
+        <div class="dropdown-usuario-admin" id="dropdownUsuarioAdmin">
+          <button 
+            type="button" 
+            class="btn-trigger-usuario" 
+            id="btnTriggerUsuario"
+            aria-expanded="false" 
+            aria-haspopup="true"
+            aria-controls="menuDropdownAdmin"
+            aria-label="Menú de cuenta de {{ session.usuario_nombre }}"
+          >
+            <div class="avatar-admin-badge" aria-hidden="true">
+              {{ usuario_iniciales or session.usuario_nombre[:2]|upper }}
+            </div>
+            <div class="meta-usuario-cabecera">
+              <span class="nombre-admin">{{ session.usuario_nombre }}</span>
+              <span class="rol-badge">Admin</span>
+            </div>
+            <span class="material-symbols-outlined icono-flecha-dropdown" aria-hidden="true">expand_more</span>
+          </button>
+
+          <div class="menu-dropdown-admin" id="menuDropdownAdmin" role="menu" aria-labelledby="btnTriggerUsuario">
+            <div class="dropdown-header-info">
+              <p class="dropdown-usuario-nombre">{{ usuario_actual.nombre if usuario_actual else session.usuario_nombre }}</p>
+              <p class="dropdown-usuario-email">{{ usuario_actual.email if usuario_actual else session.usuario_email }}</p>
+            </div>
+
+            <div class="dropdown-divisor" role="separator"></div>
+
+            <ul class="dropdown-items-lista">
+              <li role="none">
+                <a class="dropdown-enlace" href="{{ url_for('perfil') }}" role="menuitem">
+                  <span class="material-symbols-outlined" aria-hidden="true">person</span>
+                  <span>Mi Perfil</span>
+                </a>
+              </li>
+              <li role="none">
+                <a class="dropdown-enlace" href="{{ url_for('admin_reportes') }}" role="menuitem">
+                  <span class="material-symbols-outlined" aria-hidden="true">monitoring</span>
+                  <span>Reportes de Ventas</span>
+                </a>
+              </li>
+              <li role="none">
+                <a class="dropdown-enlace" href="{{ url_for('inicio') }}" role="menuitem">
+                  <span class="material-symbols-outlined" aria-hidden="true">public</span>
+                  <span>Portada Tienda</span>
+                </a>
+              </li>
+            </ul>
+
+            <div class="dropdown-divisor" role="separator"></div>
+
+            <div class="dropdown-footer">
+              <form class="form-logout-dropdown" action="{{ url_for('logout') }}" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <button type="submit" class="dropdown-btn-logout" role="menuitem">
+                  <span class="material-symbols-outlined" aria-hidden="true">logout</span>
+                  <span>Cerrar Sesión</span>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -158,16 +223,6 @@
       </div>
     {% endif %}
 
-    <div class="admin-acciones-pie">
-      <a class="boton boton-secundario" href="{{ url_for('inicio') }}">
-        <span class="material-symbols-outlined" aria-hidden="true">storefront</span>
-        <span>Ver Tienda Pública</span>
-      </a>
-      <a class="boton boton-destacado" href="{{ url_for('perfil') }}">
-        <span class="material-symbols-outlined" aria-hidden="true">person</span>
-        <span>Mi Perfil</span>
-      </a>
-    </div>
   </div>
 </main>
 {% endblock %}
