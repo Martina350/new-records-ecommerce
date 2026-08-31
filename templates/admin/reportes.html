@@ -154,48 +154,62 @@
       {% endif %}
     </div>
 
-    <!-- Bloque 2: Rankings (Discos y Categorías) -->
+    <!-- Bloque 2: Rankings Optimizados con Gráficos Estadísticos -->
     <div class="reportes-grid-rankings">
-      <!-- Ranking de Discos Más Vendidos -->
+      <!-- 1. Ranking de Discos: Gráfico de Barras (Bar Chart) -->
       <div class="admin-seccion-bloque reportes-tarjeta-ranking">
-        <h2 class="admin-subtitulo-bloque" style="margin-bottom: 0.25rem;">
-          <span class="material-symbols-outlined" aria-hidden="true">leaderboard</span>
-          <span>Top Discos Más Vendidos</span>
-        </h2>
-        <p style="margin: 0 0 1.25rem 0; color: var(--text-muted-page); font-size: 0.9rem;">
-          Álbumes con mayor demanda en unidades y recaudación.
-        </p>
+        <div class="reportes-cabecera-grafico">
+          <div>
+            <h2 class="admin-subtitulo-bloque" style="margin-bottom: 0.25rem;">
+              <span class="material-symbols-outlined" aria-hidden="true">bar_chart</span>
+              <span>Top Discos Más Vendidos</span>
+            </h2>
+            <p style="margin: 0; color: var(--text-muted-page); font-size: 0.9rem;">
+              Comparativa de rendimiento en unidades y facturación por álbum.
+            </p>
+          </div>
+          <span class="badge-tipo-grafico">
+            <span class="material-symbols-outlined" aria-hidden="true">equalizer</span>
+            Gráfico de Barras
+          </span>
+        </div>
 
         {% if ranking_discos %}
-          <div class="reportes-lista-ranking">
+          <!-- Contenedor del Gráfico de Barras -->
+          <div class="grafico-barras-contenedor">
             {% for disco in ranking_discos %}
-              <div class="reporte-item-ranking">
-                <div class="reporte-ranking-posicion posicion-{{ disco.posicion }}">
-                  #{{ disco.posicion }}
+              <div class="barra-ranking-fila">
+                <div class="barra-ranking-info-superior">
+                  <div class="barra-ranking-meta">
+                    <span class="reporte-ranking-posicion posicion-{{ disco.posicion }}">#{{ disco.posicion }}</span>
+                    <div class="barra-ranking-titulos">
+                      <strong class="barra-ranking-album">{{ disco.album }}</strong>
+                      <span class="barra-ranking-artista">{{ disco.artista }}</span>
+                    </div>
+                  </div>
+                  <div class="barra-ranking-etiquetas">
+                    <span class="badge-formato-tarjeta badge-formato-{{ disco.formato|lower }}">{{ disco.formato }}</span>
+                    <span class="badge-categoria-mini">{{ disco.categoria_nombre }}</span>
+                  </div>
                 </div>
 
-                <div class="reporte-ranking-disco-info">
-                  <div class="reporte-ranking-cabecera-item">
-                    <div class="reporte-ranking-titulos">
-                      <strong>{{ disco.album }}</strong>
-                      <span class="reporte-ranking-artista">{{ disco.artista }}</span>
-                    </div>
-                    <div class="reporte-ranking-badges">
-                      <span class="badge-formato-tarjeta badge-formato-{{ disco.formato|lower }}">
-                        {{ disco.formato }}
-                      </span>
-                      <span class="badge-categoria-mini">{{ disco.categoria_nombre }}</span>
-                    </div>
+                <!-- Barra de Rendimiento Comparativo -->
+                <div class="barra-track-visual">
+                  <div 
+                    class="barra-fill-visual" 
+                    style="width: {{ disco.porcentaje_relativo }}%;"
+                    title="{{ disco.album }}: {{ disco.total_unidades }} unidades ({{ disco.porcentaje_relativo }}%)"
+                  >
+                    <span class="barra-fill-brillo"></span>
                   </div>
+                </div>
 
-                  <div class="reportes-barra-contenedor-ranking">
-                    <div class="reportes-barra-progreso-ranking" style="width: {{ disco.porcentaje_relativo }}%;"></div>
-                  </div>
-
-                  <div class="reporte-ranking-metricas">
-                    <span><strong>{{ disco.total_unidades }}</strong> unidades vendidas</span>
-                    <span class="precio-subtotal">${{ "%.2f"|format(disco.total_facturado) }}</span>
-                  </div>
+                <div class="barra-ranking-metricas-pie">
+                  <span class="barra-unidades-dato">
+                    <span class="material-symbols-outlined icono-unidades" aria-hidden="true">album</span>
+                    <strong>{{ disco.total_unidades }}</strong> unidades vendidas ({{ disco.porcentaje_relativo }}%)
+                  </span>
+                  <span class="precio-subtotal">${{ "%.2f"|format(disco.total_facturado) }}</span>
                 </div>
               </div>
             {% endfor %}
@@ -208,46 +222,60 @@
         {% endif %}
       </div>
 
-      <!-- Ranking de Géneros / Categorías -->
+      <!-- 2. Ventas por Género: Gráfico de Pastel / Donut (Pie Chart) -->
       <div class="admin-seccion-bloque reportes-tarjeta-ranking">
-        <h2 class="admin-subtitulo-bloque" style="margin-bottom: 0.25rem;">
-          <span class="material-symbols-outlined" aria-hidden="true">pie_chart</span>
-          <span>Ventas por Género Musical</span>
-        </h2>
-        <p style="margin: 0 0 1.25rem 0; color: var(--text-muted-page); font-size: 0.9rem;">
-          Distribución de ingresos y volumen de ventas por categoría.
-        </p>
+        <div class="reportes-cabecera-grafico">
+          <div>
+            <h2 class="admin-subtitulo-bloque" style="margin-bottom: 0.25rem;">
+              <span class="material-symbols-outlined" aria-hidden="true">pie_chart</span>
+              <span>Distribución de Ventas por Género</span>
+            </h2>
+            <p style="margin: 0; color: var(--text-muted-page); font-size: 0.9rem;">
+              Participación porcentual de mercado y volumen por categoría musical.
+            </p>
+          </div>
+          <span class="badge-tipo-grafico">
+            <span class="material-symbols-outlined" aria-hidden="true">donut_large</span>
+            Gráfico de Pastel
+          </span>
+        </div>
 
         {% if ranking_categorias %}
-          <div class="reportes-lista-ranking">
-            {% for cat in ranking_categorias %}
-              <div class="reporte-item-ranking">
-                <div class="reporte-ranking-posicion posicion-{{ cat.posicion }}">
-                  #{{ cat.posicion }}
+          <div class="grafico-pie-layout">
+            <!-- Visualizador Central del Gráfico de Pastel -->
+            <div class="pie-chart-visual-wrapper">
+              <div class="pie-chart-circulo" id="graficoPieCategorias">
+                <div class="pie-chart-centro">
+                  <span class="pie-centro-etiqueta">Total Facturado</span>
+                  <span class="pie-centro-monto">${{ "%.2f"|format(resumen.total_facturado) }}</span>
+                  <span class="pie-centro-unidades">{{ resumen.total_unidades }} discos</span>
                 </div>
+              </div>
+            </div>
 
-                <div class="reporte-ranking-disco-info">
-                  <div class="reporte-ranking-cabecera-item">
-                    <div class="reporte-ranking-titulos">
-                      <strong>{{ cat.categoria_nombre }}</strong>
-                      <span class="reporte-ranking-artista">{{ cat.total_pedidos }} pedido(s) asociados</span>
+            <!-- Leyenda Descriptiva con Swatches de Color -->
+            <div class="pie-chart-leyenda-lista">
+              {% for cat in ranking_categorias %}
+                <div 
+                  class="item-leyenda-pie" 
+                  data-porcentaje="{{ cat.porcentaje_participacion }}"
+                  data-categoria="{{ cat.categoria_nombre }}"
+                >
+                  <div class="pie-leyenda-cabecera">
+                    <div class="pie-leyenda-nombre-bloque">
+                      <span class="pie-swatch"></span>
+                      <strong class="pie-nombre-cat">{{ cat.categoria_nombre }}</strong>
                     </div>
-                    <div class="reporte-ranking-badges">
-                      <span class="badge-activo-admin" style="margin-top: 0;">{{ "%.1f"|format(cat.porcentaje_participacion) }}% cuota</span>
-                    </div>
+                    <span class="badge-cuota-pie">{{ "%.1f"|format(cat.porcentaje_participacion) }}%</span>
                   </div>
 
-                  <div class="reportes-barra-contenedor-ranking">
-                    <div class="reportes-barra-progreso-categoria" style="width: {{ cat.porcentaje_participacion }}%;"></div>
-                  </div>
-
-                  <div class="reporte-ranking-metricas">
-                    <span><strong>{{ cat.total_unidades }}</strong> discos despachados</span>
+                  <div class="pie-leyenda-detalles">
+                    <span>{{ cat.total_unidades }} disco(s) • {{ cat.total_pedidos }} pedido(s)</span>
                     <span class="precio-subtotal">${{ "%.2f"|format(cat.total_facturado) }}</span>
                   </div>
                 </div>
-              </div>
-            {% endfor %}
+              {% endfor %}
+            </div>
           </div>
         {% else %}
           <div class="reportes-estado-vacio">

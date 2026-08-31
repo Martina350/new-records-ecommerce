@@ -11,6 +11,7 @@ function inicializarAplicacion() {
   inicializarAcordeonPedidosMovil();
   inicializarDropdownAdmin();
   inicializarUploaderPreviewAdmin();
+  inicializarGraficosReportes();
 }
 
 function sincronizarClaseBody(evento) {
@@ -1080,3 +1081,51 @@ function inicializarUploaderPreviewAdmin() {
     limpiarImagen();
   });
 }
+
+/**
+ * Inicialización y Renderizado Dinámico del Gráfico de Pastel / Donut
+ */
+function inicializarGraficosReportes() {
+  const pieChart = document.getElementById('graficoPieCategorias');
+  if (!pieChart) return;
+
+  const items = document.querySelectorAll('.item-leyenda-pie');
+  if (!items.length) return;
+
+  // Paleta armónica de colores Dark Cyberpunk
+  const paletaColores = [
+    '#8a2ce2', // Violeta Neón principal
+    '#00FF41', // Verde Neón acento
+    '#38bdf8', // Cyan eléctrico
+    '#f59e0b', // Ámbar / Dorado
+    '#ec4899', // Rosa Neón
+    '#a855f7', // Púrpura suave
+    '#10b981', // Esmeralda
+    '#f43f5e'  // Coral
+  ];
+
+  const segmentos = [];
+  let acumulado = 0;
+
+  items.forEach((item, index) => {
+    const porcentaje = parseFloat(item.dataset.porcentaje) || 0;
+    const color = paletaColores[index % paletaColores.length];
+    
+    const inicio = acumulado;
+    const fin = acumulado + porcentaje;
+    segmentos.push(`${color} ${inicio}% ${fin}%`);
+    acumulado = fin;
+
+    // Asignar color al swatch de la leyenda
+    const swatch = item.querySelector('.pie-swatch');
+    if (swatch) {
+      swatch.style.backgroundColor = color;
+      swatch.style.color = color;
+    }
+  });
+
+  if (segmentos.length > 0) {
+    pieChart.style.background = `conic-gradient(${segmentos.join(', ')})`;
+  }
+}
+
