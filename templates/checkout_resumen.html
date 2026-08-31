@@ -38,6 +38,20 @@
     <form action="{{ url_for('confirmar_checkout') }}" method="post" id="form-confirmar-pedido">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
+      <!-- Resumen Ultra-Compacto para Flujo Móvil -->
+      <div class="resumen-ultracompacto-movil">
+        <div class="resumen-movil-info">
+          <div class="icono-resumen-movil-wrap">
+            <span class="material-symbols-outlined icono-resumen-movil" aria-hidden="true">shopping_bag</span>
+          </div>
+          <div>
+            <span class="resumen-movil-etiqueta">Total de tu pedido</span>
+            <span class="resumen-movil-sub">{{ carrito.total_unidades }} disco{% if carrito.total_unidades != 1 %}s{% endif %} seleccionado{% if carrito.total_unidades != 1 %}s{% endif %}</span>
+          </div>
+        </div>
+        <span class="resumen-movil-monto-neon">${{ "%.2f"|format(carrito.total_general) }}</span>
+      </div>
+
       <div class="checkout-grid-horizontal">
         <!-- BLOQUE 1: Datos de Envío y Facturación -->
         <section class="checkout-card-columna" aria-labelledby="titulo-bloque-envio">

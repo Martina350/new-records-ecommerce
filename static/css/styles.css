@@ -3859,6 +3859,10 @@ select option {
   font-size: 0.75rem;
 }
 
+.resumen-ultracompacto-movil {
+  display: none;
+}
+
 /* Grid Horizontal Multicolumna (3 Columnas en Desktop) */
 .checkout-grid-horizontal {
   display: grid;
@@ -8369,14 +8373,79 @@ select option {
     padding: 0.35rem 0.5rem;
   }
 
-  /* Grid Horizontal de Checkout a 1 Columna Apilada */
+  /* 1. Resumen Ultra-Compacto Superior para Móvil */
+  .resumen-ultracompacto-movil {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(16, 16, 22, 0.92);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(138, 44, 226, 0.35);
+    border-radius: 0.85rem;
+    padding: 1rem 1.15rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .resumen-movil-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .icono-resumen-movil-wrap {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.5rem;
+    background: rgba(138, 44, 226, 0.15);
+    border: 1px solid rgba(138, 44, 226, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .icono-resumen-movil {
+    font-size: 1.35rem;
+    color: var(--primary);
+  }
+
+  .resumen-movil-etiqueta {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted-page);
+  }
+
+  .resumen-movil-sub {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-heading);
+  }
+
+  .resumen-movil-monto-neon {
+    font-family: monospace;
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: var(--accent);
+    text-shadow: 0 0 12px rgba(0, 255, 65, 0.3);
+  }
+
+  /* 2. Grid Horizontal de Checkout a 1 Columna Apilada Secuencial */
   .checkout-grid-horizontal {
-    grid-template-columns: 1fr !important;
+    display: flex !important;
+    flex-direction: column !important;
     gap: 1.25rem;
   }
 
   .checkout-card-columna {
     border-radius: 0.85rem;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .card-columna-cabecera {
@@ -8387,28 +8456,208 @@ select option {
     padding: 1.1rem 1.25rem;
   }
 
-  .boton-confirmar-checkout-cta {
-    padding: 0.95rem 1rem;
-    font-size: 0.95rem;
+  /* 3. Selección de Método de Pago Táctil con Pulgar */
+  .metodos-pago-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
   }
 
-  /* Grid de Tarjetas de Pago a 1 Columna */
+  .metodo-pago-tarjeta-label {
+    cursor: pointer;
+    width: 100%;
+    display: block;
+  }
+
+  .metodo-pago-tarjeta-box {
+    padding: 1.15rem 1.1rem;
+    border-radius: 0.85rem;
+    min-height: 5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    transition: all 0.2s ease;
+  }
+
+  .metodo-pago-tarjeta-box.seleccionado {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 16px rgba(0, 255, 65, 0.2), inset 0 0 12px rgba(0, 255, 65, 0.05);
+  }
+
+  .radio-indicador-visual {
+    width: 1.4rem;
+    height: 1.4rem;
+    flex-shrink: 0;
+  }
+
+  /* 4. Botón Principal "Confirmar Pago" Destacado al Final */
+  .boton-confirmar-checkout {
+    padding: 1.1rem 1rem !important;
+    font-size: 1.05rem !important;
+    font-weight: 800 !important;
+    width: 100%;
+    min-height: 3.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.65rem;
+  }
+
+  /* 5. Inputs y Formularios: Prevenir Auto-Zoom en Safari Móvil (iOS) */
+  input[type="text"],
+  input[type="password"],
+  input[type="email"],
+  input[type="number"],
+  input[type="tel"],
+  select,
+  textarea,
+  .entrada-formulario {
+    font-size: 16px !important;
+    min-height: 44px;
+  }
+
+  /* Grid de Tarjetas de Pago a 1 Columna en Móvil */
   .grid-tarjetas-bancarias-wide {
     grid-template-columns: 1fr !important;
     gap: 1rem;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .tarjeta-bancaria-item {
-    padding: 1.1rem 1.25rem;
+    padding: 1.1rem 1.15rem;
     border-radius: 0.85rem;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .tarjeta-bancaria-cabecera {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .marca-tarjeta-grupo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .tipo-tarjeta-tag {
+    display: none; /* En móvil ocultamos la etiqueta secundaria para dar espacio limpio */
+  }
+
+  .badge-predeterminado-chip {
+    padding: 0.25rem 0.65rem;
+    font-size: 0.725rem;
   }
 
   .tarjeta-bancaria-numero {
-    font-size: 1.05rem;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .mascara-puntos {
+    letter-spacing: 0.1em;
+    font-size: 0.95rem;
   }
 
   .ultimos4-codigo {
     font-size: 1.05rem;
+    padding: 0.2rem 0.5rem;
+  }
+
+  /* Pie de Tarjeta Bancaria en Móvil (Organización en 2 Filas sin desbordamiento) */
+  .tarjeta-bancaria-pie {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 0.85rem 0.5rem;
+    width: 100%;
+    box-sizing: border-box;
+    padding-top: 0.75rem;
+  }
+
+  .tarjeta-campo-info {
+    min-width: 0;
+  }
+
+  .campo-valor-titular {
+    font-size: 0.875rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 11rem;
+  }
+
+  .campo-valor-vence {
+    font-size: 0.85rem;
+  }
+
+  .tarjeta-accion-eliminar {
+    grid-column: 1 / -1;
+    width: 100%;
+    margin-left: 0;
+    padding-top: 0.25rem;
+  }
+
+  .tarjeta-accion-eliminar form {
+    width: 100%;
+  }
+
+  .boton-eliminar-tarjeta {
+    width: 100%;
+    height: 2.35rem;
+    justify-content: center;
+    font-size: 0.825rem;
+    font-weight: 700;
+    border-radius: 0.5rem;
+    box-sizing: border-box;
+  }
+
+  /* Tarjeta de Selección en Checkout Móvil */
+  .tarjeta-box-cabecera {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .tarjeta-box-numero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .tarjeta-box-detalles {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .titular-completo {
+    max-width: 10rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   /* Banner de Seguridad Horizontal en Móvil */
