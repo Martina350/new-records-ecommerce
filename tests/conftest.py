@@ -1,8 +1,10 @@
 """Fixtures compartidas para ejecutar pruebas sin persistir cambios en PostgreSQL."""
 
 import pytest
+from unittest.mock import patch
 
 from app import app
+from mailer import mail
 from models import db
 
 
@@ -27,12 +29,13 @@ def client(tmp_path):
         db.session.configure(join_transaction_mode="create_savepoint")
         assert db.session().get_bind() is conexion
 
-        try:
-            yield app.test_client()
-        finally:
-            db.session.remove()
-            if transaccion.is_active:
-                transaccion.rollback()
-            conexion.close()
-            motores[None] = motor_original
-            db.session.configure(join_transaction_mode="conditional_savepoint")
+        with patch.object(mail, "send"):
+            try:
+                yield app.test_client()
+            finally:
+                db.session.remove()
+                if transaccion.is_active:
+                    transaccion.rollback()
+                conexion.close()
+                motores[None] = motor_original
+                db.session.configure(join_transaction_mode="conditional_savepoint")

@@ -42,11 +42,13 @@ class Config:
     DB_BACKUP_PASSWORD = os.getenv("DB_BACKUP_PASSWORD", "")
     POSTGRES_BIN = os.getenv("POSTGRES_BIN", "")
 
-    # Correo electrónico (PIN y notificaciones)
+    # Mailjet mediante SMTP (PIN y notificaciones)
     MAIL_SERVER = os.getenv("MAIL_SERVER", "")
     MAIL_PORT = int(os.getenv("MAIL_PORT", "587"))
     MAIL_USE_TLS = os.getenv("MAIL_USE_TLS", "1") == "1"
+    MAIL_USE_SSL = os.getenv("MAIL_USE_SSL", "0") == "1"
+    MAIL_DEBUG = os.getenv("MAIL_DEBUG", "0") == "1"
     MAIL_USERNAME = os.getenv("MAIL_USERNAME", "")
     MAIL_PASSWORD = os.getenv("MAIL_PASSWORD", "")
-    MAIL_DEFAULT_SENDER = os.getenv("MAIL_DEFAULT_SENDER", "ventas@newrecords.local")
+    MAIL_DEFAULT_SENDER = os.getenv("MAIL_DEFAULT_SENDER", "")
 

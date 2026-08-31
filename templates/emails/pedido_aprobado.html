@@ -1,0 +1,21 @@
+{% extends "emails/base.html" %}
+
+{% block titulo %}Pedido aprobado - New Records{% endblock %}
+{% block preheader %}Tu pedido {{ numero }} fue aprobado.{% endblock %}
+
+{% block contenido %}
+  <p class="eyebrow">Pedido actualizado</p>
+  <h1>¡Tu pedido fue aprobado!</h1>
+  <p>Hola {{ nombre }}, tenemos buenas noticias sobre tu compra.</p>
+
+  <div class="panel">
+    <p class="dato-etiqueta">Pedido</p>
+    <p class="dato-valor">{{ numero }}</p>
+    <div style="margin-top:20px;"><span class="estado estado-aprobado">APROBADO</span></div>
+  </div>
+
+  <p>Tu factura oficial ya está disponible para descargar desde el historial de pedidos.</p>
+  {% if url_pedidos %}
+    <p><a class="boton" href="{{ url_pedidos }}">Ver pedido y factura</a></p>
+  {% endif %}
+{% endblock %}

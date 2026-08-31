@@ -45,6 +45,7 @@ El sistema cuenta con una arquitectura relacional sólida respaldada por procedi
 - **Frontend**: HTML5, CSS3 responsive y Jinja2
 - **Documentos PDF**: ReportLab
 - **Seguridad**: Werkzeug Security (`scrypt`) y decoradores RBAC
+- **Correo transaccional**: Flask-Mail / Mailjet SMTP
 - **Pruebas Automatizadas**: pytest
 
 ---
@@ -142,6 +143,11 @@ CLIENTE_DEMO_NAME=Cliente Demo
 CLIENTE_DEMO_EMAIL=cliente@newrecords.local
 CLIENTE_DEMO_PASSWORD=change_client_password
 ```
+
+Para activar el envío real de PINes y notificaciones, configura una cuenta de
+Mailjet y completa las variables `MAIL_*` de tu `.env`. La API Key se utiliza
+como usuario SMTP y la Secret Key como contraseña SMTP. El procedimiento completo
+se encuentra en [`docs/CONFIGURACION_MAILJET.md`](docs/CONFIGURACION_MAILJET.md).
 
 ### 5. Configurar roles e inicializar la base de datos
 

@@ -1,90 +1,155 @@
-"""Servicio de correo electrónico para el envío de PINes de verificación en New Records."""
+"""Servicio central de correo para los mensajes enviados por New Records."""
 
-import os
-
+from flask import current_app, has_app_context, has_request_context, url_for
 from flask_mail import Mail, Message
+
 
 mail = Mail()
 
 
+def _es_valor_real(valor):
+    """Descarta valores vacíos y marcadores incluidos en archivos de ejemplo."""
+    if not valor:
+        return False
+
+    normalizado = str(valor).strip().lower()
+    marcadores = (
+        "change_",
+        "your_",
+        "tu_",
+        "<",
+        "smtp.example.com",
+        "@newrecords.example",
+        "@newrecords.local",
+    )
+    return not any(marcador in normalizado for marcador in marcadores)
+
+
 def smtp_configurado():
-    """Devuelve True solo si las variables de entorno SMTP están configuradas con valores reales."""
-    servidor = os.getenv("MAIL_SERVER", "")
-    usuario = os.getenv("MAIL_USERNAME", "")
-    return bool(servidor and servidor != "smtp.example.com" and usuario and usuario != "your_email@example.com")
+    """Indica si el proveedor SMTP tiene credenciales y remitente reales."""
+    if not has_app_context():
+        return False
+
+    claves_requeridas = (
+        "MAIL_SERVER",
+        "MAIL_USERNAME",
+        "MAIL_PASSWORD",
+        "MAIL_DEFAULT_SENDER",
+    )
+    return all(_es_valor_real(current_app.config.get(clave)) for clave in claves_requeridas)
 
 
-def enviar_pin(destinatario, nombre, pin):
-    """Envía el PIN de verificación al correo del cliente.
+def _url_pedidos():
+    """Genera el enlace al historial cuando existe una solicitud web activa."""
+    if not has_request_context():
+        return None
+    return url_for("lista_pedidos", _external=True)
 
-    Retorna True si el correo fue enviado, False si falló o SMTP no está configurado.
-    """
+
+def _enviar_mensaje(asunto, destinatario, cuerpo, plantilla, **contexto):
+    """Envía un mensaje y registra el fallo sin exponer credenciales al usuario."""
     if not smtp_configurado():
         return False
 
     try:
-        asunto = "New Records — Tu código de verificación de tarjeta"
-        cuerpo = (
-            f"Hola {nombre},\n\n"
-            f"Tu código de verificación para confirmar tu tarjeta en New Records es:\n\n"
-            f"    {pin}\n\n"
-            f"Este código es válido por 5 minutos. Si no realizaste esta solicitud, ignora este mensaje.\n\n"
-            f"— Equipo New Records"
+        contenido_html = current_app.jinja_env.get_or_select_template(plantilla).render(
+            **contexto
         )
-        msg = Message(subject=asunto, recipients=[destinatario], body=cuerpo)
-        mail.send(msg)
+        mensaje = Message(
+            subject=asunto,
+            recipients=[destinatario],
+            body=cuerpo,
+            html=contenido_html,
+        )
+        mail.send(mensaje)
         return True
     except Exception:
+        current_app.logger.exception(
+            "No fue posible enviar el correo '%s' al destinatario solicitado.",
+            asunto,
+        )
         return False
+
+
+def enviar_pin(destinatario, nombre, pin, url_verificacion=None):
+    """Envía el PIN de verificación al correo del cliente."""
+    asunto = "New Records — Tu código de verificación de tarjeta"
+    cuerpo = (
+        f"Hola {nombre},\n\n"
+        f"Tu código de verificación para confirmar tu tarjeta en New Records es:\n\n"
+        f"    {pin}\n\n"
+        "Este código es válido por 5 minutos. "
+        "Si no realizaste esta solicitud, ignora este mensaje.\n\n"
+        "— Equipo New Records"
+    )
+    return _enviar_mensaje(
+        asunto,
+        destinatario,
+        cuerpo,
+        "emails/pin_verificacion.html",
+        nombre=nombre,
+        pin=pin,
+        url_verificacion=url_verificacion,
+    )
 
 
 def notificar_creacion_pedido(pedido):
-    """Envía un correo de confirmación de pedido recibido al cliente."""
-    if not smtp_configurado():
-        return False
-
-    try:
-        cliente = pedido.cliente
-        asunto = f"New Records — Pedido {pedido.numero} recibido con éxito"
-        cuerpo = (
-            f"Hola {cliente.nombre},\n\n"
-            f"Hemos recibido tu pedido {pedido.numero} con un total de ${pedido.total:.2f}.\n\n"
-            f"Tu orden se encuentra actualmente en estado PENDIENTE de revisión administrativa. "
-            f"Te notificaremos en cuanto sea aprobada para proceder al despacho.\n\n"
-            f"Puedes consultar tu comprobante y el detalle de tu compra ingresando a tu cuenta en New Records.\n\n"
-            f"— Equipo New Records"
-        )
-        msg = Message(subject=asunto, recipients=[cliente.email], body=cuerpo)
-        mail.send(msg)
-        return True
-    except Exception:
-        return False
+    """Envía al cliente la confirmación de que su pedido fue recibido."""
+    cliente = pedido.cliente
+    asunto = f"New Records — Pedido {pedido.numero} recibido con éxito"
+    cuerpo = (
+        f"Hola {cliente.nombre},\n\n"
+        f"Hemos recibido tu pedido {pedido.numero} con un total de ${pedido.total:.2f}.\n\n"
+        "Tu orden se encuentra actualmente en estado PENDIENTE de revisión administrativa. "
+        "Te notificaremos en cuanto sea aprobada para proceder al despacho.\n\n"
+        "Puedes consultar tu comprobante y el detalle de tu compra ingresando "
+        "a tu cuenta en New Records.\n\n"
+        "— Equipo New Records"
+    )
+    return _enviar_mensaje(
+        asunto,
+        cliente.email,
+        cuerpo,
+        "emails/pedido_recibido.html",
+        nombre=cliente.nombre,
+        numero=pedido.numero,
+        total=f"{pedido.total:.2f}",
+        url_pedidos=_url_pedidos(),
+    )
 
 
 def notificar_cambio_estado(pedido):
-    """Envía un correo al cliente notificando la aprobación o rechazo de su pedido."""
-    if not smtp_configurado():
-        return False
+    """Notifica al cliente la aprobación o el rechazo de su pedido."""
+    cliente = pedido.cliente
+    asunto = f"New Records — Actualización de tu pedido {pedido.numero}"
 
-    try:
-        cliente = pedido.cliente
-        asunto = f"New Records — Actualización de tu pedido {pedido.numero}"
-        if pedido.estado == "APROBADO":
-            cuerpo = (
-                f"Hola {cliente.nombre},\n\n"
-                f"¡Buenas noticias! Tu pedido {pedido.numero} ha sido APROBADO.\n"
-                f"Ya puedes descargar tu Factura Oficial de venta desde tu panel de pedidos.\n\n"
-                f"— Equipo New Records"
-            )
-        else:
-            cuerpo = (
-                f"Hola {cliente.nombre},\n\n"
-                f"Te informamos que tu pedido {pedido.numero} ha sido RECHAZADO.\n"
-                f"Motivo: {pedido.motivo_rechazo or 'Sin motivo especificado'}.\n\n"
-                f"— Equipo New Records"
-            )
-        msg = Message(subject=asunto, recipients=[cliente.email], body=cuerpo)
-        mail.send(msg)
-        return True
-    except Exception:
-        return False
+    if pedido.estado == "APROBADO":
+        cuerpo = (
+            f"Hola {cliente.nombre},\n\n"
+            f"¡Buenas noticias! Tu pedido {pedido.numero} ha sido APROBADO.\n"
+            "Ya puedes descargar tu Factura Oficial de venta desde tu panel de pedidos.\n\n"
+            "— Equipo New Records"
+        )
+    else:
+        cuerpo = (
+            f"Hola {cliente.nombre},\n\n"
+            f"Te informamos que tu pedido {pedido.numero} ha sido RECHAZADO.\n"
+            f"Motivo: {pedido.motivo_rechazo or 'Sin motivo especificado'}.\n\n"
+            "— Equipo New Records"
+        )
+
+    plantilla = (
+        "emails/pedido_aprobado.html"
+        if pedido.estado == "APROBADO"
+        else "emails/pedido_rechazado.html"
+    )
+    return _enviar_mensaje(
+        asunto,
+        cliente.email,
+        cuerpo,
+        plantilla,
+        nombre=cliente.nombre,
+        numero=pedido.numero,
+        motivo=pedido.motivo_rechazo or "Sin motivo especificado",
+        url_pedidos=_url_pedidos(),
+    )

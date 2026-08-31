@@ -706,7 +706,16 @@ def pago_agregar():
             )
 
         usuario = obtener_usuario_actual()
-        enviado = enviar_pin(usuario.email, usuario.nombre, pin)
+        enviado = enviar_pin(
+            usuario.email,
+            usuario.nombre,
+            pin,
+            url_for(
+                "pago_verificar",
+                token=verificacion.token_verificacion,
+                _external=True,
+            ),
+        )
 
         if enviado:
             flash(

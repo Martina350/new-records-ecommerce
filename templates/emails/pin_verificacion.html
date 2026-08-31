@@ -1,0 +1,22 @@
+{% extends "emails/base.html" %}
+
+{% block titulo %}Verifica tu tarjeta - New Records{% endblock %}
+{% block preheader %}Tu código de verificación de New Records vence en 5 minutos.{% endblock %}
+
+{% block contenido %}
+  <p class="eyebrow">Verificación de seguridad</p>
+  <h1>Confirma tu nueva tarjeta</h1>
+  <p>Hola {{ nombre }}, utiliza este código para completar el registro de tu tarjeta:</p>
+
+  <div class="panel" style="text-align:center;">
+    <p class="dato-etiqueta">Tu código de verificación</p>
+    <p style="margin:8px 0;color:#ffffff;font-size:38px;font-weight:700;letter-spacing:10px;">{{ pin }}</p>
+    <p style="margin:0;color:#94a3b8;font-size:13px;">Válido durante 5 minutos</p>
+  </div>
+
+  {% if url_verificacion %}
+    <p style="text-align:center;"><a class="boton" href="{{ url_verificacion }}">Verificar mi tarjeta</a></p>
+  {% endif %}
+
+  <div class="aviso">Si no solicitaste registrar una tarjeta, ignora este correo. Nunca compartas este código con otra persona.</div>
+{% endblock %}
