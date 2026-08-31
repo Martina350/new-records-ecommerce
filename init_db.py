@@ -30,18 +30,21 @@ CATEGORIAS = [
     {
         "nombre": "Rock",
         "slug": "rock",
+        "prefijo_codigo": "ROC",
         "descripcion": "Del rock clásico al grunge y el sonido alternativo.",
         "imagen": "img/categorias/rock.jpg",
     },
     {
         "nombre": "Pop",
         "slug": "pop",
+        "prefijo_codigo": "POP",
         "descripcion": "Grandes voces, melodías globales y producción contemporánea.",
         "imagen": "img/categorias/pop.jpg",
     },
     {
         "nombre": "Reggaeton",
         "slug": "reggaeton",
+        "prefijo_codigo": "REG",
         "descripcion": "Ritmos urbanos, trap latino y sonidos del Caribe.",
         "imagen": "img/categorias/reggaeton.jpg",
     },
@@ -249,6 +252,9 @@ RUTA_REGLAS_FASES_7_10 = (
 RUTA_REGLAS_FASE_12 = (
     Path(__file__).resolve().parent / "database" / "rules_fases12.sql"
 )
+RUTA_REGLAS_CODIGOS_DISCOS = (
+    Path(__file__).resolve().parent / "database" / "rules_codigos_discos.sql"
+)
 
 
 def actualizar_reglas_schema():
@@ -287,6 +293,10 @@ def actualizar_reglas_schema():
         with conexion.cursor() as cursor:
             cursor.execute(reglas_fase_12)
 
+    reglas_codigos_discos = RUTA_REGLAS_CODIGOS_DISCOS.read_text(encoding="utf-8")
+    with conexion.cursor() as cursor:
+        cursor.execute(reglas_codigos_discos)
+
 
 def obtener_password(nombre_variable):
     password = os.getenv(nombre_variable, "")
@@ -304,6 +314,7 @@ def cargar_categoria(datos):
         db.session.add(categoria)
 
     categoria.nombre = datos["nombre"]
+    categoria.prefijo_codigo = datos["prefijo_codigo"]
     categoria.descripcion = datos["descripcion"]
     categoria.imagen = datos["imagen"]
     return categoria

@@ -31,6 +31,12 @@ Este documento especifica formalmente las reglas de negocio implementadas en los
    - Los discos y categorías nunca se eliminan físicamente de la base de datos si tienen historial de pedidos o relaciones activas.
    - Se utiliza el atributo booleano `activo`. Los productos inactivos no se muestran en el catálogo público ni pueden agregarse al carrito.
    - La desactivación de una categoría con discos activos exige confirmación explícita y desactiva lógicamente sus discos asociados en cascada controlada.
+4. **Código Único Automático**:
+   - Cada categoría define un prefijo único de 3 a 5 caracteres alfanuméricos en mayúsculas.
+   - Al crear un disco, PostgreSQL reserva el siguiente consecutivo mediante `generar_codigo_disco(integer)` y produce un SKU como `NR-ROC-005`.
+   - El formulario administrativo no permite escribir ni reemplazar manualmente este código.
+   - El contador se bloquea dentro de la misma transacción que crea el disco, evitando duplicados por concurrencia; un rollback también revierte la reserva.
+   - El prefijo de una categoría deja de ser editable cuando ya existen discos asociados, para conservar la coherencia histórica de sus SKU.
 
 ---
 

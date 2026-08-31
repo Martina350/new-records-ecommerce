@@ -59,6 +59,32 @@
             <span class="nota-campo">Identificador único en la URL (letras minúsculas, números y guiones).</span>
           </div>
 
+          {% set prefijo_bloqueado = categoria and categoria.discos %}
+          <div class="campo-admin col-span-2">
+            <label class="etiqueta-tarjeta" for="prefijo_codigo">Prefijo para Códigos de Discos <span class="requerido">*</span></label>
+            <input
+              class="entrada-formulario entrada-tarjeta{% if prefijo_bloqueado %} entrada-bloqueada{% endif %}"
+              type="text"
+              id="prefijo_codigo"
+              name="prefijo_codigo"
+              value="{{ prefijo_codigo | default(categoria.prefijo_codigo if categoria else '') }}"
+              placeholder="Ej. ROC, POP, REG, JAZ"
+              minlength="3"
+              maxlength="5"
+              pattern="[A-Za-z0-9]{3,5}"
+              autocomplete="off"
+              required
+              {% if prefijo_bloqueado %}disabled{% endif %}
+            />
+            <span class="nota-campo">
+              {% if prefijo_bloqueado %}
+                No puede modificarse porque esta categoría ya tiene discos registrados.
+              {% else %}
+                Usa entre 3 y 5 letras o números. Se normalizará a mayúsculas; por ejemplo: NR-JAZ-001.
+              {% endif %}
+            </span>
+          </div>
+
           <div class="campo-admin col-span-2">
             <label class="etiqueta-tarjeta" for="descripcion">Descripción del Género</label>
             <textarea

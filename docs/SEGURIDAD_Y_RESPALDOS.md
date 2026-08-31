@@ -34,7 +34,7 @@ python -m pytest tests/test_seguridad_respaldos.py -v
 
 ## 2. Integridad de Datos en PostgreSQL
 
-La consistencia y calidad de la información están garantizadas a nivel de motor relacional mediante reglas declaradas en [`database/rules_fases12.sql`](../database/rules_fases12.sql):
+La consistencia y calidad de la información están garantizadas a nivel de motor relacional mediante reglas declaradas en [`database/rules_fases12.sql`](../database/rules_fases12.sql) y [`database/rules_codigos_discos.sql`](../database/rules_codigos_discos.sql):
 
 ### 2.1 Restricciones de Calidad (`CHECK` Constraints)
 - **Inventario y Precios**:
@@ -46,6 +46,7 @@ La consistencia y calidad de la información están garantizadas a nivel de moto
 - **Identidad y Acceso**:
   - `usuarios.rol IN ('cliente', 'administrador')`.
   - Validación de formato en correos y slugs de categorías.
+  - `categorias.prefijo_codigo` es único y solo admite entre 3 y 5 caracteres alfanuméricos en mayúsculas.
 - **Transaccionalidad y Estados**:
   - `pedidos.estado IN ('PENDIENTE', 'APROBADO', 'RECHAZADO')`.
   - Exigencia obligatoria de `motivo_rechazo` si el estado es `RECHAZADO`.

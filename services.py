@@ -30,6 +30,14 @@ def generar_referencia_pago():
     return f"TXN-{secrets.token_hex(16).upper()}"
 
 
+def generar_codigo_disco(categoria_id):
+    """Reserva y retorna el siguiente código de una categoría en PostgreSQL."""
+    return db.session.execute(
+        text("SELECT generar_codigo_disco(:categoria_id)"),
+        {"categoria_id": categoria_id},
+    ).scalar_one()
+
+
 def procesar_checkout(cliente_id, metodo_pago_id):
     """Convierte el carrito en un pedido persistente con detalles históricos y cobro simulado.
 

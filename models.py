@@ -87,10 +87,19 @@ class Usuario(db.Model):
 
 class Categoria(db.Model):
     __tablename__ = "categorias"
+    __table_args__ = (
+        db.CheckConstraint(
+            "prefijo_codigo ~ '^[A-Z0-9]{3,5}$'",
+            name="ck_categorias_prefijo_codigo",
+        ),
+    )
 
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(80), nullable=False, unique=True)
     slug = db.Column(db.String(90), nullable=False, unique=True, index=True)
+    prefijo_codigo = db.Column(
+        db.String(5), nullable=False, unique=True, index=True
+    )
     descripcion = db.Column(db.Text)
     imagen = db.Column(db.String(255))
     activo = db.Column(db.Boolean, nullable=False, default=True, server_default="true")
@@ -109,9 +118,38 @@ class Categoria(db.Model):
     )
 
     discos = db.relationship("Disco", back_populates="categoria")
+    secuencia_codigo = db.relationship(
+        "SecuenciaCodigoCategoria",
+        back_populates="categoria",
+        cascade="all, delete-orphan",
+        uselist=False,
+    )
 
     def __repr__(self):
         return f"<Categoria {self.nombre}>"
+
+
+class SecuenciaCodigoCategoria(db.Model):
+    """Contador transaccional utilizado para los códigos de cada categoría."""
+
+    __tablename__ = "secuencias_codigo_categoria"
+    __table_args__ = (
+        db.CheckConstraint(
+            "ultimo_numero >= 0",
+            name="ck_secuencias_codigo_ultimo_numero",
+        ),
+    )
+
+    categoria_id = db.Column(
+        db.Integer,
+        db.ForeignKey("categorias.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    ultimo_numero = db.Column(
+        db.Integer, nullable=False, default=0, server_default="0"
+    )
+
+    categoria = db.relationship("Categoria", back_populates="secuencia_codigo")
 
 
 class Disco(db.Model):

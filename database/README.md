@@ -11,6 +11,11 @@ los rankings de discos y géneros. `rules_fases12.sql` contiene las restriccione
 y triggers finales. `roles_seguridad.sql` se aplica mediante
 `configure_db_roles.py`, nunca desde la cuenta web.
 
+`rules_codigos_discos.sql` migra las categorías existentes, crea el contador por
+categoría y define `generar_codigo_disco(integer)`. Esta función reserva códigos
+con bloqueo transaccional en el formato `NR-PREFIJO-NÚMERO`; el administrador no
+escribe el SKU al registrar un disco.
+
 `schema_fase3.sql` conserva únicamente la referencia histórica de la Fase 3; las
 reglas posteriores prevalecen sobre esa fotografía inicial.
 

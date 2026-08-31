@@ -250,9 +250,15 @@ def test_flujo_administracion_catalogo_crud_y_desactivacion(client):
 
         # 1. Crear categoría
         slug_cat = f"jazz-{secrets.token_hex(3)}"
+        prefijo_cat = f"J{secrets.token_hex(2).upper()}"
         resp_cat = client.post(
             "/admin/categorias/nueva",
-            data={"nombre": "Jazz & Blues", "slug": slug_cat, "descripcion": "Grandes clásicos del jazz y blues."},
+            data={
+                "nombre": "Jazz & Blues",
+                "slug": slug_cat,
+                "prefijo_codigo": prefijo_cat,
+                "descripcion": "Grandes clásicos del jazz y blues.",
+            },
             follow_redirects=True,
         )
         assert resp_cat.status_code == 200
@@ -263,13 +269,11 @@ def test_flujo_administracion_catalogo_crud_y_desactivacion(client):
             cat_id = cat_creada.id
 
         # 2. Crear disco CD en esa categoría
-        codigo_disco = f"NR-JAZZ-{secrets.token_hex(3).upper()}"
         resp_disco = client.post(
             "/admin/discos/nuevo",
             data={
                 "categoria_id": cat_id,
                 "formato": "CD",
-                "codigo": codigo_disco,
                 "album": "Kind of Blue",
                 "artista": "Miles Davis",
                 "descripcion": "Obra cumbre del jazz modal.",
@@ -285,8 +289,11 @@ def test_flujo_administracion_catalogo_crud_y_desactivacion(client):
         assert resp_disco.status_code == 200
 
         with app.app_context():
-            disco_creado = Disco.query.filter_by(codigo=codigo_disco).first()
+            disco_creado = Disco.query.filter_by(
+                categoria_id=cat_id, album="Kind of Blue"
+            ).first()
             assert disco_creado is not None
+            assert disco_creado.codigo == f"NR-{prefijo_cat}-001"
             disco_id = disco_creado.id
             assert disco_creado.activo is True
 

@@ -9,6 +9,7 @@ El modelo cubre catálogo, usuarios, verificación de tarjetas, pedidos, cobros 
 ```mermaid
 erDiagram
     CATEGORIAS ||--o{ DISCOS : clasifica
+    CATEGORIAS ||--o| SECUENCIAS_CODIGO_CATEGORIA : numera
     USUARIOS ||--o{ METODOS_PAGO : registra
     USUARIOS ||--o{ VERIFICACIONES_TARJETA : solicita
     USUARIOS ||--o{ PEDIDOS : realiza
@@ -38,6 +39,7 @@ No existen productos digitales, perecibles ni clases provenientes del ejemplo de
 ## Decisiones relacionales
 
 - Una categoría puede clasificar muchos discos, pero cada disco pertenece a una categoría.
+- Cada categoría mantiene como máximo una secuencia transaccional para generar códigos únicos.
 - Un usuario puede registrar varios métodos de pago y realizar varios pedidos.
 - `Pedido` tiene dos relaciones diferentes con `Usuario`: cliente y administrador revisor.
 - Cada pedido conserva sus líneas en `detalles_pedido`.
@@ -53,4 +55,3 @@ No existen productos digitales, perecibles ni clases provenientes del ejemplo de
 - Pedido: `PENDIENTE`, `APROBADO` o `RECHAZADO`.
 - Transacción: `PENDIENTE`, `APROBADA` o `RECHAZADA`.
 - Factura: `COMPROBANTE_PENDIENTE` o `FACTURA_FINAL`.
-

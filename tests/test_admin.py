@@ -1,6 +1,7 @@
 """Pruebas del módulo de administración, catálogo y aprobación de pedidos — Fase 10."""
 
 import os
+import re
 import secrets
 from sqlalchemy import text
 from app import app
@@ -102,6 +103,34 @@ def test_procedimiento_aprobacion_instalado():
 
 # ── Tests de CRUD de Discos ──────────────────────────────────────────────────
 
+def test_generador_codigos_discos_instalado():
+    """La reserva de códigos debe ejecutarse dentro de PostgreSQL."""
+    with app.app_context():
+        existe = db.session.execute(
+            text(
+                "SELECT EXISTS ("
+                "SELECT 1 FROM pg_proc "
+                "WHERE proname = 'generar_codigo_disco' "
+                "AND prokind = 'f'"
+                ")"
+            )
+        ).scalar_one()
+        assert existe is True
+
+
+def test_formulario_nuevo_disco_no_permite_escribir_codigo(client):
+    with client:
+        autenticar_admin(client)
+        respuesta = client.get("/admin/discos/nuevo")
+        contenido = respuesta.data.decode("utf-8")
+
+        assert respuesta.status_code == 200
+        assert 'name="codigo"' not in contenido
+        assert 'id="previsualizacion-codigo"' in contenido
+        assert 'data-prefijo="' in contenido
+        assert "Código Único Automático" in contenido
+
+
 def test_crud_disco_crear_y_editar(client):
     with client:
         autenticar_admin(client)
@@ -109,8 +138,19 @@ def test_crud_disco_crear_y_editar(client):
         with app.app_context():
             cat = Categoria.query.filter_by(activo=True).first()
             cat_id = cat.id
+            prefijo_categoria = cat.prefijo_codigo
+            numeros_existentes = [
+                int(coincidencia.group(1))
+                for disco in cat.discos
+                if (
+                    coincidencia := re.fullmatch(
+                        rf"NR-{re.escape(prefijo_categoria)}-(\d+)", disco.codigo
+                    )
+                )
+            ]
+            maximo_existente = max(numeros_existentes, default=0)
 
-        codigo_vinilo = f"NR-VIN-{secrets.token_hex(3).upper()}"
+        album_prueba = f"Álbum de Prueba Admin {secrets.token_hex(3)}"
 
         try:
             # Crear nuevo Vinilo
@@ -118,8 +158,8 @@ def test_crud_disco_crear_y_editar(client):
                 "/admin/discos/nuevo",
                 data={
                     "formato": "VINILO",
-                    "codigo": codigo_vinilo,
-                    "album": "Álbum de Prueba Admin",
+                    "codigo": "CODIGO-MANUAL-NO-PERMITIDO",
+                    "album": album_prueba,
                     "artista": "Artista Admin",
                     "descripcion": "Descripción del álbum de prueba.",
                     "categoria_id": str(cat_id),
@@ -136,8 +176,15 @@ def test_crud_disco_crear_y_editar(client):
             assert "creado exitosamente" in resp_crear.data.decode("utf-8")
 
             with app.app_context():
-                disco_creado = Disco.query.filter_by(codigo=codigo_vinilo).first()
+                disco_creado = Disco.query.filter_by(album=album_prueba).first()
                 assert disco_creado is not None
+                codigo_generado = re.fullmatch(
+                    rf"NR-{re.escape(prefijo_categoria)}-(\d+)",
+                    disco_creado.codigo,
+                )
+                assert codigo_generado is not None
+                assert disco_creado.codigo != "CODIGO-MANUAL-NO-PERMITIDO"
+                assert int(codigo_generado.group(1)) > maximo_existente
                 assert disco_creado.formato == "VINILO"
                 assert isinstance(disco_creado, Vinilo)
                 assert disco_creado.costo_embalaje == 3.50
@@ -170,7 +217,7 @@ def test_crud_disco_crear_y_editar(client):
                 assert disco_editado.stock == 20
         finally:
             with app.app_context():
-                d = Disco.query.filter_by(codigo=codigo_vinilo).first()
+                d = Disco.query.filter_by(album=album_prueba).first()
                 if d:
                     db.session.delete(d)
                     db.session.commit()
@@ -204,6 +251,7 @@ def test_crud_categoria_crear_y_desactivar(client):
     with client:
         autenticar_admin(client)
         slug_test = f"genero-{secrets.token_hex(3)}"
+        prefijo_test = secrets.token_hex(2).upper()
 
         try:
             # Crear categoría
@@ -212,6 +260,7 @@ def test_crud_categoria_crear_y_desactivar(client):
                 data={
                     "nombre": "Género Test Admin",
                     "slug": slug_test,
+                    "prefijo_codigo": prefijo_test,
                     "descripcion": "Descripción del género de prueba.",
                     "imagen": "img/placeholder.jpg",
                 },
@@ -224,6 +273,7 @@ def test_crud_categoria_crear_y_desactivar(client):
                 cat = Categoria.query.filter_by(slug=slug_test).first()
                 assert cat is not None
                 assert cat.activo is True
+                assert cat.prefijo_codigo == prefijo_test
                 cat_id = cat.id
 
             # Desactivar

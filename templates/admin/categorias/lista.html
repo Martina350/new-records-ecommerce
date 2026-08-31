@@ -39,6 +39,7 @@
             <tr>
               <th>Nombre del Género</th>
               <th>Slug (URL)</th>
+              <th>Prefijo</th>
               <th>Discos Vinculados</th>
               <th>Descripción</th>
               <th>Estado</th>
@@ -50,6 +51,7 @@
               <tr class="{% if not cat.activo %}fila-inactiva{% endif %}">
                 <td><strong>{{ cat.nombre }}</strong></td>
                 <td><code>{{ cat.slug }}</code></td>
+                <td><code>NR-{{ cat.prefijo_codigo }}-###</code></td>
                 <td>
                   <span class="badge-activo-admin" style="margin-top: 0;">
                     {{ cat.discos | length }} disco(s)
@@ -97,7 +99,7 @@
               </tr>
             {% else %}
               <tr>
-                <td colspan="6" class="texto-centrado">No hay categorías registradas.</td>
+                <td colspan="7" class="texto-centrado">No hay categorías registradas.</td>
               </tr>
             {% endfor %}
           </tbody>

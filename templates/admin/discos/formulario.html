@@ -70,16 +70,15 @@
             </div>
 
             <div class="campo-admin">
-              <label class="etiqueta-tarjeta" for="codigo">Código Único <span class="requerido">*</span></label>
+              <label class="etiqueta-tarjeta" for="previsualizacion-codigo">Código Único Automático</label>
               <input
-                class="entrada-formulario entrada-tarjeta"
+                class="entrada-formulario entrada-tarjeta entrada-bloqueada"
                 type="text"
-                id="codigo"
-                name="codigo"
-                value="{{ codigo | default('') }}"
-                placeholder="Ej. NR-ROC-002"
-                required
+                id="previsualizacion-codigo"
+                value="NR-PREFIJO-###"
+                disabled
               />
+              <span class="nota-campo">PostgreSQL asignará el siguiente número disponible del género al guardar.</span>
             </div>
           {% else %}
             <div class="campo-admin col-span-2">
@@ -90,9 +89,9 @@
 
           <div class="campo-admin col-span-2">
             <label class="etiqueta-tarjeta" for="categoria_id">Género Musical / Categoría <span class="requerido">*</span></label>
-            <select class="entrada-formulario select-custom" id="categoria_id" name="categoria_id" required>
+            <select class="entrada-formulario select-custom" id="categoria_id" name="categoria_id" required onchange="actualizarVistaCodigo()">
               {% for cat in categorias %}
-                <option value="{{ cat.id }}" {% if (disco and disco.categoria_id == cat.id) or (categoria_id and categoria_id|int == cat.id) %}selected{% endif %}>
+                <option value="{{ cat.id }}" data-prefijo="{{ cat.prefijo_codigo }}" {% if (disco and disco.categoria_id == cat.id) or (categoria_id and categoria_id|int == cat.id) %}selected{% endif %}>
                   {{ cat.nombre }}
                 </option>
               {% endfor %}
@@ -217,5 +216,17 @@ function toggleFormato(formato) {
     grupo.style.display = formato === 'VINILO' ? 'block' : 'none';
   }
 }
+
+function actualizarVistaCodigo() {
+  var categoria = document.getElementById('categoria_id');
+  var vista = document.getElementById('previsualizacion-codigo');
+  if (!categoria || !vista || !categoria.options.length) {
+    return;
+  }
+  var opcion = categoria.options[categoria.selectedIndex];
+  vista.value = 'NR-' + opcion.dataset.prefijo + '-###';
+}
+
+actualizarVistaCodigo();
 </script>
 {% endblock %}

@@ -67,6 +67,7 @@ new-records-ecommerce/
 ├── database/                   # Scripts SQL de esquema, reglas, procedimientos y roles
 │   ├── reports.sql             # Consultas analíticas de reportes
 │   ├── roles_seguridad.sql     # Roles de mínimo privilegio PostgreSQL
+│   ├── rules_codigos_discos.sql # Códigos automáticos por categoría
 │   ├── rules_fases7_10.sql     # Procedimiento de aprobación y triggers
 │   ├── rules_fases12.sql       # Restricciones CHECK y triggers avanzados
 │   └── schema_fase3.sql        # Esquema inicial DDL

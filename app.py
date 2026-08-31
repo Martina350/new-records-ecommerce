@@ -2,6 +2,7 @@
 
 from datetime import date
 from decimal import Decimal, InvalidOperation
+import re
 
 import click
 from email_validator import EmailNotValidError, validate_email
@@ -61,6 +62,7 @@ from payments import (
 from pdf_generator import generar_pdf_pedido
 from services import (
     aprobar_pedido,
+    generar_codigo_disco,
     obtener_estadisticas_dashboard,
     obtener_pedido_por_numero,
     obtener_pedidos_admin,
@@ -835,7 +837,6 @@ def admin_discos_nuevo():
 
     if request.method == "POST":
         formato = request.form.get("formato", "").upper().strip()
-        codigo = request.form.get("codigo", "").strip()
         album = request.form.get("album", "").strip()
         artista = request.form.get("artista", "").strip()
         descripcion = request.form.get("descripcion", "").strip()
@@ -850,10 +851,6 @@ def admin_discos_nuevo():
         errores = []
         if formato not in ("CD", "VINILO"):
             errores.append("Selecciona un formato válido (CD o VINILO).")
-        if not codigo or len(codigo) < 3:
-            errores.append("El código del producto es obligatorio (mínimo 3 caracteres).")
-        elif Disco.query.filter_by(codigo=codigo).first() is not None:
-            errores.append(f"Ya existe un disco registrado con el código '{codigo}'.")
         if not album:
             errores.append("El nombre del álbum es obligatorio.")
         if not artista:
@@ -894,7 +891,6 @@ def admin_discos_nuevo():
                 categorias=categorias,
                 disco=None,
                 formato=formato,
-                codigo=codigo,
                 album=album,
                 artista=artista,
                 descripcion=descripcion,
@@ -908,6 +904,7 @@ def admin_discos_nuevo():
             )
 
         try:
+            codigo = generar_codigo_disco(cat_id_val)
             datos_comunes = {
                 "categoria_id": cat_id_val,
                 "codigo": codigo,
@@ -937,7 +934,10 @@ def admin_discos_nuevo():
 
             db.session.add(nuevo_disco)
             db.session.commit()
-            flash(f"Disco '{album}' creado exitosamente en el catálogo.", "success")
+            flash(
+                f"Disco '{album}' creado exitosamente con el código {codigo}.",
+                "success",
+            )
             return redirect(url_for("admin_discos_lista"))
         except Exception:
             db.session.rollback()
@@ -1076,11 +1076,11 @@ def admin_categorias_nueva():
     if request.method == "POST":
         nombre = request.form.get("nombre", "").strip()
         slug = request.form.get("slug", "").strip().lower()
+        prefijo_codigo = request.form.get("prefijo_codigo", "").strip().upper()
         descripcion = request.form.get("descripcion", "").strip()
         imagen = request.form.get("imagen", "").strip()
 
         if not slug and nombre:
-            import re
             slug = re.sub(r"[^\w\s-]", "", nombre.lower()).strip()
             slug = re.sub(r"[-\s]+", "-", slug)
 
@@ -1091,16 +1091,34 @@ def admin_categorias_nueva():
             errores.append("El slug de la categoría es obligatorio.")
         elif Categoria.query.filter_by(slug=slug).first() is not None:
             errores.append(f"Ya existe una categoría con el slug '{slug}'.")
+        if not re.fullmatch(r"[A-Z0-9]{3,5}", prefijo_codigo):
+            errores.append(
+                "El prefijo debe contener entre 3 y 5 letras mayúsculas o números."
+            )
+        elif (
+            Categoria.query.filter_by(prefijo_codigo=prefijo_codigo).first()
+            is not None
+        ):
+            errores.append(f"El prefijo '{prefijo_codigo}' ya está en uso.")
 
         if errores:
             for e in errores:
                 flash(e, "error")
-            return render_template("admin/categorias/formulario.html", categoria=None, nombre=nombre, slug=slug, descripcion=descripcion, imagen=imagen)
+            return render_template(
+                "admin/categorias/formulario.html",
+                categoria=None,
+                nombre=nombre,
+                slug=slug,
+                prefijo_codigo=prefijo_codigo,
+                descripcion=descripcion,
+                imagen=imagen,
+            )
 
         try:
             nueva_cat = Categoria(
                 nombre=nombre,
                 slug=slug,
+                prefijo_codigo=prefijo_codigo,
                 descripcion=descripcion or None,
                 imagen=imagen or None,
                 activo=True,
@@ -1125,6 +1143,9 @@ def admin_categorias_editar(id):
     if request.method == "POST":
         nombre = request.form.get("nombre", "").strip()
         slug = request.form.get("slug", "").strip().lower()
+        prefijo_codigo = request.form.get(
+            "prefijo_codigo", categoria.prefijo_codigo
+        ).strip().upper()
         descripcion = request.form.get("descripcion", "").strip()
         imagen = request.form.get("imagen", "").strip()
 
@@ -1137,15 +1158,38 @@ def admin_categorias_editar(id):
             cat_existente = Categoria.query.filter_by(slug=slug).first()
             if cat_existente and cat_existente.id != categoria.id:
                 errores.append(f"El slug '{slug}' ya está en uso por otra categoría.")
+        if not re.fullmatch(r"[A-Z0-9]{3,5}", prefijo_codigo):
+            errores.append(
+                "El prefijo debe contener entre 3 y 5 letras mayúsculas o números."
+            )
+        else:
+            prefijo_existente = Categoria.query.filter_by(
+                prefijo_codigo=prefijo_codigo
+            ).first()
+            if prefijo_existente and prefijo_existente.id != categoria.id:
+                errores.append(f"El prefijo '{prefijo_codigo}' ya está en uso.")
+            elif (
+                prefijo_codigo != categoria.prefijo_codigo
+                and Disco.query.filter_by(categoria_id=categoria.id).first()
+                is not None
+            ):
+                errores.append(
+                    "El prefijo no puede cambiar porque la categoría ya tiene discos."
+                )
 
         if errores:
             for e in errores:
                 flash(e, "error")
-            return render_template("admin/categorias/formulario.html", categoria=categoria)
+            return render_template(
+                "admin/categorias/formulario.html",
+                categoria=categoria,
+                prefijo_codigo=prefijo_codigo,
+            )
 
         try:
             categoria.nombre = nombre
             categoria.slug = slug
+            categoria.prefijo_codigo = prefijo_codigo
             categoria.descripcion = descripcion or None
             categoria.imagen = imagen or None
             db.session.commit()

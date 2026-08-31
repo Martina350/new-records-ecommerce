@@ -16,6 +16,7 @@
 - `id`: PK entera.
 - `nombre`: nombre del género, obligatorio y único.
 - `slug`: identificador para URL, obligatorio, único e indexado.
+- `prefijo_codigo`: prefijo único de 3 a 5 letras mayúsculas o números usado para generar los SKU de sus discos.
 - `descripcion`: explicación del género.
 - `imagen`: ruta relativa dentro de `static`.
 - `activo`: estado para eliminación lógica.
@@ -25,7 +26,7 @@
 
 - `id`: PK entera.
 - `categoria_id`: FK obligatoria hacia `categorias`, con eliminación restrictiva.
-- `codigo`: SKU obligatorio, único e indexado.
+- `codigo`: SKU obligatorio, único e indexado, generado en PostgreSQL con el formato `NR-PREFIJO-NÚMERO`.
 - `album`: nombre del álbum obligatorio.
 - `artista`: artista obligatorio e indexado.
 - `descripcion`: información comercial obligatoria.
@@ -38,6 +39,12 @@
 - `imagen`: ruta relativa de la portada.
 - `activo`: estado para eliminación lógica.
 - `fecha_creacion`, `fecha_actualizacion`: fechas UTC, con valor predeterminado en PostgreSQL.
+
+## `secuencias_codigo_categoria`
+
+- `categoria_id`: PK y FK hacia `categorias`; existe un solo contador por género.
+- `ultimo_numero`: último consecutivo reservado, obligatorio y no negativo.
+- Su fila se bloquea durante la generación para evitar códigos duplicados ante solicitudes concurrentes.
 
 ## `metodos_pago`
 
