@@ -3,55 +3,92 @@
 {% block titulo %}Mis Pedidos{% endblock %}
 
 {% block contenido %}
-<main class="carrito-principal">
-  <div class="contenedor">
-    <div class="carrito-cabecera">
-      <h1 class="carrito-titulo">
-        Mis <span class="degradado">Pedidos</span>
-      </h1>
-      <p class="carrito-subtitulo">
-        Consulta el estado y detalle histórico de tus compras en New Records.
-      </p>
+<main class="pedidos-seccion-desktop">
+  <div class="contenedor-pedidos-wide">
+    <!-- Cabecera de Mis Pedidos -->
+    <div class="pedidos-cabecera-wide">
+      <div class="pedidos-cabecera-titulos">
+        <h1 class="pedidos-titulo-principal">
+          Mis <span class="degradado">Pedidos</span>
+        </h1>
+        <p class="pedidos-subtitulo-principal">
+          Consulta el estado y detalle histórico de tus compras en New Records.
+        </p>
+      </div>
+
+      {% if pedidos %}
+        <div class="pedidos-cabecera-controles">
+          <div class="chip-total-pedidos-contador">
+            <span class="material-symbols-outlined" aria-hidden="true">receipt_long</span>
+            <span>{{ pedidos | length }} pedido{% if pedidos | length != 1 %}s{% endif %} registrado{% if pedidos | length != 1 %}s{% endif %}</span>
+          </div>
+
+          <a class="boton boton-secundario boton-chico" href="{{ url_for('productos') }}">
+            <span class="material-symbols-outlined" aria-hidden="true">album</span>
+            <span>Ir al Catálogo</span>
+          </a>
+        </div>
+      {% endif %}
     </div>
 
     {% if pedidos %}
-      <div class="caja-formulario pedidos-caja">
-        <div class="tabla-carrito-contenedor">
-          <table class="tabla-carrito">
+      <!-- Tarjeta Panorámica Widescreen (Estilo Screenshot 2) -->
+      <div class="pedidos-card-pantalla-completa">
+        <div class="tabla-pedidos-wrapper-fluid">
+          <table class="tabla-pedidos-widescreen">
             <thead>
               <tr>
-                <th>Número de Pedido</th>
-                <th>Fecha de Compra</th>
-                <th>Método de Pago</th>
-                <th>Artículos</th>
-                <th>Total</th>
-                <th>Estado</th>
-                <th>Acción</th>
+                <th class="col-th-num-pedido">NÚMERO DE PEDIDO</th>
+                <th class="col-th-fecha">FECHA DE COMPRA</th>
+                <th class="col-th-metodo">MÉTODO DE PAGO</th>
+                <th class="col-th-articulos">ARTÍCULOS</th>
+                <th class="col-th-total">TOTAL</th>
+                <th class="col-th-estado">ESTADO</th>
+                <th class="col-th-acciones-ped">ACCIONES</th>
               </tr>
             </thead>
             <tbody>
               {% for pedido in pedidos %}
-                <tr class="fila-pedido">
-                  <td class="col-numero-pedido">
-                    <a class="enlace-numero-pedido" href="{{ url_for('ver_pedido', numero=pedido.numero) }}">
-                      <strong>{{ pedido.numero }}</strong>
+                <tr class="fila-pedido-widescreen">
+                  <!-- Número de pedido con link y código monospace -->
+                  <td class="celda-numero-pedido">
+                    <a class="enlace-codigo-pedido" href="{{ url_for('ver_pedido', numero=pedido.numero) }}" title="Ver detalle del pedido {{ pedido.numero }}">
+                      <code class="codigo-pedido-texto">{{ pedido.numero }}</code>
                     </a>
                   </td>
-                  <td class="col-fecha-pedido">
-                    <span>{{ pedido.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}</span>
+
+                  <!-- Fecha de compra y hora -->
+                  <td class="celda-fecha-pedido">
+                    <div class="fecha-hora-bloque">
+                      <span class="fecha-principal-texto">{{ pedido.fecha_creacion.strftime('%d/%m/%Y') }}</span>
+                      <span class="hora-secundaria-texto">{{ pedido.fecha_creacion.strftime('%H:%M') }}</span>
+                    </div>
                   </td>
-                  <td class="col-metodo-pedido">
-                    <span class="metodo-tarjeta-resumen">
-                      {{ pedido.metodo_pago.marca }} **** {{ pedido.metodo_pago.ultimos4 }}
+
+                  <!-- Método de Pago con icono -->
+                  <td class="celda-metodo-pedido">
+                    <div class="metodo-tarjeta-chip">
+                      <span class="material-symbols-outlined icono-tarjeta-chip" aria-hidden="true">credit_card</span>
+                      <span class="marca-tarjeta-texto">{{ pedido.metodo_pago.marca }}</span>
+                      <span class="ultimos4-tarjeta-texto">•••• {{ pedido.metodo_pago.ultimos4 }}</span>
+                    </div>
+                  </td>
+
+                  <!-- Artículos comprados -->
+                  <td class="celda-articulos-pedido">
+                    <span class="badge-articulos-chip">
+                      <span class="material-symbols-outlined icono-badge-articulos" aria-hidden="true">album</span>
+                      <span>{{ pedido.detalles | length }} disco{% if pedido.detalles | length != 1 %}s{% endif %}</span>
                     </span>
                   </td>
-                  <td class="col-articulos-pedido">
-                    <span>{{ pedido.detalles | length }} producto(s)</span>
+
+                  <!-- Total acumulado en verde neón tabular -->
+                  <td class="celda-total-pedido">
+                    <span class="total-pedido-monto-neon">${{ "%.2f"|format(pedido.total) }}</span>
                   </td>
-                  <td class="col-total-pedido">
-                    <span class="precio-subtotal">${{ "%.2f"|format(pedido.total) }}</span>
-                  </td>
-                  <td class="col-estado-pedido">
+
+                  <!-- Estado del pedido con badges de color -->
+                  <td class="celda-estado-pedido">
                     <span class="badge-estado badge-estado-{{ pedido.estado | lower }}">
                       {% if pedido.estado == "PENDIENTE" %}
                         <span class="material-symbols-outlined icono-estado-chico" aria-hidden="true">schedule</span>
@@ -63,13 +100,15 @@
                       {{ pedido.estado }}
                     </span>
                   </td>
-                  <td class="col-accion-pedido">
-                    <div class="acciones-pedido-lista">
-                      <a class="boton boton-secundario boton-chico" href="{{ url_for('ver_pedido', numero=pedido.numero) }}">
+
+                  <!-- Acciones: Detalle y PDF -->
+                  <td class="celda-acciones-pedido">
+                    <div class="grupo-acciones-pedido">
+                      <a class="boton boton-secundario boton-chico boton-ver-pedido" href="{{ url_for('ver_pedido', numero=pedido.numero) }}">
                         <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
-                        Detalle
+                        <span>Detalle</span>
                       </a>
-                      <a class="boton boton-secundario boton-chico boton-icono-solo" href="{{ url_for('descargar_comprobante', numero=pedido.numero) }}" title="Descargar Comprobante PDF" target="_blank">
+                      <a class="boton boton-secundario boton-chico boton-pdf-pedido" href="{{ url_for('descargar_comprobante', numero=pedido.numero) }}" title="Descargar Comprobante PDF" target="_blank">
                         <span class="material-symbols-outlined" aria-hidden="true">picture_as_pdf</span>
                       </a>
                     </div>
@@ -79,15 +118,31 @@
             </tbody>
           </table>
         </div>
+
+        <!-- Barra Inferior de la Tarjeta de Pedidos -->
+        <div class="pedidos-barra-inferior-wide">
+          <div class="pedidos-info-pie">
+            <span class="material-symbols-outlined" aria-hidden="true">history</span>
+            <span>Mostrando {{ pedidos | length }} pedido{% if pedidos | length != 1 %}s{% endif %} en tu historial de compras</span>
+          </div>
+
+          <a class="boton boton-destacado resplandor-neon boton-chico" href="{{ url_for('productos') }}">
+            <span>Explorar más álbumes</span>
+            <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+          </a>
+        </div>
       </div>
     {% else %}
-      <div class="estado-vacio">
-        <span class="material-symbols-outlined icono-vacio" aria-hidden="true">receipt_long</span>
-        <h3 class="titulo-vacio">No has realizado ningún pedido todavía</h3>
-        <p class="texto-vacio">Explora nuestro catálogo de CD y Vinilos para realizar tu primera compra.</p>
+      <!-- Estado Vacío -->
+      <div class="estado-vacio caja-formulario">
+        <div class="icono-vacio-wrapper">
+          <span class="material-symbols-outlined icono-vacio" aria-hidden="true">receipt_long</span>
+        </div>
+        <h2 class="titulo-vacio">No has realizado ningún pedido todavía</h2>
+        <p class="texto-vacio">Explora nuestro catálogo dinámico de CD y Vinilos para realizar tu primera compra.</p>
         <a class="boton boton-principal resplandor-neon" href="{{ url_for('productos') }}">
-          Ir al Catálogo de Discos
-          <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+          <span class="material-symbols-outlined" aria-hidden="true">album</span>
+          <span>Ir al Catálogo de Discos</span>
         </a>
       </div>
     {% endif %}

@@ -4400,33 +4400,300 @@ select option {
   font-size: 1rem;
 }
 
-/* ===== Historial de Pedidos (Lista) ===== */
-.pedidos-caja {
-  padding: 1.5rem;
+/* ===== Vista de Mis Pedidos (Rediseño Widescreen Desktop) ===== */
+.pedidos-seccion-desktop {
+  padding: 2rem 0 3.5rem;
+  width: 100%;
 }
 
-.fila-pedido {
-  transition: background 0.15s;
+.contenedor-pedidos-wide {
+  width: 100%;
+  max-width: 90rem;
+  margin: 0 auto;
+  padding: 0 1.5rem;
 }
 
-.fila-pedido:hover {
-  background: rgba(138, 44, 226, 0.05);
+@media (min-width: 1280px) {
+  .contenedor-pedidos-wide {
+    padding: 0 2rem;
+  }
 }
 
-.col-numero-pedido strong {
-  font-family: monospace;
+.pedidos-cabecera-wide {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.pedidos-cabecera-titulos {
+  flex: 1;
+  min-width: 18rem;
+}
+
+.pedidos-titulo-principal {
+  font-size: 2.25rem;
+  font-weight: 900;
+  color: var(--text-heading);
+  margin: 0 0 0.35rem 0;
+  letter-spacing: -0.02em;
+}
+
+.pedidos-subtitulo-principal {
+  color: var(--text-muted-page);
   font-size: 0.95rem;
+  margin: 0;
+}
+
+.pedidos-cabecera-controles {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.chip-total-pedidos-contador {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(138, 44, 226, 0.12);
+  border: 1px solid rgba(138, 44, 226, 0.3);
+  color: var(--text-heading);
+  padding: 0.5rem 0.95rem;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.chip-total-pedidos-contador .material-symbols-outlined {
   color: var(--primary);
+  font-size: 1.15rem;
 }
 
-.enlace-numero-pedido:hover strong {
-  color: var(--accent);
+/* Tarjeta Panorámica de Pedidos */
+.pedidos-card-pantalla-completa {
+  background: rgba(16, 16, 20, 0.85);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(138, 44, 226, 0.2);
+  border-radius: 1rem;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+  width: 100%;
+  overflow: hidden;
 }
 
-.metodo-tarjeta-resumen {
+.tabla-pedidos-wrapper-fluid {
+  width: 100%;
+  overflow: hidden;
+}
+
+.tabla-pedidos-widescreen {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  table-layout: auto;
+}
+
+.tabla-pedidos-widescreen thead th {
+  padding: 1.1rem 1.5rem;
+  font-size: 0.775rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted-page);
+  border-bottom: 1px solid rgba(138, 44, 226, 0.2);
+  background: rgba(138, 44, 226, 0.04);
+  white-space: nowrap;
+}
+
+.col-th-num-pedido { width: 17%; }
+.col-th-fecha { width: 14%; }
+.col-th-metodo { width: 17%; }
+.col-th-articulos { width: 14%; }
+.col-th-total { width: 12%; }
+.col-th-estado { width: 12%; }
+.col-th-acciones-ped { width: 14%; text-align: right; }
+
+.tabla-pedidos-widescreen tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.tabla-pedidos-widescreen tbody tr:hover {
+  background-color: rgba(138, 44, 226, 0.04);
+}
+
+.tabla-pedidos-widescreen tbody td {
+  padding: 1.15rem 1.5rem;
+  border-bottom: 1px solid rgba(138, 44, 226, 0.1);
+  vertical-align: middle;
+}
+
+.tabla-pedidos-widescreen tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Columna Número de Pedido */
+.enlace-codigo-pedido {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+
+.enlace-codigo-pedido:hover {
+  transform: translateY(-1px);
+}
+
+.codigo-pedido-texto {
   font-family: monospace;
+  font-size: 0.925rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #c084fc;
+  background: rgba(138, 44, 226, 0.12);
+  padding: 0.35rem 0.65rem;
+  border-radius: 0.4rem;
+  border: 1px solid rgba(138, 44, 226, 0.28);
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.enlace-codigo-pedido:hover .codigo-pedido-texto {
+  color: var(--accent);
+  border-color: var(--primary);
+  background: rgba(138, 44, 226, 0.22);
+  box-shadow: 0 0 10px rgba(138, 44, 226, 0.3);
+}
+
+/* Columna Fecha */
+.fecha-hora-bloque {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.fecha-principal-texto {
+  font-weight: 600;
+  font-size: 0.925rem;
+  color: var(--text-heading);
+}
+
+.hora-secundaria-texto {
+  font-size: 0.775rem;
+  color: var(--text-muted-page);
+  font-family: monospace;
+}
+
+/* Columna Método de Pago */
+.metodo-tarjeta-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 0.875rem;
   color: var(--text-page);
+}
+
+.icono-tarjeta-chip {
+  font-size: 1.15rem;
+  color: var(--primary);
+  opacity: 0.9;
+}
+
+.marca-tarjeta-texto {
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ultimos4-tarjeta-texto {
+  font-family: monospace;
+  color: var(--text-muted-page);
+  font-size: 0.85rem;
+}
+
+/* Columna Artículos */
+.celda-articulos-pedido {
+  white-space: nowrap;
+}
+
+.badge-articulos-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.85rem;
+  background: rgba(138, 44, 226, 0.14);
+  border: 1px solid rgba(138, 44, 226, 0.35);
+  border-radius: 9999px;
+  color: #e9d5ff;
+  font-size: 0.825rem;
+  font-weight: 700;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.icono-badge-articulos {
+  font-size: 1.05rem;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+/* Columna Total */
+.total-pedido-monto-neon {
+  font-family: monospace;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--accent);
+  letter-spacing: -0.02em;
+}
+
+/* Columna Acciones */
+.celda-acciones-pedido {
+  text-align: right;
+}
+
+.grupo-acciones-pedido {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.boton-ver-pedido {
+  font-weight: 600;
+}
+
+.boton-pdf-pedido {
+  padding: 0.4rem;
+  min-width: 2.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Barra Inferior de Pedidos */
+.pedidos-barra-inferior-wide {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.15rem 1.5rem;
+  background: rgba(138, 44, 226, 0.03);
+  border-top: 1px solid rgba(138, 44, 226, 0.18);
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.pedidos-info-pie {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-muted-page);
+}
+
+.pedidos-info-pie .material-symbols-outlined {
+  color: var(--primary);
+  font-size: 1.1rem;
 }
 
 /* ===== Detalle de Pedido ===== */
