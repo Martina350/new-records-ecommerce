@@ -7,6 +7,7 @@ function inicializarAplicacion() {
   inicializarCustomSelects();
   configurarFormularioTarjeta();
   inicializarResumenCarrito();
+  inicializarCheckoutHorizontal();
 }
 
 function sincronizarClaseBody(evento) {
@@ -872,6 +873,26 @@ function inicializarResumenCarrito() {
     if (e.key === 'Escape' && panel.classList.contains('abierto')) {
       cerrarResumen();
     }
+  });
+}
+
+/**
+ * Control Interactivo de Selección de Tarjetas en Checkout Horizontal
+ */
+function inicializarCheckoutHorizontal() {
+  const radios = document.querySelectorAll('.radio-metodo-real');
+  if (!radios.length) return;
+
+  radios.forEach((radio) => {
+    radio.addEventListener('change', () => {
+      document.querySelectorAll('.metodo-pago-tarjeta-box').forEach((box) => {
+        box.classList.remove('seleccionado');
+      });
+      const boxPadre = radio.closest('.metodo-pago-tarjeta-label')?.querySelector('.metodo-pago-tarjeta-box');
+      if (boxPadre && radio.checked) {
+        boxPadre.classList.add('seleccionado');
+      }
+    });
   });
 }
 

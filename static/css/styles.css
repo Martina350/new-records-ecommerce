@@ -3671,128 +3671,653 @@ select option {
   margin-top: 0.5rem;
 }
 
-.checkout-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+/* ===== Vista de Resumen de Checkout (Rediseño Horizontal Multicolumna Desktop) ===== */
+.checkout-seccion-desktop {
+  padding: 1.75rem 0 3rem;
+  width: 100%;
 }
 
-@media (min-width: 768px) {
-  .checkout-grid {
-    grid-template-columns: 1fr 1fr;
+.contenedor-checkout-wide {
+  width: 100%;
+  max-width: 90rem;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+@media (min-width: 1280px) {
+  .contenedor-checkout-wide {
+    padding: 0 2rem;
   }
 }
 
-.checkout-bloque {
-  background: rgba(18, 18, 18, 0.6);
-  border: 1px solid var(--border-light);
-  border-radius: 0.75rem;
-  padding: 1.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.checkout-subtitulo-bloque {
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--text-heading);
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  border-bottom: 1px solid var(--border-light);
-  padding-bottom: 0.5rem;
-}
-
-.checkout-datos-usuario p {
-  margin: 0 0 0.5rem 0;
-  font-size: 0.875rem;
-  color: var(--text-page);
-}
-
-.checkout-lista-items {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  max-height: 14rem;
-  overflow-y: auto;
-}
-
-.item-checkout {
+.checkout-cabecera-wide {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  font-size: 0.875rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px dashed rgba(138, 44, 226, 0.15);
+  align-items: flex-end;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
 }
 
-.item-checkout-info {
-  display: flex;
-  flex-direction: column;
+.checkout-cabecera-titulos {
+  flex: 1;
+  min-width: 18rem;
 }
 
-.item-checkout-titulo {
-  font-weight: 600;
+.checkout-titulo-principal {
+  font-size: 2.25rem;
+  font-weight: 900;
   color: var(--text-heading);
+  margin: 0 0 0.35rem 0;
+  letter-spacing: -0.02em;
 }
 
-.item-checkout-meta {
-  font-size: 0.75rem;
+.checkout-subtitulo-principal {
+  color: var(--text-muted-page);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.checkout-cabecera-pasos {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: rgba(138, 44, 226, 0.08);
+  border: 1px solid rgba(138, 44, 226, 0.22);
+  padding: 0.45rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.825rem;
   color: var(--text-muted-page);
 }
 
-.item-checkout-subtotal {
-  font-family: monospace;
-  font-weight: 700;
-  color: var(--accent);
-}
-
-.checkout-total-caja {
+.paso-checkout {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding-top: 0.75rem;
-  border-top: 1px solid var(--border-light);
-  font-weight: 700;
-  font-size: 1.1rem;
+  gap: 0.35rem;
+  font-weight: 600;
 }
 
-.checkout-monto-total {
-  font-size: 1.35rem;
+.numero-paso {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.paso-checkout.completado {
+  color: #c084fc;
+}
+
+.paso-checkout.completado .numero-paso {
+  background: rgba(138, 44, 226, 0.3);
+  color: #fff;
+}
+
+.paso-checkout.activo {
   color: var(--accent);
-  font-family: monospace;
+  font-weight: 700;
 }
 
-.aviso-fase7 {
+.paso-checkout.activo .numero-paso {
+  background: var(--accent);
+  color: #000;
+}
+
+.separador-pasos {
+  color: rgba(138, 44, 226, 0.4);
+  font-size: 0.75rem;
+}
+
+/* Grid Horizontal Multicolumna (3 Columnas en Desktop) */
+.checkout-grid-horizontal {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  align-items: stretch;
+}
+
+@media (min-width: 1024px) {
+  .checkout-grid-horizontal {
+    grid-template-columns: 1fr 1.2fr 1.1fr;
+    gap: 1.5rem;
+  }
+}
+
+/* Tarjeta de cada Columna */
+.checkout-card-columna {
+  background: rgba(16, 16, 20, 0.85);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(138, 44, 226, 0.2);
+  border-radius: 1rem;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
   display: flex;
-  gap: 0.75rem;
-  align-items: flex-start;
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.4);
-  color: #fcd34d;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  margin-bottom: 1.5rem;
+  flex-direction: column;
+  overflow: hidden;
+  transition: border-color 0.2s ease, transform 0.2s ease;
 }
 
-.icono-fase7 {
-  font-size: 1.5rem;
+.checkout-card-columna:hover {
+  border-color: rgba(138, 44, 226, 0.35);
+}
+
+.card-columna-cabecera {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 1.15rem 1.25rem;
+  background: rgba(138, 44, 226, 0.04);
+  border-bottom: 1px solid rgba(138, 44, 226, 0.18);
+}
+
+.icono-card-columna {
+  font-size: 1.6rem;
+  color: var(--primary);
+  background: rgba(138, 44, 226, 0.12);
+  padding: 0.4rem;
+  border-radius: 0.5rem;
   flex-shrink: 0;
 }
 
-.aviso-fase7 p {
-  margin: 0.25rem 0 0 0;
-  color: var(--text-muted-page);
-  font-size: 0.8125rem;
+.icono-card-columna.icono-verde {
+  color: var(--accent);
+  background: rgba(0, 255, 65, 0.1);
 }
 
-.checkout-acciones {
+.card-columna-titulo {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-heading);
+  margin: 0;
+}
+
+.card-columna-subtitulo {
+  font-size: 0.775rem;
+  color: var(--text-muted-page);
+  display: block;
+}
+
+.card-columna-cuerpo {
+  padding: 1.25rem;
   display: flex;
-  justify-content: flex-start;
+  flex-direction: column;
+  flex: 1;
+  gap: 1rem;
+}
+
+/* Bloque 1: Datos de Envío */
+.datos-envio-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  flex: 1;
+}
+
+.dato-envio-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px dashed rgba(138, 44, 226, 0.12);
+}
+
+.dato-envio-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.dato-envio-etiqueta {
+  font-size: 0.725rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted-page);
+}
+
+.dato-envio-valor {
+  font-size: 0.9rem;
+  color: var(--text-page);
+}
+
+.dato-direccion {
+  color: #c084fc;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.tarjeta-pie-accion {
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(138, 44, 226, 0.15);
+}
+
+.enlace-destacado-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--accent);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.enlace-destacado-btn:hover {
+  opacity: 0.85;
+  transform: translateX(2px);
+}
+
+.enlace-destacado-btn .material-symbols-outlined {
+  font-size: 1.05rem;
+}
+
+/* Bloque 2: Métodos de Pago */
+.metodos-pago-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.metodo-pago-tarjeta-label {
+  cursor: pointer;
+  display: block;
+}
+
+.radio-metodo-real {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.metodo-pago-tarjeta-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem 1.15rem;
+  background: rgba(18, 18, 24, 0.6);
+  border: 1px solid rgba(138, 44, 226, 0.2);
+  border-radius: 0.75rem;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.metodo-pago-tarjeta-label:hover .metodo-pago-tarjeta-box {
+  border-color: rgba(138, 44, 226, 0.5);
+  background: rgba(138, 44, 226, 0.05);
+}
+
+.radio-metodo-real:checked + .metodo-pago-tarjeta-box,
+.metodo-pago-tarjeta-box.seleccionado {
+  border-color: var(--accent);
+  background: rgba(0, 255, 65, 0.03);
+  box-shadow: 0 0 16px rgba(0, 255, 65, 0.15);
+}
+
+.tarjeta-box-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tarjeta-box-marca-grupo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.radio-indicador-visual {
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 50%;
+  border: 2px solid rgba(138, 44, 226, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.radio-metodo-real:checked + .metodo-pago-tarjeta-box .radio-indicador-visual,
+.metodo-pago-tarjeta-box.seleccionado .radio-indicador-visual {
+  border-color: var(--accent);
+}
+
+.punto-radio {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.2s ease;
+}
+
+.radio-metodo-real:checked + .metodo-pago-tarjeta-box .punto-radio,
+.metodo-pago-tarjeta-box.seleccionado .punto-radio {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.icono-marca-tarjeta {
+  font-size: 1.25rem;
+  color: var(--primary);
+}
+
+.marca-nombre {
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--text-heading);
+  text-transform: uppercase;
+}
+
+.badge-predeterminada-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(0, 255, 65, 0.12);
+  border: 1px solid rgba(0, 255, 65, 0.3);
+  color: var(--accent);
+  font-size: 0.725rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  flex-shrink: 0;
+}
+
+.badge-predeterminada-pill .material-symbols-outlined {
+  font-size: 0.85rem;
+}
+
+/* Fila Central: Número */
+.tarjeta-box-numero {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: monospace;
+  font-size: 1.05rem;
+  letter-spacing: 0.1em;
+  padding: 0.15rem 0;
+}
+
+.numero-mascara {
+  color: var(--text-muted-page);
+  letter-spacing: 0.15em;
+  font-size: 0.95rem;
+}
+
+.numero-ultimos4 {
+  font-weight: 800;
+  color: #c084fc;
+  font-size: 1.05rem;
+  background: rgba(138, 44, 226, 0.14);
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.35rem;
+  border: 1px solid rgba(138, 44, 226, 0.25);
+}
+
+/* Fila Inferior: Detalles */
+.tarjeta-box-detalles {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+  border-top: 1px dashed rgba(138, 44, 226, 0.15);
+  padding-top: 0.6rem;
+}
+
+.tarjeta-detalle-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.tarjeta-detalle-col.col-vence {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.tarjeta-detalle-etiqueta {
+  font-size: 0.675rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted-page);
+}
+
+.tarjeta-detalle-valor {
+  font-size: 0.875rem;
+  color: var(--text-page);
+  font-weight: 600;
+}
+
+.titular-completo {
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.25;
+}
+
+.vence-codigo {
+  font-family: monospace;
+  color: #c084fc;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+/* Aviso de seguridad en Bloque 2 */
+.tarjeta-seguridad-aviso {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.65rem 0.85rem;
+  background: rgba(138, 44, 226, 0.06);
+  border: 1px solid rgba(138, 44, 226, 0.16);
+  border-radius: 0.5rem;
+  font-size: 0.775rem;
+  color: var(--text-muted-page);
+  margin-top: auto;
+}
+
+.icono-seguridad-tarjeta {
+  font-size: 1.15rem;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.tarjeta-seguridad-aviso p {
+  margin: 0;
+  line-height: 1.35;
+}
+
+.grupo-enlaces-tarjetas {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.enlace-secundario-tarjetas {
+  color: var(--text-muted-page);
+}
+
+.enlace-secundario-tarjetas:hover {
+  color: var(--text-heading);
+}
+
+.aviso-sin-tarjeta-compacto {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 1.5rem 1rem;
+  background: rgba(239, 68, 68, 0.05);
+  border: 1px dashed rgba(239, 68, 68, 0.3);
+  border-radius: 0.75rem;
+  gap: 0.75rem;
+  flex: 1;
+  justify-content: center;
+}
+
+.icono-sin-tarjeta {
+  font-size: 2.25rem;
+  color: #f87171;
+}
+
+.texto-sin-tarjeta strong {
+  display: block;
+  font-size: 0.9rem;
+  color: #fee2e2;
+  margin-bottom: 0.2rem;
+}
+
+.texto-sin-tarjeta p {
+  margin: 0;
+  font-size: 0.775rem;
+  color: var(--text-muted-page);
+}
+
+/* Bloque 3: Resumen y Total */
+.checkout-articulos-lista-compacta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-height: 10.5rem;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.articulo-checkout-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px dashed rgba(138, 44, 226, 0.12);
+  font-size: 0.825rem;
+  gap: 0.5rem;
+}
+
+.articulo-checkout-item:last-child {
+  border-bottom: none;
+}
+
+.articulo-checkout-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.articulo-nombre {
+  font-weight: 600;
+  color: var(--text-heading);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 12rem;
+}
+
+.articulo-formato-meta {
+  font-size: 0.725rem;
+  color: var(--text-muted-page);
+}
+
+.articulo-subtotal {
+  font-family: monospace;
+  font-weight: 700;
+  color: var(--text-heading);
+  flex-shrink: 0;
+}
+
+.checkout-desglose-totales {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.75rem 0.85rem;
+  background: rgba(138, 44, 226, 0.06);
+  border: 1px solid rgba(138, 44, 226, 0.2);
+  border-radius: 0.625rem;
+}
+
+.desglose-fila-mini {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.775rem;
+  color: var(--text-muted-page);
+}
+
+.valor-verde {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.desglose-total-principal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.4rem;
+  margin-top: 0.2rem;
+  border-top: 1px solid rgba(138, 44, 226, 0.2);
+}
+
+.etiqueta-total-checkout {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text-heading);
+}
+
+.monto-total-checkout {
+  font-family: monospace;
+  font-size: 1.45rem;
+  font-weight: 900;
+  color: var(--accent);
+  letter-spacing: -0.02em;
+  text-shadow: 0 0 12px rgba(0, 255, 65, 0.25);
+}
+
+.checkout-acciones-finales {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: auto;
+}
+
+.boton-confirmar-checkout {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  justify-content: center;
+  letter-spacing: 0.01em;
+}
+
+.boton-volver-carrito {
+  width: 100%;
+  justify-content: center;
+  font-size: 0.825rem;
+}
+
+.garantia-seguridad-mini {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.7rem;
+  color: var(--text-muted-page);
+  justify-content: center;
+  text-align: center;
+}
+
+.icono-seguridad-mini {
+  font-size: 0.85rem;
+  color: var(--accent);
 }
 
 /* ===== Métodos de Pago - Layout ===== */
