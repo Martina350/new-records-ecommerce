@@ -51,14 +51,14 @@
               {% for pedido in pedidos %}
                 <tr class="fila-pedido-widescreen">
                   <!-- Número de pedido con link y código monospace -->
-                  <td class="celda-numero-pedido">
+                  <td class="celda-numero-pedido" data-label="Pedido">
                     <a class="enlace-codigo-pedido" href="{{ url_for('ver_pedido', numero=pedido.numero) }}" title="Ver detalle del pedido {{ pedido.numero }}">
                       <code class="codigo-pedido-texto">{{ pedido.numero }}</code>
                     </a>
                   </td>
 
                   <!-- Fecha de compra y hora -->
-                  <td class="celda-fecha-pedido">
+                  <td class="celda-fecha-pedido" data-label="Fecha">
                     <div class="fecha-hora-bloque">
                       <span class="fecha-principal-texto">{{ pedido.fecha_creacion.strftime('%d/%m/%Y') }}</span>
                       <span class="hora-secundaria-texto">{{ pedido.fecha_creacion.strftime('%H:%M') }}</span>
@@ -66,7 +66,7 @@
                   </td>
 
                   <!-- Método de Pago con icono -->
-                  <td class="celda-metodo-pedido">
+                  <td class="celda-metodo-pedido" data-label="Método de Pago">
                     <div class="metodo-tarjeta-chip">
                       <span class="material-symbols-outlined icono-tarjeta-chip" aria-hidden="true">credit_card</span>
                       <span class="marca-tarjeta-texto">{{ pedido.metodo_pago.marca }}</span>
@@ -75,7 +75,7 @@
                   </td>
 
                   <!-- Artículos comprados -->
-                  <td class="celda-articulos-pedido">
+                  <td class="celda-articulos-pedido" data-label="Artículos">
                     <span class="badge-articulos-chip">
                       <span class="material-symbols-outlined icono-badge-articulos" aria-hidden="true">album</span>
                       <span>{{ pedido.detalles | length }} disco{% if pedido.detalles | length != 1 %}s{% endif %}</span>
@@ -83,12 +83,12 @@
                   </td>
 
                   <!-- Total acumulado en verde neón tabular -->
-                  <td class="celda-total-pedido">
+                  <td class="celda-total-pedido" data-label="Total">
                     <span class="total-pedido-monto-neon">${{ "%.2f"|format(pedido.total) }}</span>
                   </td>
 
                   <!-- Estado del pedido con badges de color -->
-                  <td class="celda-estado-pedido">
+                  <td class="celda-estado-pedido" data-label="Estado">
                     <span class="badge-estado badge-estado-{{ pedido.estado | lower }}">
                       {% if pedido.estado == "PENDIENTE" %}
                         <span class="material-symbols-outlined icono-estado-chico" aria-hidden="true">schedule</span>
@@ -102,7 +102,7 @@
                   </td>
 
                   <!-- Acciones: Detalle y PDF -->
-                  <td class="celda-acciones-pedido">
+                  <td class="celda-acciones-pedido" data-label="Acciones">
                     <div class="grupo-acciones-pedido">
                       <a class="boton boton-secundario boton-chico boton-ver-pedido" href="{{ url_for('ver_pedido', numero=pedido.numero) }}">
                         <span class="material-symbols-outlined" aria-hidden="true">visibility</span>

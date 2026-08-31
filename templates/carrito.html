@@ -53,7 +53,7 @@
               {% for item in carrito.elementos %}
                 <tr class="fila-producto-carrito">
                   <!-- Columna 1: Producto con Portada, Título, Artista y Género -->
-                  <td class="celda-producto">
+                  <td class="celda-producto" data-label="Producto">
                     <div class="producto-bloque-info">
                       <div class="portada-miniatura-wrapper">
                         <img 
@@ -77,7 +77,7 @@
                   </td>
 
                   <!-- Columna 2: Formato Badge (CD / Vinilo) -->
-                  <td class="celda-formato">
+                  <td class="celda-formato" data-label="Formato">
                     <span class="badge-formato-tarjeta badge-formato-{{ item.disco.formato | lower }}">
                       <span class="material-symbols-outlined icono-badge-formato" aria-hidden="true">
                         {{ 'album' if item.disco.formato == 'VINILO' else 'disc_full' }}
@@ -87,7 +87,7 @@
                   </td>
 
                   <!-- Columna 3: Precio Unitario -->
-                  <td class="celda-precio">
+                  <td class="celda-precio" data-label="Precio">
                     <div class="precio-col-info">
                       <span class="precio-unitario-numero">${{ "%.2f"|format(item.precio_unitario) }}</span>
                       <span class="precio-unitario-leyenda">IVA y envío incl.</span>
@@ -95,7 +95,7 @@
                   </td>
 
                   <!-- Columna 4: Control de Cantidad -->
-                  <td class="celda-cantidad">
+                  <td class="celda-cantidad" data-label="Cantidad">
                     <form class="form-cantidad-inline" action="{{ url_for('actualizar_carrito', disco_id=item.disco.id) }}" method="post">
                       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                       <div class="input-cantidad-grupo">
@@ -115,12 +115,12 @@
                   </td>
 
                   <!-- Columna 5: Subtotal -->
-                  <td class="celda-subtotal">
+                  <td class="celda-subtotal" data-label="Subtotal">
                     <span class="subtotal-numero-neon">${{ "%.2f"|format(item.subtotal) }}</span>
                   </td>
 
                   <!-- Columna 6: Acciones -->
-                  <td class="celda-acciones">
+                  <td class="celda-acciones" data-label="Acciones">
                     <form action="{{ url_for('eliminar_del_carrito', disco_id=item.disco.id) }}" method="post">
                       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                       <button class="boton-eliminar-fila" type="submit" title="Eliminar {{ item.disco.album }} del carrito" aria-label="Eliminar {{ item.disco.album }}">
