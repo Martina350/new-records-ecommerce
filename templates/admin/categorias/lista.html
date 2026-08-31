@@ -48,22 +48,22 @@
           <tbody>
             {% for cat in categorias %}
               <tr class="{% if not cat.activo %}fila-inactiva{% endif %}">
-                <td><strong>{{ cat.nombre }}</strong></td>
-                <td><code>NR-{{ cat.prefijo_codigo }}-###</code></td>
-                <td>
+                <td data-label="Género"><strong>{{ cat.nombre }}</strong></td>
+                <td data-label="Prefijo"><code>NR-{{ cat.prefijo_codigo }}-###</code></td>
+                <td data-label="Discos">
                   <span class="badge-activo-admin" style="margin-top: 0;">
                     {{ cat.discos | length }} disco(s)
                   </span>
                 </td>
-                <td>{{ cat.descripcion or 'Sin descripción' }}</td>
-                <td>
+                <td data-label="Descripción">{{ cat.descripcion or 'Sin descripción' }}</td>
+                <td data-label="Estado">
                   {% if cat.activo %}
                     <span class="badge-estado badge-estado-aprobado">Activa</span>
                   {% else %}
                     <span class="badge-estado badge-estado-rechazado">Inactiva</span>
                   {% endif %}
                 </td>
-                <td>
+                <td data-label="Acciones">
                   <div class="acciones-pedido-lista">
                     <a class="boton boton-secundario boton-chico" href="{{ url_for('admin_categorias_editar', id=cat.id) }}">
                       <span class="material-symbols-outlined" aria-hidden="true">edit</span>

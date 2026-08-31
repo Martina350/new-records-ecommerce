@@ -131,16 +131,16 @@
             <tbody>
               {% for p in ultimos_pedidos %}
                 <tr>
-                  <td><strong>{{ p.numero }}</strong></td>
-                  <td>{{ p.cliente.nombre }}</td>
-                  <td>{{ p.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}</td>
-                  <td><span class="precio-subtotal">${{ "%.2f"|format(p.total) }}</span></td>
-                  <td>
+                  <td data-label="N° Pedido"><code>{{ p.numero }}</code></td>
+                  <td data-label="Cliente"><strong>{{ p.cliente.nombre }}</strong></td>
+                  <td data-label="Fecha">{{ p.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}</td>
+                  <td data-label="Total"><span class="precio-subtotal">${{ "%.2f"|format(p.total) }}</span></td>
+                  <td data-label="Estado">
                     <span class="badge-estado badge-estado-{{ p.estado | lower }}">
                       {{ p.estado }}
                     </span>
                   </td>
-                  <td>
+                  <td data-label="Acción">
                     <a class="boton boton-secundario boton-chico" href="{{ url_for('admin_pedido_detalle', numero=p.numero) }}">
                       <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
                       <span>Revisar</span>

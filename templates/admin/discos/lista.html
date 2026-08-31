@@ -147,20 +147,20 @@
           <tbody>
             {% for d in discos %}
               <tr class="{% if not d.activo %}fila-inactiva{% endif %}">
-                <td><code>{{ d.codigo }}</code></td>
-                <td>
+                <td data-label="Código"><code>{{ d.codigo }}</code></td>
+                <td data-label="Álbum / Artista">
                   <strong>{{ d.album }}</strong><br/>
                   <small class="artista-disco-carrito">{{ d.artista }}</small>
                 </td>
-                <td>{{ d.categoria.nombre if d.categoria else 'Sin género' }}</td>
-                <td>
+                <td data-label="Género">{{ d.categoria.nombre if d.categoria else 'Sin género' }}</td>
+                <td data-label="Formato">
                   <span class="badge-formato-tarjeta badge-formato-{{ d.formato | lower }}">
                     {{ d.formato }}
                   </span>
                 </td>
-                <td>${{ "%.2f"|format(d.precio_base) }}</td>
-                <td><strong>${{ "%.2f"|format(d.precio_final()) }}</strong></td>
-                <td>
+                <td data-label="Precio Base">${{ "%.2f"|format(d.precio_base) }}</td>
+                <td data-label="Precio Final"><strong>${{ "%.2f"|format(d.precio_final()) }}</strong></td>
+                <td data-label="Stock">
                   {% if d.stock == 0 %}
                     <span class="badge-stock-agotado">Agotado (0)</span>
                   {% elif d.stock <= 3 %}
@@ -169,14 +169,14 @@
                     <span>{{ d.stock }} unid.</span>
                   {% endif %}
                 </td>
-                <td>
+                <td data-label="Estado">
                   {% if d.activo %}
                     <span class="badge-estado badge-estado-aprobado">Activo</span>
                   {% else %}
                     <span class="badge-estado badge-estado-rechazado">Inactivo</span>
                   {% endif %}
                 </td>
-                <td>
+                <td data-label="Acciones">
                   <div class="acciones-pedido-lista">
                     <a class="boton boton-secundario boton-chico" href="{{ url_for('admin_discos_editar', id=d.id) }}">
                       <span class="material-symbols-outlined" aria-hidden="true">edit</span>

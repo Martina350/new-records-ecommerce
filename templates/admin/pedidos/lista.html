@@ -64,24 +64,24 @@
           <tbody>
             {% for p in pedidos %}
               <tr>
-                <td><strong>{{ p.numero }}</strong></td>
-                <td>
-                  <span>{{ p.cliente.nombre }}</span><br/>
+                <td data-label="N° Pedido"><code>{{ p.numero }}</code></td>
+                <td data-label="Cliente">
+                  <strong>{{ p.cliente.nombre }}</strong><br/>
                   <small class="artista-disco-carrito">{{ p.cliente.email }}</small>
                 </td>
-                <td>{{ p.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}</td>
-                <td>
+                <td data-label="Fecha">{{ p.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}</td>
+                <td data-label="Método de Pago">
                   <span class="metodo-tarjeta-resumen">
                     {{ p.metodo_pago.marca }} **** {{ p.metodo_pago.ultimos4 }}
                   </span>
                 </td>
-                <td><span class="precio-subtotal">${{ "%.2f"|format(p.total) }}</span></td>
-                <td>
+                <td data-label="Total"><span class="precio-subtotal">${{ "%.2f"|format(p.total) }}</span></td>
+                <td data-label="Estado">
                   <span class="badge-estado badge-estado-{{ p.estado | lower }}">
                     {{ p.estado }}
                   </span>
                 </td>
-                <td>
+                <td data-label="Acción">
                   <a class="boton boton-secundario boton-chico" href="{{ url_for('admin_pedido_detalle', numero=p.numero) }}">
                     <span class="material-symbols-outlined" aria-hidden="true">rate_review</span>
                     <span>Auditar Pedido</span>
