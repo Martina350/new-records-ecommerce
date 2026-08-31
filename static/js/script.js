@@ -14,6 +14,7 @@ function inicializarAplicacion() {
   inicializarUploaderPreviewAdmin();
   inicializarGraficosReportes();
   inicializarCargarMasDiscosAdmin();
+  inicializarCargarMasProductosCatalogo();
 }
 
 function sincronizarClaseBody(evento) {
@@ -1259,4 +1260,80 @@ function inicializarCargarMasDiscosAdmin() {
     }
   });
 }
+
+/**
+ * Carga dinámica asíncrona de álbumes en móvil para el catálogo público (Botón "Cargar más")
+ */
+function inicializarCargarMasProductosCatalogo() {
+  const btnCargar = document.getElementById('btnCargarMasCatalogo');
+  const contenedorGrid = document.getElementById('gridProductosCatalogo');
+  const contadorProgreso = document.getElementById('contadorProgresoCatalogo');
+  const bloqueCargar = document.getElementById('bloqueCargarMasCatalogo');
+
+  if (!btnCargar || !contenedorGrid) return;
+
+  btnCargar.addEventListener('click', async () => {
+    const paginaSiguiente = parseInt(btnCargar.dataset.paginaSiguiente, 10);
+    const totalPaginas = parseInt(btnCargar.dataset.totalPaginas, 10);
+    const categoria = btnCargar.dataset.categoria || '';
+    const busqueda = btnCargar.dataset.q || '';
+    const baseUrl = btnCargar.dataset.url;
+
+    if (btnCargar.classList.contains('cargando') || paginaSiguiente > totalPaginas) return;
+
+    btnCargar.classList.add('cargando');
+    const texto = btnCargar.querySelector('.texto-btn-cargar');
+    if (texto) texto.textContent = 'Cargando álbumes...';
+
+    try {
+      const url = new URL(baseUrl, window.location.origin);
+      url.searchParams.set('pagina', paginaSiguiente);
+      if (categoria && categoria !== 'todos') url.searchParams.set('categoria', categoria);
+      if (busqueda) url.searchParams.set('q', busqueda);
+      url.searchParams.set('ajax', '1');
+
+      const respuesta = await fetch(url.toString(), {
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!respuesta.ok) throw new Error('Error al cargar más productos');
+
+      const data = await respuesta.json();
+      if (data.html) {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = data.html;
+        while (tempDiv.firstChild) {
+          contenedorGrid.appendChild(tempDiv.firstChild);
+        }
+      }
+
+      const porPagina = data.por_pagina || 6;
+      const totalMostrados = Math.min(paginaSiguiente * porPagina, data.total);
+      if (contadorProgreso) {
+        contadorProgreso.textContent = `Mostrando ${totalMostrados} de ${data.total} álbumes`;
+      }
+
+      if (data.tiene_mas && paginaSiguiente < totalPaginas) {
+        btnCargar.dataset.paginaSiguiente = (paginaSiguiente + 1).toString();
+      } else {
+        if (bloqueCargar) {
+          bloqueCargar.style.display = 'none';
+        }
+      }
+    } catch (err) {
+      console.error('Error al cargar más productos del catálogo:', err);
+      if (texto) texto.textContent = 'Reintentar cargar más';
+    } finally {
+      btnCargar.classList.remove('cargando');
+      const siguienteNum = parseInt(btnCargar.dataset.paginaSiguiente, 10);
+      if (siguienteNum <= totalPaginas && texto) {
+        texto.textContent = 'Cargar más álbumes';
+      }
+    }
+  });
+}
+
 

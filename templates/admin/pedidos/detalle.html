@@ -5,22 +5,38 @@
 {% block contenido %}
 <main class="seccion-admin">
   <div class="contenedor">
-    <div class="admin-cabecera-principal">
-      <div class="admin-cabecera-info">
+    <div class="admin-cabecera-principal admin-cabecera-auditoria">
+      <!-- Fila Superior Móvil: Volver a Bandeja + Badge Estado -->
+      <div class="admin-auditoria-meta-top-movil">
+        <a class="enlace-volver-auditoria" href="{{ url_for('admin_pedidos_lista') }}">
+          <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+          <span>Bandeja de Pedidos</span>
+        </a>
+        <span class="badge-estado badge-estado-{{ pedido.estado | lower }}">
+          {{ pedido.estado }}
+        </span>
+      </div>
+
+      <div class="admin-cabecera-info admin-auditoria-info-inline">
         <div class="admin-icono-grande">
           <span class="material-symbols-outlined" aria-hidden="true">admin_panel_settings</span>
         </div>
-        <div>
-          <h1 id="titulo-auditoria" class="titulo-admin">
-            Auditoría de Pedido: <span class="degradado">{{ pedido.numero }}</span>
+        <div class="admin-auditoria-titulos">
+          <h1 id="titulo-auditoria" class="titulo-admin titulo-auditoria-inline">
+            <span class="etiqueta-auditoria-texto">Auditoría Pedido:</span>
+            <span class="degradado codigo-pedido-auditoria">{{ pedido.numero }}</span>
           </h1>
-          <p class="subtitulo-admin">
-            Registrado el {{ pedido.fecha_creacion.strftime('%d/%m/%Y a las %H:%M') }} | Estado: <span class="badge-estado badge-estado-{{ pedido.estado | lower }}">{{ pedido.estado }}</span>
+          <p class="subtitulo-admin subtitulo-auditoria-meta">
+            <span class="material-symbols-outlined icono-mini-meta" aria-hidden="true">calendar_today</span>
+            <span>Registrado el {{ pedido.fecha_creacion.strftime('%d/%m/%Y a las %H:%M') }}</span>
+            <span class="badge-estado badge-estado-{{ pedido.estado | lower }} badge-auditoria-desktop">
+              {{ pedido.estado }}
+            </span>
           </p>
         </div>
       </div>
 
-      <div class="admin-cabecera-acciones">
+      <div class="admin-cabecera-acciones admin-acciones-desktop-only">
         <a class="boton boton-secundario" href="{{ url_for('admin_pedidos_lista') }}">
           <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
           <span>Bandeja de Pedidos</span>
@@ -85,11 +101,13 @@
 
     <!-- Tabla de Artículos con Comprobación de Stock en Tiempo Real -->
     <div class="admin-seccion-bloque">
-      <h3 class="admin-subtitulo-bloque">
-        <span class="material-symbols-outlined" aria-hidden="true">inventory_2</span>
+      <h3 class="admin-subtitulo-bloque admin-subtitulo-inventario-flex">
+        <span class="material-symbols-outlined icono-subtitulo-verde" aria-hidden="true">inventory_2</span>
         <span>Comprobación de Inventario Físico en Tiempo Real</span>
       </h3>
-      <div class="tabla-carrito-contenedor">
+
+      <!-- Vista Desktop: Tabla panorámica completa -->
+      <div class="tabla-carrito-contenedor vista-desktop-admin-pedidos">
         <table class="tabla-carrito">
           <thead>
             <tr>
@@ -141,6 +159,66 @@
             {% endfor %}
           </tbody>
         </table>
+      </div>
+
+      <!-- Vista Móvil: Tarjetas estructuradas de inventario -->
+      <div class="admin-stock-cards-movil-grid vista-movil-admin-pedidos">
+        {% for detalle in pedido.detalles %}
+          <div class="admin-stock-card-movil">
+            <div class="admin-stock-card-cabecera">
+              <div class="admin-stock-album-info">
+                <h4 class="nombre-album-stock-card">{{ detalle.album }}</h4>
+                <span class="artista-stock-card">{{ detalle.artista }}</span>
+              </div>
+              <span class="badge-formato-tarjeta badge-formato-{{ detalle.formato | lower }}">
+                {{ detalle.formato }}
+              </span>
+            </div>
+
+            <div class="admin-stock-card-filas">
+              <div class="stock-card-fila">
+                <span class="stock-card-etiqueta">Cant. Solicitada:</span>
+                <strong class="stock-card-valor">{{ detalle.cantidad }} unid.</strong>
+              </div>
+
+              <div class="stock-card-fila">
+                <span class="stock-card-etiqueta">Stock en Almacén:</span>
+                <span class="stock-card-valor">
+                  {% if detalle.disco %}
+                    {{ detalle.disco.stock }} unidades
+                  {% else %}
+                    <span class="badge-stock-agotado">Eliminado</span>
+                  {% endif %}
+                </span>
+              </div>
+
+              <div class="stock-card-fila">
+                <span class="stock-card-etiqueta">Precio Unitario:</span>
+                <span class="stock-card-valor">${{ "%.2f"|format(detalle.precio_unitario) }}</span>
+              </div>
+
+              <div class="stock-card-fila stock-card-fila-subtotal">
+                <span class="stock-card-etiqueta">Subtotal:</span>
+                <strong class="stock-card-valor valor-subtotal-neon">${{ "%.2f"|format(detalle.subtotal) }}</strong>
+              </div>
+            </div>
+
+            <div class="admin-stock-card-pie">
+              <span class="stock-card-etiqueta-pie">Disponibilidad:</span>
+              {% if detalle.disco and detalle.disco.stock >= detalle.cantidad %}
+                <span class="badge-estado badge-estado-aprobado">
+                  <span class="material-symbols-outlined icono-estado-chico" aria-hidden="true">check</span>
+                  <span>Suficiente</span>
+                </span>
+              {% else %}
+                <span class="badge-estado badge-estado-rechazado">
+                  <span class="material-symbols-outlined icono-estado-chico" aria-hidden="true">warning</span>
+                  <span>Insuficiente</span>
+                </span>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
       </div>
 
       <div class="pedido-total-resumen">
@@ -225,17 +303,6 @@
         </div>
       </div>
     {% endif %}
-
-    <div class="admin-acciones-pie">
-      <a class="boton boton-secundario" href="{{ url_for('admin_pedidos_lista') }}">
-        <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
-        <span>Volver a Bandeja de Pedidos</span>
-      </a>
-      <a class="boton boton-secundario" href="{{ url_for('admin_dashboard') }}">
-        <span class="material-symbols-outlined" aria-hidden="true">dashboard</span>
-        <span>Panel de Control</span>
-      </a>
-    </div>
   </div>
 </main>
 {% endblock %}

@@ -5,6 +5,8 @@ import secrets
 from datetime import datetime, timezone
 from decimal import Decimal
 
+import pytest
+
 from app import app
 from models import (
     CD,
@@ -25,6 +27,17 @@ from services import (
     obtener_reporte_ventas_temporal,
     obtener_resumen_metricas_ventas,
 )
+
+
+@pytest.fixture(autouse=True)
+def limpiar_pedidos_analiticos(client):
+    """Garantiza aislamiento de métricas eliminando pedidos previos en la transacción."""
+    with app.app_context():
+        DetallePedido.query.delete()
+        TransaccionPago.query.delete()
+        Pedido.query.delete()
+        db.session.commit()
+    yield
 
 
 def pass_admin():
@@ -129,6 +142,7 @@ def agregar_detalle_auxiliar(pedido, disco, cantidad, precio_unitario):
 
 
 # ── Tests de Acceso y Autorización ──────────────────────────────────────────
+
 
 def test_reportes_requiere_autenticacion_y_rol_admin(client):
     """Usuarios anónimos o clientes no pueden ingresar a los reportes administrativos."""

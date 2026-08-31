@@ -25,11 +25,31 @@ def test_menu_global_lista_generos_desde_postgresql(client):
 
 
 def test_catalogo_todos_los_productos(client):
-    respuesta = client.get("/productos")
+    """Verifica la paginación del catálogo con 8 álbumes por página."""
+    resp_pag1 = client.get("/productos")
+    assert resp_pag1.status_code == 200
+    assert b"Deb\xc3\xad Tirar M\xc3\xa1s Fotos" in resp_pag1.data
+    assert b"Future Nostalgia" in resp_pag1.data
+
+    resp_pag2 = client.get("/productos?pagina=2")
+    assert resp_pag2.status_code == 200
+    assert b"The Dark Side of the Moon" in resp_pag2.data
+    assert b"Hit Me Hard and Soft" in resp_pag2.data
+
+
+def test_catalogo_carga_mas_ajax(client):
+    """Verifica que el endpoint AJAX para móvil retorne JSON con HTML de tarjetas."""
+    respuesta = client.get("/productos?pagina=2&ajax=1")
     assert respuesta.status_code == 200
-    assert b"The Dark Side of the Moon" in respuesta.data
-    assert b"Future Nostalgia" in respuesta.data
-    assert b"Deb\xc3\xad Tirar M\xc3\xa1s Fotos" in respuesta.data
+    data = respuesta.get_json()
+    assert data is not None
+    assert "html" in data
+    assert data["pagina"] == 2
+    assert data["total_paginas"] >= 2
+    assert "The Dark Side of the Moon" in data["html"]
+    assert "Hit Me Hard and Soft" in data["html"]
+
+
 
 
 def test_filtro_productos_por_categoria(client):

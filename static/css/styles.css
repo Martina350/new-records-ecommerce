@@ -909,7 +909,7 @@ img { max-width: 100%; height: auto; display: block; }
   .sidebar:hover,
   .sidebar:focus-within {
     width: 280px;
-    z-index: 100;
+    z-index: 99999 !important;
     box-shadow: 12px 0 35px rgba(0, 0, 0, 0.75);
     background: rgba(18, 18, 18, 0.98);
   }
@@ -12531,6 +12531,546 @@ body.modal-pedido-abierto {
 }
 
 /* ==========================================================================
+   Cabecera de Auditoría de Pedidos (Optimizada Móvil y Desktop)
+   ========================================================================== */
+.admin-auditoria-meta-top-movil {
+  display: none;
+}
+
+.admin-auditoria-info-inline {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.titulo-auditoria-inline {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin: 0 0 0.25rem 0;
+  line-height: 1.2;
+}
+
+.etiqueta-auditoria-texto {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-heading);
+}
+
+.codigo-pedido-auditoria {
+  font-size: 1.45rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.subtitulo-auditoria-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .admin-cabecera-auditoria {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0 0 1rem 0;
+  }
+
+  .admin-auditoria-meta-top-movil {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 0.5rem;
+  }
+
+  .enlace-volver-auditoria {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.825rem;
+    font-weight: 700;
+    color: var(--text-page);
+    text-decoration: none;
+    background: rgba(138, 44, 226, 0.12);
+    border: 1px solid rgba(138, 44, 226, 0.25);
+    padding: 0.35rem 0.75rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+  }
+
+  .enlace-volver-auditoria:hover {
+    color: #ffffff;
+    border-color: var(--accent);
+  }
+
+  .enlace-volver-auditoria .material-symbols-outlined {
+    font-size: 1.1rem;
+    color: var(--primary);
+  }
+
+  .admin-cabecera-auditoria .admin-auditoria-info-inline {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.85rem;
+    width: 100%;
+  }
+
+  .admin-cabecera-auditoria .admin-icono-grande {
+    width: 3.1rem;
+    height: 3.1rem;
+    min-width: 3.1rem;
+    border-radius: 0.75rem;
+  }
+
+  .admin-cabecera-auditoria .admin-icono-grande .material-symbols-outlined {
+    font-size: 1.65rem;
+  }
+
+  .admin-auditoria-titulos {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .titulo-auditoria-inline {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    font-size: 1.05rem;
+    margin: 0;
+    line-height: 1.25;
+  }
+
+  .etiqueta-auditoria-texto {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #ffffff;
+    white-space: nowrap;
+  }
+
+  .codigo-pedido-auditoria {
+    font-size: 1.05rem;
+    font-weight: 900;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+
+  .subtitulo-auditoria-meta {
+    font-size: 0.825rem;
+    font-weight: 500;
+    color: var(--text-page);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .subtitulo-auditoria-meta .icono-mini-meta {
+    font-size: 0.95rem;
+    color: var(--primary);
+  }
+
+  .badge-auditoria-desktop {
+    display: none !important;
+  }
+
+  .admin-acciones-desktop-only {
+    display: none !important;
+  }
+}
+
+/* ==========================================================================
+   Tarjetas Móviles de Inventario en Auditoría de Pedidos
+   ========================================================================== */
+.admin-subtitulo-inventario-flex {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.icono-subtitulo-verde {
+  color: var(--accent) !important;
+  font-size: 1.45rem;
+  flex-shrink: 0;
+}
+
+.admin-stock-card-movil {
+  background: rgba(18, 18, 26, 0.85);
+  border: 1px solid rgba(138, 44, 226, 0.25);
+  border-radius: 0.85rem;
+  padding: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.admin-stock-card-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px dashed rgba(138, 44, 226, 0.2);
+}
+
+.admin-stock-album-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.nombre-album-stock-card {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.25;
+}
+
+.artista-stock-card {
+  font-size: 0.825rem;
+  font-weight: 600;
+  color: var(--text-muted-page);
+}
+
+.admin-stock-card-filas {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.stock-card-fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.stock-card-etiqueta {
+  color: var(--text-muted-page);
+  font-weight: 600;
+}
+
+.stock-card-valor {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.stock-card-fila-subtotal {
+  padding-top: 0.25rem;
+}
+
+.valor-subtotal-neon {
+  color: var(--accent);
+  font-weight: 900;
+  font-size: 0.95rem;
+}
+
+.admin-stock-card-pie {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.6rem;
+  border-top: 1px dashed rgba(138, 44, 226, 0.2);
+}
+
+.stock-card-etiqueta-pie {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-heading);
+}
+
+.admin-acciones-pie {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  width: 100%;
+}
+
+.admin-acciones-pie-centrado {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 2rem;
+  width: 100%;
+}
+
+/* ==========================================================================
+   Optimizaciones de Espaciado Móvil para Paneles Administrativos y Reportes
+   ========================================================================== */
+@media (max-width: 768px) {
+  .admin-cabecera-principal {
+    margin-bottom: 0.85rem !important;
+  }
+
+  .admin-seccion-bloque {
+    padding: 1.65rem 1.35rem !important;
+    margin-bottom: 0.85rem !important;
+    border-radius: 1.1rem !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .admin-subtitulo-bloque {
+    font-size: 1.2rem !important;
+    margin-bottom: 0.85rem !important;
+    gap: 0.5rem !important;
+  }
+
+  .admin-kpi-grid {
+    gap: 0.65rem !important;
+    margin-bottom: 0.85rem !important;
+  }
+
+  .admin-kpi-card {
+    padding: 1.25rem 1.15rem !important;
+    gap: 1rem !important;
+    border-radius: 1rem !important;
+  }
+
+  .admin-kpi-numero {
+    font-size: 1.6rem !important;
+    margin-bottom: 0.2rem !important;
+  }
+
+  .admin-kpi-icono {
+    width: 3.1rem !important;
+    height: 3.1rem !important;
+  }
+
+  .admin-kpi-icono .material-symbols-outlined {
+    font-size: 1.65rem !important;
+  }
+
+  .reportes-grid-rankings {
+    gap: 0.85rem !important;
+    margin-top: 0.85rem !important;
+  }
+
+  .reportes-tarjeta-ranking {
+    padding: 1.65rem 1.35rem !important;
+    margin-bottom: 0 !important;
+  }
+
+  .reportes-cabecera-grafico {
+    margin-bottom: 1.15rem !important;
+    gap: 0.65rem !important;
+  }
+
+  .reportes-estado-vacio {
+    padding: 2.25rem 1.25rem !important;
+    border-radius: 0.85rem !important;
+  }
+
+  .reportes-estado-vacio .icono-vacio {
+    font-size: 2.75rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .reportes-estado-vacio h3 {
+    font-size: 1.05rem !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  .reportes-estado-vacio p {
+    font-size: 0.85rem !important;
+  }
+
+  .admin-filtros-pedidos {
+    margin-bottom: 1rem !important;
+    gap: 0.45rem !important;
+  }
+
+  .boton-filtro-tab {
+    padding: 0.55rem 0.95rem !important;
+    font-size: 0.85rem !important;
+  }
+
+  .admin-acciones-pie {
+    display: flex !important;
+    justify-content: center !important;
+    width: 100% !important;
+    margin-top: 1.25rem !important;
+  }
+
+  .admin-acciones-pie .boton {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .admin-acciones-pie-centrado {
+    margin-top: 1.25rem !important;
+  }
+}
+
+/* ==========================================================================
+   Reporte Temporal de Ventas: Tarjetas Móviles y Filtros
+   ========================================================================== */
+.reportes-cabecera-temporal-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.reportes-titulos-bloque {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.subtitulo-bloque-descripcion {
+  margin: 0;
+  color: var(--text-muted-page);
+  font-size: 0.9rem;
+}
+
+.admin-filtros-reportes-grid {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0;
+}
+
+.admin-reporte-temporal-cards-movil-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.admin-reporte-temporal-card-movil {
+  background: rgba(18, 18, 26, 0.85);
+  border: 1px solid rgba(138, 44, 226, 0.25);
+  border-radius: 0.85rem;
+  padding: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.reporte-temporal-card-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px dashed rgba(138, 44, 226, 0.2);
+}
+
+.reporte-temporal-periodo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 1rem;
+  color: #ffffff;
+}
+
+.icono-mini-periodo {
+  font-size: 1.1rem;
+  color: var(--primary);
+}
+
+.badge-pedidos-aprobados-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: rgba(0, 255, 65, 0.1);
+  border: 1px solid rgba(0, 255, 65, 0.3);
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+}
+
+.icono-mini-ordenes {
+  font-size: 0.9rem;
+}
+
+.reporte-temporal-card-cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.reporte-temporal-fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.reporte-temporal-etiqueta {
+  color: var(--text-muted-page);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.reporte-temporal-valor {
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.precio-subtotal-neon {
+  color: var(--accent);
+  font-weight: 900;
+  font-size: 1rem;
+}
+
+.reporte-temporal-fila-progreso {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding-top: 0.4rem;
+  border-top: 1px dashed rgba(138, 44, 226, 0.15);
+}
+
+.progreso-info-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.porcentaje-cuota-neon {
+  color: var(--accent);
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 768px) {
+  .admin-filtros-reportes-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
+    margin-top: 0.5rem !important;
+  }
+
+  .admin-filtros-reportes-grid .boton-filtro-tab {
+    width: 100% !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+  }
+}
+
+/* ==========================================================================
    Botón Móvil Cargar Más Álbumes
    ========================================================================== */
 .contenedor-cargar-mas-movil {
@@ -12582,9 +13122,34 @@ body.modal-pedido-abierto {
   text-align: center;
 }
 
+/* ==========================================================================
+   Alternancia de Vistas: Escritorio vs Móvil
+   ========================================================================== */
+.vista-desktop-admin-discos,
+.vista-desktop-admin-pedidos,
+.vista-desktop-catalogo {
+  display: block;
+}
+
+.vista-movil-admin-discos,
+.vista-movil-admin-pedidos,
+.vista-movil-catalogo,
+.contenedor-cargar-mas-movil {
+  display: none;
+}
+
 @media (max-width: 768px) {
+  .vista-desktop-admin-discos,
+  .vista-desktop-admin-pedidos,
+  .vista-desktop-catalogo {
+    display: none !important;
+  }
+
+  .vista-movil-admin-discos,
+  .vista-movil-admin-pedidos,
+  .vista-movil-catalogo,
   .contenedor-cargar-mas-movil {
-    display: flex;
+    display: flex !important;
   }
 }
 

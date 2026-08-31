@@ -167,7 +167,12 @@ def categorias():
 
 @app.route("/productos")
 def productos():
-    """Muestra el catálogo dinámico de discos con filtros por categoría y búsqueda."""
+    """Muestra el catálogo dinámico de discos con filtros por categoría, búsqueda y paginación (8 por página)."""
+    pagina = request.args.get("pagina", 1, type=int)
+    if pagina < 1:
+        pagina = 1
+    por_pagina = 8
+
     categoria_slug = request.args.get("categoria", "").strip()
     busqueda = request.args.get("q", "").strip()
 
@@ -187,10 +192,27 @@ def productos():
             db.or_(Disco.album.ilike(termino), Disco.artista.ilike(termino))
         )
 
-    lista_discos = consulta.order_by(Disco.album).all()
+    consulta = consulta.order_by(Disco.album)
+    total = consulta.count()
+    total_paginas = max(1, math.ceil(total / por_pagina))
+    if pagina > total_paginas:
+        pagina = total_paginas
+
+    lista_discos = consulta.offset((pagina - 1) * por_pagina).limit(por_pagina).all()
     lista_categorias = (
         Categoria.query.filter_by(activo=True).order_by(Categoria.nombre).all()
     )
+
+    if request.args.get("ajax") == "1" or request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        html_cards = render_template("productos/_tarjetas_productos.html", discos=lista_discos)
+        return jsonify({
+            "html": html_cards,
+            "pagina": pagina,
+            "total_paginas": total_paginas,
+            "total": total,
+            "por_pagina": por_pagina,
+            "tiene_mas": pagina < total_paginas,
+        })
 
     return render_template(
         "productos.html",
@@ -199,6 +221,10 @@ def productos():
         categoria_actual=categoria_actual,
         categoria_slug=categoria_slug or "todos",
         busqueda=busqueda,
+        pagina=pagina,
+        total_paginas=total_paginas,
+        total=total,
+        por_pagina=por_pagina,
     )
 
 

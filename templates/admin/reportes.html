@@ -74,19 +74,19 @@
 
     <!-- Bloque 1: Reporte Temporal de Ventas -->
     <div class="admin-seccion-bloque">
-      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
-        <div>
+      <div class="reportes-cabecera-temporal-flex">
+        <div class="reportes-titulos-bloque">
           <h2 class="admin-subtitulo-bloque" style="margin-bottom: 0.25rem;">
-            <span class="material-symbols-outlined" aria-hidden="true">timeline</span>
+            <span class="material-symbols-outlined icono-subtitulo-verde" aria-hidden="true">timeline</span>
             <span>Evolución de Ventas por Período</span>
           </h2>
-          <p style="margin: 0; color: var(--text-muted-page); font-size: 0.9rem;">
+          <p class="subtitulo-bloque-descripcion">
             Agrupación cronológica de ingresos y volumen de pedidos.
           </p>
         </div>
 
         <!-- Filtros por Período -->
-        <div class="admin-filtros-pedidos" style="margin-bottom: 0;">
+        <div class="admin-filtros-pedidos admin-filtros-reportes-grid">
           <a href="{{ url_for('admin_reportes', periodo='diario') }}" class="boton-filtro-tab {% if periodo == 'diario' %}activo{% endif %}">
             <span class="material-symbols-outlined" aria-hidden="true">today</span>
             <span>Diario</span>
@@ -107,7 +107,8 @@
       </div>
 
       {% if reporte_temporal %}
-        <div class="tabla-carrito-contenedor">
+        <!-- Vista Desktop: Tabla panorámica completa -->
+        <div class="tabla-carrito-contenedor vista-desktop-admin-pedidos">
           <table class="tabla-carrito">
             <thead>
               <tr>
@@ -144,6 +145,47 @@
               {% endfor %}
             </tbody>
           </table>
+        </div>
+
+        <!-- Vista Móvil: Tarjetas estructuradas de evolución temporal -->
+        <div class="admin-reporte-temporal-cards-movil-grid vista-movil-admin-pedidos">
+          {% for fila in reporte_temporal %}
+            {% set pct = (fila.total_facturado / resumen.total_facturado * 100) if resumen.total_facturado > 0 else 0 %}
+            <div class="admin-reporte-temporal-card-movil">
+              <div class="reporte-temporal-card-cabecera">
+                <div class="reporte-temporal-periodo-badge">
+                  <span class="material-symbols-outlined icono-mini-periodo" aria-hidden="true">calendar_today</span>
+                  <strong class="periodo-texto">{{ fila.etiqueta }}</strong>
+                </div>
+                <span class="badge-pedidos-aprobados-chip">
+                  <span class="material-symbols-outlined icono-mini-ordenes" aria-hidden="true">task_alt</span>
+                  <span>{{ fila.total_pedidos }} orden(es)</span>
+                </span>
+              </div>
+
+              <div class="reporte-temporal-card-cuerpo">
+                <div class="reporte-temporal-fila">
+                  <span class="reporte-temporal-etiqueta">Discos Vendidos:</span>
+                  <strong class="reporte-temporal-valor">{{ fila.total_unidades }} disco(s)</strong>
+                </div>
+
+                <div class="reporte-temporal-fila">
+                  <span class="reporte-temporal-etiqueta">Total Facturado:</span>
+                  <strong class="reporte-temporal-valor precio-subtotal-neon">${{ "%.2f"|format(fila.total_facturado) }}</strong>
+                </div>
+
+                <div class="reporte-temporal-fila-progreso">
+                  <div class="progreso-info-meta">
+                    <span class="reporte-temporal-etiqueta">% Cuota del Total:</span>
+                    <strong class="porcentaje-cuota-neon">{{ "%.1f"|format(pct) }}%</strong>
+                  </div>
+                  <div class="reportes-barra-contenedor-ranking">
+                    <div class="reportes-barra-progreso-ranking" style="width: {{ pct|round(1) }}%;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
         </div>
       {% else %}
         <div class="reportes-estado-vacio">
@@ -288,10 +330,6 @@
 
     <!-- Acciones del pie -->
     <div class="admin-acciones-pie">
-      <a class="boton boton-secundario" href="{{ url_for('admin_dashboard') }}">
-        <span class="material-symbols-outlined" aria-hidden="true">dashboard</span>
-        <span>Panel Principal</span>
-      </a>
       <a class="boton boton-destacado" href="{{ url_for('admin_pedidos_lista') }}">
         <span class="material-symbols-outlined" aria-hidden="true">shopping_cart_checkout</span>
         <span>Bandeja de Pedidos</span>

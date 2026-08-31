@@ -74,50 +74,90 @@
       </div>
 
       {% if discos %}
-        <div class="grid-productos">
-          {% for disco in discos %}
-            <article class="tarjeta-producto">
-              <a class="enlace-tarjeta-producto" href="{{ url_for('detalle_producto', codigo=disco.codigo) }}">
-                <div class="tarjeta-producto-imagen">
-                  <div 
-                    class="tarjeta-producto-imagen-fondo" 
-                    style="background-image: url('{{ url_for('static', filename=disco.imagen if disco.imagen else 'img/placeholder.jpg') }}');" 
-                    role="img" 
-                    aria-label="Portada {{ disco.album }}"
-                  ></div>
-                  <span class="badge-formato-tarjeta badge-formato-{{ disco.formato | lower }}">
-                    {{ disco.formato }}
-                  </span>
-                </div>
-              </a>
-
-              <div class="tarjeta-producto-encabezado">
-                <h3 class="tarjeta-producto-titulo">
-                  <a href="{{ url_for('detalle_producto', codigo=disco.codigo) }}">
-                    {{ disco.artista }} - {{ disco.album }}
-                  </a>
-                </h3>
-                <span class="tarjeta-producto-precio">${{ "%.2f"|format(disco.precio_base) }}</span>
-              </div>
-
-              <p class="tarjeta-producto-descripcion">{{ disco.descripcion }}</p>
-
-              <div class="tarjeta-producto-etiquetas">
-                <span class="etiqueta-producto">{{ disco.categoria.nombre }}</span>
-                <span class="etiqueta-producto etiqueta-stock{% if disco.stock == 0 %} etiqueta-agotado{% endif %}">
-                  {% if disco.stock > 0 %}Stock: {{ disco.stock }}{% else %}Agotado{% endif %}
-                </span>
-              </div>
-
-              <div class="tarjeta-producto-acciones">
-                <a class="boton boton-principal boton-tarjeta resplandor-neon" href="{{ url_for('detalle_producto', codigo=disco.codigo) }}">
-                  Ver detalles
-                  <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
-                </a>
-              </div>
-            </article>
-          {% endfor %}
+        <div class="grid-productos" id="gridProductosCatalogo">
+          {% include "productos/_tarjetas_productos.html" %}
         </div>
+
+        <!-- Botón Cargar Más Álbumes (Exclusivo para Vista Móvil) -->
+        {% if total_paginas > 1 %}
+          <div class="contenedor-cargar-mas-movil vista-movil-catalogo" id="bloqueCargarMasCatalogo">
+            <button
+              type="button"
+              class="boton boton-principal resplandor-neon btn-cargar-mas-discos"
+              id="btnCargarMasCatalogo"
+              data-pagina-siguiente="{{ pagina + 1 }}"
+              data-total-paginas="{{ total_paginas }}"
+              data-categoria="{{ categoria_slug }}"
+              data-q="{{ busqueda or '' }}"
+              data-url="{{ url_for('productos') }}"
+            >
+              <span class="material-symbols-outlined icono-cargar-mas" aria-hidden="true">autorenew</span>
+              <span class="texto-btn-cargar">Cargar más álbumes</span>
+            </button>
+            <span class="contador-progreso-movil" id="contadorProgresoCatalogo">
+              Mostrando {{ [pagina * por_pagina, total]|min }} de {{ total }} álbumes
+            </span>
+          </div>
+        {% endif %}
+
+        <!-- Paginación Desktop Panorámica (Se oculta automáticamente en móvil) -->
+        {% if total_paginas > 1 %}
+          <div class="paginacion-admin-contenedor vista-desktop-catalogo">
+            <div class="paginacion-admin-info">
+              Mostrando <strong>{{ ((pagina - 1) * por_pagina) + 1 }}</strong> a <strong>{{ [pagina * por_pagina, total]|min }}</strong> de <strong>{{ total }}</strong> álbumes
+            </div>
+
+            <nav class="paginacion-admin-controles" aria-label="Navegación de páginas">
+              <!-- Botón Anterior -->
+              {% if pagina > 1 %}
+                <a 
+                  class="btn-paginacion" 
+                  href="{{ url_for('productos', categoria=categoria_slug, q=busqueda, pagina=pagina - 1) }}"
+                  title="Página anterior"
+                >
+                  <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+                  <span>Anterior</span>
+                </a>
+              {% else %}
+                <span class="btn-paginacion deshabilitado" aria-disabled="true">
+                  <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+                  <span>Anterior</span>
+                </span>
+              {% endif %}
+
+              <!-- Números de Página -->
+              <div class="paginacion-numeros">
+                {% for p in range(1, total_paginas + 1) %}
+                  {% if p == pagina %}
+                    <span class="btn-num-pag activo" aria-current="page">{{ p }}</span>
+                  {% else %}
+                    <a 
+                      class="btn-num-pag" 
+                      href="{{ url_for('productos', categoria=categoria_slug, q=busqueda, pagina=p) }}"
+                    >{{ p }}</a>
+                  {% endif %}
+                {% endfor %}
+              </div>
+
+              <!-- Botón Siguiente -->
+              {% if pagina < total_paginas %}
+                <a 
+                  class="btn-paginacion" 
+                  href="{{ url_for('productos', categoria=categoria_slug, q=busqueda, pagina=pagina + 1) }}"
+                  title="Página siguiente"
+                >
+                  <span>Siguiente</span>
+                  <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+                </a>
+              {% else %}
+                <span class="btn-paginacion deshabilitado" aria-disabled="true">
+                  <span>Siguiente</span>
+                  <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+                </span>
+              {% endif %}
+            </nav>
+          </div>
+        {% endif %}
       {% else %}
         <div class="estado-vacio">
           <span class="material-symbols-outlined icono-vacio" aria-hidden="true">album</span>
