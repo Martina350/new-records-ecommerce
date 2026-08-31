@@ -32,6 +32,47 @@
       </div>
     </div>
 
+    <!-- Barra de Filtros Avanzados -->
+    <div class="admin-barra-filtros-avanzados">
+      <form method="get" action="{{ url_for('admin_discos_lista') }}" class="form-filtros-grid">
+        <div class="campo-filtro-item">
+          <label for="filtroCategoria" class="etiqueta-filtro-mini">
+            <span class="material-symbols-outlined" aria-hidden="true">category</span>
+            Género Musical:
+          </label>
+          <select id="filtroCategoria" name="categoria_id" class="input-filtro-select" onchange="this.form.submit()">
+            <option value="">Todos los géneros</option>
+            {% for cat in categorias %}
+              <option value="{{ cat.id }}" {% if categoria_filtro == cat.id|string %}selected{% endif %}>
+                {{ cat.nombre }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="campo-filtro-item">
+          <label for="filtroFormato" class="etiqueta-filtro-mini">
+            <span class="material-symbols-outlined" aria-hidden="true">album</span>
+            Formato Físico:
+          </label>
+          <select id="filtroFormato" name="formato" class="input-filtro-select" onchange="this.form.submit()">
+            <option value="">Todos los formatos</option>
+            <option value="CD" {% if formato_filtro == 'CD' %}selected{% endif %}>CD</option>
+            <option value="VINILO" {% if formato_filtro == 'VINILO' %}selected{% endif %}>Vinilo</option>
+          </select>
+        </div>
+
+        {% if categoria_filtro or formato_filtro %}
+          <div class="campo-filtro-acciones">
+            <a href="{{ url_for('admin_discos_lista') }}" class="boton boton-secundario boton-chico">
+              <span class="material-symbols-outlined" aria-hidden="true">clear_all</span>
+              <span>Limpiar Filtros</span>
+            </a>
+          </div>
+        {% endif %}
+      </form>
+    </div>
+
     <div class="admin-seccion-bloque">
       <div class="tabla-carrito-contenedor">
         <table class="tabla-carrito">
@@ -106,12 +147,71 @@
               </tr>
             {% else %}
               <tr>
-                <td colspan="9" class="texto-centrado">No hay discos registrados en el catálogo.</td>
+                <td colspan="9" class="texto-centrado">No hay discos registrados que coincidan con los filtros.</td>
               </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
+
+      <!-- Paginación Condicional (Se oculta automáticamente si total_paginas <= 1) -->
+      {% if total_paginas > 1 %}
+        <div class="paginacion-admin-contenedor">
+          <div class="paginacion-admin-info">
+            Mostrando <strong>{{ ((pagina - 1) * por_pagina) + 1 }}</strong> a <strong>{{ [pagina * por_pagina, total]|min }}</strong> de <strong>{{ total }}</strong> discos
+          </div>
+
+          <nav class="paginacion-admin-controles" aria-label="Navegación de páginas">
+            <!-- Botón Anterior -->
+            {% if pagina > 1 %}
+              <a 
+                class="btn-paginacion" 
+                href="{{ url_for('admin_discos_lista', categoria_id=categoria_filtro, formato=formato_filtro, pagina=pagina - 1) }}"
+                title="Página anterior"
+              >
+                <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+                <span>Anterior</span>
+              </a>
+            {% else %}
+              <span class="btn-paginacion deshabilitado" aria-disabled="true">
+                <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+                <span>Anterior</span>
+              </span>
+            {% endif %}
+
+            <!-- Números de Página -->
+            <div class="paginacion-numeros">
+              {% for p in range(1, total_paginas + 1) %}
+                {% if p == pagina %}
+                  <span class="btn-num-pag activo" aria-current="page">{{ p }}</span>
+                {% else %}
+                  <a 
+                    class="btn-num-pag" 
+                    href="{{ url_for('admin_discos_lista', categoria_id=categoria_filtro, formato=formato_filtro, pagina=p) }}"
+                  >{{ p }}</a>
+                {% endif %}
+              {% endfor %}
+            </div>
+
+            <!-- Botón Siguiente -->
+            {% if pagina < total_paginas %}
+              <a 
+                class="btn-paginacion" 
+                href="{{ url_for('admin_discos_lista', categoria_id=categoria_filtro, formato=formato_filtro, pagina=pagina + 1) }}"
+                title="Página siguiente"
+              >
+                <span>Siguiente</span>
+                <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+              </a>
+            {% else %}
+              <span class="btn-paginacion deshabilitado" aria-disabled="true">
+                <span>Siguiente</span>
+                <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+              </span>
+            {% endif %}
+          </nav>
+        </div>
+      {% endif %}
     </div>
   </div>
 </main>

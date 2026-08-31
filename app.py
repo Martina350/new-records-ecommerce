@@ -2,6 +2,7 @@
 
 from datetime import date
 from decimal import Decimal, InvalidOperation
+import math
 import re
 
 import click
@@ -832,9 +833,41 @@ def admin_reportes():
 @app.route("/admin/discos")
 @rol_requerido("administrador")
 def admin_discos_lista():
-    """Lista completa de discos para gestión administrativa."""
-    discos = Disco.query.order_by(Disco.activo.desc(), Disco.fecha_creacion.desc()).all()
-    return render_template("admin/discos/lista.html", discos=discos)
+    """Lista de discos con filtros por género/formato y paginación (5 por página)."""
+    pagina = request.args.get("pagina", 1, type=int)
+    if pagina < 1:
+        pagina = 1
+    por_pagina = 5
+
+    categoria_id = request.args.get("categoria_id", "").strip()
+    formato = request.args.get("formato", "").strip().upper()
+
+    query = Disco.query
+    if categoria_id and categoria_id.isdigit():
+        query = query.filter_by(categoria_id=int(categoria_id))
+    if formato in ("CD", "VINILO"):
+        query = query.filter_by(formato=formato)
+
+    query = query.order_by(Disco.activo.desc(), Disco.fecha_creacion.desc())
+    total = query.count()
+    total_paginas = max(1, math.ceil(total / por_pagina))
+    if pagina > total_paginas:
+        pagina = total_paginas
+
+    discos = query.offset((pagina - 1) * por_pagina).limit(por_pagina).all()
+    categorias = Categoria.query.filter_by(activo=True).order_by(Categoria.nombre).all()
+
+    return render_template(
+        "admin/discos/lista.html",
+        discos=discos,
+        categorias=categorias,
+        categoria_filtro=categoria_id,
+        formato_filtro=formato,
+        pagina=pagina,
+        total_paginas=total_paginas,
+        total=total,
+        por_pagina=por_pagina,
+    )
 
 
 @app.route("/admin/discos/nuevo", methods=["GET", "POST"])
@@ -1072,9 +1105,28 @@ def admin_discos_reactivar(id):
 @app.route("/admin/categorias")
 @rol_requerido("administrador")
 def admin_categorias_lista():
-    """Lista de categorías con conteo de discos."""
-    categorias = Categoria.query.order_by(Categoria.activo.desc(), Categoria.nombre).all()
-    return render_template("admin/categorias/lista.html", categorias=categorias)
+    """Lista de categorías con conteo de discos y paginación (5 por página)."""
+    pagina = request.args.get("pagina", 1, type=int)
+    if pagina < 1:
+        pagina = 1
+    por_pagina = 5
+
+    query = Categoria.query.order_by(Categoria.activo.desc(), Categoria.nombre)
+    total = query.count()
+    total_paginas = max(1, math.ceil(total / por_pagina))
+    if pagina > total_paginas:
+        pagina = total_paginas
+
+    categorias = query.offset((pagina - 1) * por_pagina).limit(por_pagina).all()
+
+    return render_template(
+        "admin/categorias/lista.html",
+        categorias=categorias,
+        pagina=pagina,
+        total_paginas=total_paginas,
+        total=total,
+        por_pagina=por_pagina,
+    )
 
 
 @app.route("/admin/categorias/nueva", methods=["GET", "POST"])
@@ -1268,10 +1320,33 @@ def admin_categorias_reactivar(id):
 @app.route("/admin/pedidos")
 @rol_requerido("administrador")
 def admin_pedidos_lista():
-    """Bandeja administrativa de pedidos con filtros por estado."""
+    """Bandeja administrativa de pedidos con filtros por estado y paginación (5 por página)."""
+    pagina = request.args.get("pagina", 1, type=int)
+    if pagina < 1:
+        pagina = 1
+    por_pagina = 5
+
     estado = request.args.get("estado", "").strip().upper()
-    pedidos = obtener_pedidos_admin(estado=estado if estado in ("PENDIENTE", "APROBADO", "RECHAZADO") else None)
-    return render_template("admin/pedidos/lista.html", pedidos=pedidos, estado_filtro=estado)
+    pedidos_todos = obtener_pedidos_admin(
+        estado=estado if estado in ("PENDIENTE", "APROBADO", "RECHAZADO") else None
+    )
+    total = len(pedidos_todos)
+    total_paginas = max(1, math.ceil(total / por_pagina))
+    if pagina > total_paginas:
+        pagina = total_paginas
+
+    inicio = (pagina - 1) * por_pagina
+    pedidos = pedidos_todos[inicio:inicio + por_pagina]
+
+    return render_template(
+        "admin/pedidos/lista.html",
+        pedidos=pedidos,
+        estado_filtro=estado,
+        pagina=pagina,
+        total_paginas=total_paginas,
+        total=total,
+        por_pagina=por_pagina,
+    )
 
 
 @app.route("/admin/pedidos/<numero>")

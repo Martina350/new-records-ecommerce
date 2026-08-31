@@ -103,6 +103,65 @@
           </tbody>
         </table>
       </div>
+
+      <!-- Paginación Condicional (Se oculta automáticamente si total_paginas <= 1) -->
+      {% if total_paginas > 1 %}
+        <div class="paginacion-admin-contenedor">
+          <div class="paginacion-admin-info">
+            Mostrando <strong>{{ ((pagina - 1) * por_pagina) + 1 }}</strong> a <strong>{{ [pagina * por_pagina, total]|min }}</strong> de <strong>{{ total }}</strong> categorías
+          </div>
+
+          <nav class="paginacion-admin-controles" aria-label="Navegación de páginas">
+            <!-- Botón Anterior -->
+            {% if pagina > 1 %}
+              <a 
+                class="btn-paginacion" 
+                href="{{ url_for('admin_categorias_lista', pagina=pagina - 1) }}"
+                title="Página anterior"
+              >
+                <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+                <span>Anterior</span>
+              </a>
+            {% else %}
+              <span class="btn-paginacion deshabilitado" aria-disabled="true">
+                <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+                <span>Anterior</span>
+              </span>
+            {% endif %}
+
+            <!-- Números de Página -->
+            <div class="paginacion-numeros">
+              {% for p in range(1, total_paginas + 1) %}
+                {% if p == pagina %}
+                  <span class="btn-num-pag activo" aria-current="page">{{ p }}</span>
+                {% else %}
+                  <a 
+                    class="btn-num-pag" 
+                    href="{{ url_for('admin_categorias_lista', pagina=p) }}"
+                  >{{ p }}</a>
+                {% endif %}
+              {% endfor %}
+            </div>
+
+            <!-- Botón Siguiente -->
+            {% if pagina < total_paginas %}
+              <a 
+                class="btn-paginacion" 
+                href="{{ url_for('admin_categorias_lista', pagina=pagina + 1) }}"
+                title="Página siguiente"
+              >
+                <span>Siguiente</span>
+                <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+              </a>
+            {% else %}
+              <span class="btn-paginacion deshabilitado" aria-disabled="true">
+                <span>Siguiente</span>
+                <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+              </span>
+            {% endif %}
+          </nav>
+        </div>
+      {% endif %}
     </div>
   </div>
 </main>
