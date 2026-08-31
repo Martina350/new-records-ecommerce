@@ -8,9 +8,14 @@
     <!-- Cabecera de Métodos de Pago -->
     <div class="pago-cabecera-wide">
       <div class="pago-cabecera-titulos">
-        <h1 class="pago-titulo-principal">
-          Mis <span class="degradado">Métodos de Pago</span>
-        </h1>
+        <div class="pago-titulo-fila-movil">
+          <h1 class="pago-titulo-principal">
+            Mis <span class="degradado">Métodos de Pago</span>
+          </h1>
+          <button type="button" class="btn-toggle-info-seguridad" id="btnToggleInfoSeguridad" aria-expanded="false" aria-controls="panelInfoSeguridad" title="Información de Seguridad" aria-label="Mostrar u ocultar información de seguridad">
+            <span class="material-symbols-outlined icono-info-toggle" aria-hidden="true">info</span>
+          </button>
+        </div>
         <p class="pago-subtitulo-principal">
           Administra tus tarjetas guardadas y opciones de facturación con seguridad bancaria de última generación.
         </p>
@@ -120,8 +125,8 @@
       {% endif %}
     </section>
 
-    <!-- Sección Inferior: Panel Informativo de Seguridad Horizontal (4 Columnas) -->
-    <section class="seguridad-banner-horizontal-wide" aria-labelledby="titulo-seguridad-banner">
+    <!-- Sección Inferior: Panel Informativo de Seguridad Horizontal (4 Columnas / Colapsable en Móvil) -->
+    <section class="seguridad-banner-horizontal-wide panel-info-seguridad-colapsable" id="panelInfoSeguridad" aria-labelledby="titulo-seguridad-banner">
       <div class="seguridad-banner-cabecera">
         <div class="seguridad-banner-titulo-grupo">
           <div class="seguridad-icono-glow-mini">

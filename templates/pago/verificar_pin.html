@@ -42,7 +42,7 @@
         </div>
 
         {% if intentos_restantes > 0 and not verificacion.verificada %}
-          <form class="formulario-contacto" action="{{ url_for('pago_verificar', token=token) }}" method="post">
+          <form class="formulario-contacto form-verificar-pin" action="{{ url_for('pago_verificar', token=token) }}" method="post">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="campo-formulario campo-pin">
               <label class="etiqueta-formulario" for="pin">Código PIN <span class="requerido">*</span></label>
@@ -60,13 +60,13 @@
                 autocomplete="one-time-code"
                 autofocus
               />
-              <span class="nota-campo">Solo números, exactamente 6 dígitos.</span>
+              <span class="nota-campo nota-campo-pin">Solo números, exactamente 6 dígitos.</span>
             </div>
 
-            <div class="grupo-botones-formulario">
-              <button class="boton boton-principal resplandor-neon" type="submit" id="btn-verificar-pin">
+            <div class="grupo-botones-verificar-pin">
+              <button class="boton boton-principal resplandor-neon btn-accion-verificar-pin" type="submit" id="btn-verificar-pin">
                 <span class="material-symbols-outlined" aria-hidden="true">verified</span>
-                Verificar y activar tarjeta
+                <span>Verificar y activar tarjeta</span>
               </button>
             </div>
           </form>
@@ -78,11 +78,11 @@
         {% endif %}
 
         <div class="pin-acciones-extra">
-          <a class="boton boton-secundario" href="{{ url_for('pago_agregar') }}">
+          <a class="boton boton-secundario btn-reintentar-pin" href="{{ url_for('pago_agregar') }}">
             <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
-            Reintentar con nueva tarjeta
+            <span>Reintentar con nueva tarjeta</span>
           </a>
-          <a class="enlace-destacado" href="{{ url_for('pago_metodos') }}">
+          <a class="enlace-destacado enlace-volver-metodos" href="{{ url_for('pago_metodos') }}">
             Volver a mis métodos de pago
           </a>
         </div>

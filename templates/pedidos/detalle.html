@@ -10,27 +10,14 @@
 
         <!-- Cabecera Panorámica del Pedido -->
         <div class="pedido-detalle-cabecera-wide">
-          <div class="pedido-cabecera-bloque-izq">
-            <div class="icono-pedido-cabecera-wrapper">
-              <span class="material-symbols-outlined icono-pedido-cabecera" aria-hidden="true">receipt_long</span>
+          <!-- Fila 1: Código de Pedido + Badge de Estado alineados en los extremos sin desborde -->
+          <div class="pedido-detalle-top-meta-fila">
+            <div class="pedido-codigo-chip-wrap">
+              <span class="material-symbols-outlined icono-chip-pedido" aria-hidden="true">receipt_long</span>
+              <code class="codigo-pedido-detalle-neon">{{ pedido.numero }}</code>
             </div>
-            <div>
-              <div class="pedido-badge-numero-wrap">
-                <span class="etiqueta-pedido-pre">Detalle de Compra</span>
-                <code class="codigo-pedido-detalle-neon">{{ pedido.numero }}</code>
-              </div>
-              <h1 id="titulo-pedido" class="pedido-detalle-titulo-principal">
-                Resumen del Pedido
-              </h1>
-              <div class="pedido-fecha-meta">
-                <span class="material-symbols-outlined icono-meta-chico" aria-hidden="true">calendar_today</span>
-                <span>Realizado el {{ pedido.fecha_creacion.strftime('%d/%m/%Y a las %H:%M') }}</span>
-              </div>
-            </div>
-          </div>
 
-          <div class="pedido-cabecera-bloque-der">
-            <span class="badge-estado badge-estado-{{ pedido.estado | lower }} badge-estado-detalle-grande">
+            <span class="badge-estado badge-estado-{{ pedido.estado | lower }} badge-estado-detalle-header" title="Estado: {{ pedido.estado }}" aria-label="Estado: {{ pedido.estado }}">
               {% if pedido.estado == "PENDIENTE" %}
                 <span class="material-symbols-outlined icono-estado-chico" aria-hidden="true">schedule</span>
               {% elif pedido.estado == "APROBADO" %}
@@ -38,8 +25,19 @@
               {% else %}
                 <span class="material-symbols-outlined icono-estado-chico" aria-hidden="true">cancel</span>
               {% endif %}
-              {{ pedido.estado }}
+              <span class="texto-estado-desktop">{{ pedido.estado }}</span>
             </span>
+          </div>
+
+          <!-- Fila 2: Título Principal y Fecha de Realización -->
+          <div class="pedido-detalle-titulos-wrap">
+            <h1 id="titulo-pedido" class="pedido-detalle-titulo-principal">
+              Resumen del Pedido
+            </h1>
+            <div class="pedido-fecha-meta">
+              <span class="material-symbols-outlined icono-meta-chico" aria-hidden="true">calendar_today</span>
+              <span>Realizado el {{ pedido.fecha_creacion.strftime('%d/%m/%Y a las %H:%M') }}</span>
+            </div>
           </div>
         </div>
 

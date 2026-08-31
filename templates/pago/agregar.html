@@ -7,23 +7,30 @@
   <div class="contenedor">
     <div class="caja-formulario-tarjeta">
       <div class="auth-cabecera-tarjeta">
-        <div class="icono-tarjeta-cabecera">
-          <span class="material-symbols-outlined" aria-hidden="true">add_card</span>
+        <div class="tarjeta-cabecera-top-fila">
+          <div class="icono-tarjeta-cabecera">
+            <span class="material-symbols-outlined" aria-hidden="true">add_card</span>
+          </div>
+          <div class="aviso-seguridad-tarjeta-chip">
+            <span class="material-symbols-outlined" aria-hidden="true">verified_user</span>
+            <span>Verificación Segura por PIN</span>
+          </div>
         </div>
-        <div>
+
+        <div class="tarjeta-cabecera-textos">
           <h1 id="titulo-agregar-tarjeta" class="titulo-tarjeta-pagina">
             Registrar <span class="degradado">Tarjeta</span> de Pago
           </h1>
           <p class="subtitulo-tarjeta-pagina">
-            Solo guardamos los últimos 4 dígitos. Tu número completo y CVV nunca se almacenan.
+            Solo guardamos los últimos 4 dígitos. Tu número completo y código CVV nunca se almacenan.
           </p>
         </div>
       </div>
 
-      <!-- Aviso de seguridad -->
+      <!-- Aviso de seguridad informativo -->
       <div class="aviso-seguridad-tarjeta">
         <span class="material-symbols-outlined" aria-hidden="true">lock</span>
-        <span>Proceso seguro — verifica tu identidad con un PIN enviado a tu correo.</span>
+        <span>Proceso seguro — validación mediante PIN temporal de 6 dígitos enviado a tu correo.</span>
       </div>
 
       <form

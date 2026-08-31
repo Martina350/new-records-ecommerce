@@ -8,7 +8,8 @@ function inicializarAplicacion() {
   configurarFormularioTarjeta();
   inicializarResumenCarrito();
   inicializarCheckoutHorizontal();
-  inicializarAcordeonPedidosMovil();
+  inicializarModalesPedidosMovil();
+  inicializarToggleInfoSeguridad();
   inicializarDropdownAdmin();
   inicializarUploaderPreviewAdmin();
   inicializarGraficosReportes();
@@ -912,40 +913,73 @@ function inicializarCheckoutHorizontal() {
 }
 
 /**
- * Control del Acordeón Táctil para Pedidos en Vista Móvil (< 768px)
+ * Control del Modal de Detalle de Pedidos en Vista Móvil (< 768px)
  */
-function inicializarAcordeonPedidosMovil() {
-  const filasPedidos = document.querySelectorAll('.fila-pedido-widescreen');
-  if (!filasPedidos.length) return;
+function inicializarModalesPedidosMovil() {
+  const cards = document.querySelectorAll('.card-pedido-movil-compacta');
+  if (!cards.length) return;
 
-  filasPedidos.forEach((fila) => {
-    const btnToggle = fila.querySelector('.btn-toggle-acordeon-pedido');
-    if (!btnToggle) return;
+  const cerrarTodosLosModales = () => {
+    document.querySelectorAll('.modal-pedido-overlay.abierto').forEach((modal) => {
+      modal.classList.remove('abierto');
+      modal.setAttribute('aria-hidden', 'true');
+    });
+    document.body.classList.remove('modal-pedido-abierto');
+  };
 
-    const toggleFila = (e) => {
-      // Si se hizo click en un enlace dentro de la tarjeta, permitir navegación normal
-      if (e && e.target && e.target.closest('a') && !e.target.closest('.btn-toggle-acordeon-pedido')) return;
+  cards.forEach((card) => {
+    const modalId = card.dataset.pedidoModal;
+    if (!modalId) return;
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
 
-      const estaDesplegado = fila.classList.toggle('desplegado');
-      btnToggle.setAttribute('aria-expanded', String(estaDesplegado));
-      const icono = btnToggle.querySelector('.material-symbols-outlined');
-      if (icono) {
-        icono.textContent = estaDesplegado ? 'expand_less' : 'expand_more';
-      }
+    const abrirModal = (e) => {
+      if (e && e.target && e.target.closest('a')) return;
+      cerrarTodosLosModales();
+      modal.classList.add('abierto');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('modal-pedido-abierto');
     };
 
-    btnToggle.addEventListener('click', (e) => {
-      e.stopPropagation();
-      toggleFila(e);
+    card.addEventListener('click', (e) => {
+      abrirModal(e);
     });
 
-    const celdaNum = fila.querySelector('.celda-numero-pedido');
-    if (celdaNum) {
-      celdaNum.addEventListener('click', (e) => {
-        if (window.innerWidth < 768 && !e.target.closest('a')) {
-          toggleFila(e);
-        }
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        abrirModal(e);
+      }
+    });
+
+    const btnAbrir = card.querySelector('.btn-abrir-modal-pedido');
+    if (btnAbrir) {
+      btnAbrir.addEventListener('click', (e) => {
+        e.stopPropagation();
+        abrirModal(e);
       });
+    }
+
+    // Botones de cerrar dentro del modal
+    modal.querySelectorAll('.btn-cerrar-modal-pedido').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        cerrarTodosLosModales();
+      });
+    });
+
+    // Cerrar al hacer click fuera del diálogo
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        cerrarTodosLosModales();
+      }
+    });
+  });
+
+  // Cerrar con Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      cerrarTodosLosModales();
     }
   });
 }
@@ -1136,71 +1170,17 @@ function inicializarGraficosReportes() {
 }
 
 /**
- * Control Dinámico de Selectores Personalizados (Custom Dropdowns)
+ * Toggle Interactivo de Información de Seguridad en Métodos de Pago
  */
-function inicializarCustomSelects() {
-  if (window._customSelectsInicializados) return;
-  window._customSelectsInicializados = true;
+function inicializarToggleInfoSeguridad() {
+  const btnToggle = document.getElementById('btnToggleInfoSeguridad');
+  const panelSeguridad = document.getElementById('panelInfoSeguridad');
+  if (!btnToggle || !panelSeguridad) return;
 
-  document.addEventListener('click', (e) => {
-    // Si se presiona el botón trigger del selector
-    const trigger = e.target.closest('.custom-select-boton');
-    if (trigger) {
-      e.preventDefault();
-      const contenedor = trigger.closest('.custom-select-contenedor');
-      const estabaAbierto = contenedor.classList.contains('abierto');
-
-      // Cerrar todos los selectores abiertos
-      document.querySelectorAll('.custom-select-contenedor.abierto').forEach((c) => {
-        c.classList.remove('abierto');
-        c.querySelector('.custom-select-boton')?.setAttribute('aria-expanded', 'false');
-      });
-
-      if (!estabaAbierto) {
-        contenedor.classList.add('abierto');
-        trigger.setAttribute('aria-expanded', 'true');
-      }
-      return;
-    }
-
-    // Si se selecciona una opción
-    const opcion = e.target.closest('.custom-select-opcion');
-    if (opcion) {
-      e.preventDefault();
-      const contenedor = opcion.closest('.custom-select-contenedor');
-      const targetInputId = contenedor?.dataset.targetInput;
-      const input = targetInputId ? document.getElementById(targetInputId) : null;
-      const valor = opcion.dataset.value;
-
-      if (input) {
-        input.value = valor;
-        const form = input.closest('form');
-        if (form) {
-          form.submit();
-        }
-      }
-      contenedor?.classList.remove('abierto');
-      return;
-    }
-
-    // Cerrar cualquier selector si se hace clic fuera
-    if (!e.target.closest('.custom-select-contenedor')) {
-      document.querySelectorAll('.custom-select-contenedor.abierto').forEach((c) => {
-        c.classList.remove('abierto');
-        c.querySelector('.custom-select-boton')?.setAttribute('aria-expanded', 'false');
-      });
-    }
-  });
-
-  // Accesibilidad por teclado: tecla Escape cierra el selector
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      document.querySelectorAll('.custom-select-contenedor.abierto').forEach((c) => {
-        c.classList.remove('abierto');
-        c.querySelector('.custom-select-boton')?.setAttribute('aria-expanded', 'false');
-      });
-    }
+  btnToggle.addEventListener('click', (e) => {
+    e.preventDefault();
+    const estaVisible = panelSeguridad.classList.toggle('visible');
+    btnToggle.classList.toggle('activo', estaVisible);
+    btnToggle.setAttribute('aria-expanded', estaVisible ? 'true' : 'false');
   });
 }
-
-

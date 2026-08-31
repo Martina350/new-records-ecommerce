@@ -22,19 +22,15 @@
             <span class="material-symbols-outlined" aria-hidden="true">receipt_long</span>
             <span>{{ pedidos | length }} pedido{% if pedidos | length != 1 %}s{% endif %} registrado{% if pedidos | length != 1 %}s{% endif %}</span>
           </div>
-
-          <a class="boton boton-secundario boton-chico" href="{{ url_for('productos') }}">
-            <span class="material-symbols-outlined" aria-hidden="true">album</span>
-            <span>Ir al Catálogo</span>
-          </a>
         </div>
       {% endif %}
     </div>
 
     {% if pedidos %}
-      <!-- Tarjeta Panorámica Widescreen (Estilo Screenshot 2) -->
+      <!-- Tarjeta Panorámica Widescreen (Desktop Table + Mobile Compact Cards) -->
       <div class="pedidos-card-pantalla-completa">
-        <div class="tabla-pedidos-wrapper-fluid">
+        <!-- Vista Desktop: Tabla Panorámica -->
+        <div class="tabla-pedidos-wrapper-fluid vista-desktop-pedidos">
           <table class="tabla-pedidos-widescreen">
             <thead>
               <tr>
@@ -82,6 +78,11 @@
                     </span>
                   </td>
 
+                  <!-- Total acumulado en verde neón tabular -->
+                  <td class="celda-total-pedido" data-label="Total">
+                    <span class="total-pedido-monto-neon">${{ "%.2f"|format(pedido.total) }}</span>
+                  </td>
+
                   <!-- Estado del pedido con badges de color -->
                   <td class="celda-estado-pedido" data-label="Estado">
                     <span class="badge-estado badge-estado-{{ pedido.estado | lower }}">
@@ -96,12 +97,7 @@
                     </span>
                   </td>
 
-                  <!-- Total acumulado en verde neón tabular -->
-                  <td class="celda-total-pedido" data-label="Total">
-                    <span class="total-pedido-monto-neon">${{ "%.2f"|format(pedido.total) }}</span>
-                  </td>
-
-                  <!-- Acciones: Detalle y PDF (Siempre visibles y destacadas) -->
+                  <!-- Acciones: Detalle y PDF -->
                   <td class="celda-acciones-pedido" data-label="Acciones">
                     <div class="grupo-acciones-pedido">
                       <a class="boton boton-secundario boton-chico boton-ver-pedido" href="{{ url_for('ver_pedido', numero=pedido.numero) }}">
@@ -119,6 +115,52 @@
           </table>
         </div>
 
+        <!-- Vista Móvil: Cards Compactas y Limpias -->
+        <div class="pedidos-lista-movil-cards vista-movil-pedidos">
+          {% for pedido in pedidos %}
+            <article class="card-pedido-movil-compacta" data-pedido-modal="modal-pedido-{{ pedido.numero }}" tabindex="0" role="button" aria-haspopup="dialog" aria-label="Ver detalles del pedido {{ pedido.numero }}">
+              <!-- Fila 1: Nº de Pedido y Estado -->
+              <div class="fila-movil-pedido-cabecera">
+                <code class="codigo-pedido-texto">{{ pedido.numero }}</code>
+                <span class="badge-estado badge-estado-{{ pedido.estado | lower }}">
+                  {% if pedido.estado == "PENDIENTE" %}
+                    <span class="material-symbols-outlined icono-estado-chico" aria-hidden="true">schedule</span>
+                  {% elif pedido.estado == "APROBADO" %}
+                    <span class="material-symbols-outlined icono-estado-chico" aria-hidden="true">check_circle</span>
+                  {% else %}
+                    <span class="material-symbols-outlined icono-estado-chico" aria-hidden="true">cancel</span>
+                  {% endif %}
+                  {{ pedido.estado }}
+                </span>
+              </div>
+
+              <!-- Fila 2: Fecha y Cantidad de Discos -->
+              <div class="fila-movil-pedido-meta">
+                <span class="meta-fecha-movil">
+                  <span class="material-symbols-outlined" aria-hidden="true">calendar_today</span>
+                  {{ pedido.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}
+                </span>
+                <span class="meta-discos-movil">
+                  <span class="material-symbols-outlined" aria-hidden="true">album</span>
+                  {{ pedido.detalles | length }} disco{% if pedido.detalles | length != 1 %}s{% endif %}
+                </span>
+              </div>
+
+              <!-- Fila 3: Total y Botón de Abrir Modal -->
+              <div class="fila-movil-pedido-pie">
+                <div class="bloque-total-movil">
+                  <span class="etiqueta-total-movil">Total:</span>
+                  <span class="total-pedido-monto-neon">${{ "%.2f"|format(pedido.total) }}</span>
+                </div>
+                <button type="button" class="boton boton-secundario boton-chico btn-abrir-modal-pedido" data-target="modal-pedido-{{ pedido.numero }}">
+                  <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
+                  <span>Ver Detalle</span>
+                </button>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+
         <!-- Barra Inferior de la Tarjeta de Pedidos -->
         <div class="pedidos-barra-inferior-wide">
           <div class="pedidos-info-pie">
@@ -132,6 +174,134 @@
           </a>
         </div>
       </div>
+
+      <!-- MODALES DE DETALLE DE PEDIDOS (NIVEL RAÍZ PARA EVITAR CONFLICTOS DE APILAMIENTO) -->
+      {% for pedido in pedidos %}
+        <div class="modal-pedido-overlay" id="modal-pedido-{{ pedido.numero }}" aria-hidden="true" role="dialog" aria-labelledby="titulo-modal-{{ pedido.numero }}">
+          <div class="modal-pedido-dialog">
+            <!-- Cabecera Superior del Modal: Botón Volver Izquierda + Título + Estado Derecha -->
+            <header class="modal-pedido-appbar">
+              <button type="button" class="btn-modal-volver-izq btn-cerrar-modal-pedido" aria-label="Volver al listado de pedidos">
+                <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+                <span>Volver</span>
+              </button>
+              <h3 id="titulo-modal-{{ pedido.numero }}" class="modal-pedido-appbar-titulo">Detalle del Pedido</h3>
+              <span class="badge-estado badge-estado-{{ pedido.estado | lower }}">
+                {{ pedido.estado }}
+              </span>
+            </header>
+
+            <!-- Cuerpo con Scroll y Jerarquía Visual Impecable -->
+            <div class="modal-pedido-cuerpo">
+              <!-- Tarjeta Hero Resumen: Código, Fecha y Total Destacado -->
+              <div class="modal-hero-pedido-card">
+                <div class="modal-hero-top">
+                  <div class="modal-hero-codigo-wrap">
+                    <span class="modal-hero-subetiqueta">Identificador</span>
+                    <code class="modal-hero-codigo">{{ pedido.numero }}</code>
+                  </div>
+                  <span class="modal-hero-fecha">
+                    <span class="material-symbols-outlined" aria-hidden="true">event</span>
+                    {{ pedido.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}
+                  </span>
+                </div>
+
+                <div class="modal-hero-total-box">
+                  <span class="modal-hero-total-lbl">Total Pagado</span>
+                  <span class="modal-hero-total-val">${{ "%.2f"|format(pedido.total) }}</span>
+                  <span class="modal-hero-total-leyenda">Envío especializado y embalaje incluidos</span>
+                </div>
+
+                <a class="boton boton-principal resplandor-neon boton-pdf-hero" href="{{ url_for('descargar_comprobante', numero=pedido.numero) }}" target="_blank">
+                  <span class="material-symbols-outlined" aria-hidden="true">picture_as_pdf</span>
+                  <span>Descargar Comprobante PDF</span>
+                </a>
+              </div>
+
+              <!-- Bloque 1: Método de Pago y Referencia Bancaria -->
+              <div class="modal-card-seccion">
+                <div class="modal-card-seccion-cabecera">
+                  <span class="material-symbols-outlined icono-seccion-morado" aria-hidden="true">credit_card</span>
+                  <h4 class="modal-card-seccion-titulo">Método de Pago</h4>
+                </div>
+                <div class="modal-card-seccion-cuerpo">
+                  <div class="modal-fila-clave-valor">
+                    <span class="modal-clave">Tarjeta:</span>
+                    <div class="metodo-tarjeta-chip">
+                      <span class="material-symbols-outlined icono-tarjeta-chip" aria-hidden="true">credit_card</span>
+                      <span>{{ pedido.metodo_pago.marca }} •••• {{ pedido.metodo_pago.ultimos4 }}</span>
+                    </div>
+                  </div>
+                  <div class="modal-fila-clave-valor">
+                    <span class="modal-clave">Titular:</span>
+                    <strong class="modal-valor">{{ pedido.metodo_pago.titular }}</strong>
+                  </div>
+                  <div class="modal-fila-clave-valor">
+                    <span class="modal-clave">Vencimiento:</span>
+                    <span class="modal-valor vence-codigo">{{ "%02d"|format(pedido.metodo_pago.mes_vencimiento) }}/{{ pedido.metodo_pago.anio_vencimiento }}</span>
+                  </div>
+                  {% if pedido.transaccion_pago %}
+                    <div class="modal-fila-clave-valor modal-fila-ref">
+                      <span class="modal-clave">Referencia:</span>
+                      <code class="codigo-referencia-bancaria">{{ pedido.transaccion_pago.referencia }}</code>
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <!-- Bloque 2: Datos de Envío y Entrega -->
+              <div class="modal-card-seccion">
+                <div class="modal-card-seccion-cabecera">
+                  <span class="material-symbols-outlined icono-seccion-verde" aria-hidden="true">local_shipping</span>
+                  <h4 class="modal-card-seccion-titulo">Datos de Entrega</h4>
+                </div>
+                <div class="modal-card-seccion-cuerpo">
+                  <div class="modal-fila-clave-valor">
+                    <span class="modal-clave">Destinatario:</span>
+                    <strong class="modal-valor">{{ pedido.cliente.nombre }}</strong>
+                  </div>
+                  <div class="modal-fila-clave-valor">
+                    <span class="modal-clave">Ciudad:</span>
+                    <span class="modal-valor">{{ pedido.cliente.ciudad or 'No especificada' }}</span>
+                  </div>
+                  <div class="modal-fila-clave-valor">
+                    <span class="modal-clave">Dirección:</span>
+                    <span class="modal-valor">{{ pedido.cliente.direccion or 'No especificada' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Bloque 3: Discos Comprados (Detalle Histórico) -->
+              <div class="modal-card-seccion">
+                <div class="modal-card-seccion-cabecera">
+                  <span class="material-symbols-outlined icono-seccion-morado" aria-hidden="true">album</span>
+                  <h4 class="modal-card-seccion-titulo">Discos Comprados ({{ pedido.detalles | length }})</h4>
+                </div>
+                <div class="modal-articulos-lista-ordenada">
+                  {% for detalle in pedido.detalles %}
+                    <div class="modal-articulo-tarjeta-item">
+                      <div class="modal-art-fila-superior">
+                        <strong class="modal-art-titulo-album">{{ detalle.album }}</strong>
+                        <span class="badge-formato-tarjeta badge-formato-{{ detalle.formato | lower }}">
+                          {{ detalle.formato }}
+                        </span>
+                      </div>
+                      <div class="modal-art-fila-intermedia">
+                        <span class="modal-art-artista-texto">{{ detalle.artista }}</span>
+                        <span class="modal-art-unidades-precio">{{ detalle.cantidad }} unid. × ${{ "%.2f"|format(detalle.precio_unitario) }}</span>
+                      </div>
+                      <div class="modal-art-fila-subtotal-caja">
+                        <span class="modal-subtotal-etiqueta">Subtotal del álbum:</span>
+                        <span class="subtotal-numero-neon">${{ "%.2f"|format(detalle.subtotal) }}</span>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
     {% else %}
       <!-- Estado Vacío a Pantalla Completa Widescreen -->
       <div class="pedidos-card-pantalla-completa pedidos-card-vacio-widescreen">
