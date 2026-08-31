@@ -10,6 +10,7 @@ function inicializarAplicacion() {
   inicializarCheckoutHorizontal();
   inicializarAcordeonPedidosMovil();
   inicializarDropdownAdmin();
+  inicializarUploaderPreviewAdmin();
 }
 
 function sincronizarClaseBody(evento) {
@@ -100,18 +101,31 @@ function inicializarNavLanding() {
   });
 }
 
+// Delegación global directa para acordeones del sidebar (inmune a re-renderizaciones)
+document.addEventListener('click', (evento) => {
+  const btn = evento.target.closest('.btn-acordeon-sidebar');
+  if (!btn) return;
+
+  const submodulo = btn.closest('.submodulo-sidebar');
+  if (!submodulo) return;
+
+  evento.preventDefault();
+  evento.stopPropagation();
+  const estaAbierto = submodulo.classList.toggle('abierto');
+  btn.setAttribute('aria-expanded', String(estaAbierto));
+});
+
 /**
  * Control del Sidebar Lateral: Colapsar/Expandir en Desktop,
  * Slide-over en Móvil, Acordeones Jerárquicos y Auto-expansión.
  */
 function inicializarSidebar() {
   const sidebar = document.getElementById('sidebar');
-  const layoutApp = document.getElementById('layoutApp');
+  if (!sidebar) return;
+
   const btnMobileToggle = document.getElementById('btnToggleSidebarMobile');
   const btnMobileClose = document.getElementById('btnCerrarSidebarMobile');
   const backdrop = document.getElementById('sidebarBackdrop');
-
-  if (!sidebar) return;
 
   // Apertura y Cierre en Dispositivos Móviles
   const toggleMobileSidebar = (abrir) => {
@@ -121,43 +135,35 @@ function inicializarSidebar() {
     document.body.style.overflow = abrir ? 'hidden' : '';
   };
 
-  if (btnMobileToggle) {
+  if (btnMobileToggle && !btnMobileToggle.dataset.sidebarInit) {
+    btnMobileToggle.dataset.sidebarInit = 'true';
     btnMobileToggle.addEventListener('click', () => {
       toggleMobileSidebar(!sidebar.classList.contains('abierto-movil'));
     });
   }
 
-  if (btnMobileClose) {
+  if (btnMobileClose && !btnMobileClose.dataset.sidebarInit) {
+    btnMobileClose.dataset.sidebarInit = 'true';
     btnMobileClose.addEventListener('click', () => toggleMobileSidebar(false));
   }
 
-  if (backdrop) {
+  if (backdrop && !backdrop.dataset.sidebarInit) {
+    backdrop.dataset.sidebarInit = 'true';
     backdrop.addEventListener('click', () => toggleMobileSidebar(false));
   }
 
-  // Cerrar sidebar móvil con tecla Escape sin duplicar el evento tras cada navegación.
+  // Cerrar sidebar móvil con tecla Escape
   document.removeEventListener('keydown', manejarEscapeSidebar);
   document.addEventListener('keydown', manejarEscapeSidebar);
 
   // Cerrar al pulsar un enlace de navegación en móvil
   sidebar.querySelectorAll('a').forEach((enlace) => {
+    if (enlace.dataset.linkMovilInit) return;
+    enlace.dataset.linkMovilInit = 'true';
     enlace.addEventListener('click', () => {
       if (window.innerWidth < 1024) {
         toggleMobileSidebar(false);
       }
-    });
-  });
-
-  // Acordeones Jerárquicos (Submódulos)
-  const acordeonBotones = sidebar.querySelectorAll('.btn-acordeon-sidebar');
-  acordeonBotones.forEach((btn) => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const submodulo = btn.closest('.submodulo-sidebar');
-      if (!submodulo) return;
-
-      const estaAbierto = submodulo.classList.toggle('abierto');
-      btn.setAttribute('aria-expanded', String(estaAbierto));
     });
   });
 
@@ -169,7 +175,7 @@ function inicializarSidebar() {
     const enlaceActivo = submodulo.querySelector('.enlace-subitem.activo') ||
       Array.from(submodulo.querySelectorAll('.enlace-subitem')).some((a) => {
         const href = a.getAttribute('href');
-        return href && rutaActual.startsWith(href);
+        return href && (rutaActual === href || (href !== '/' && rutaActual.startsWith(href)));
       });
 
     if (enlaceActivo) {
@@ -944,27 +950,27 @@ function inicializarDropdownAdmin() {
   const dropdown = document.getElementById('dropdownUsuarioAdmin');
   if (!dropdown) return;
 
-  const trigger = document.getElementById('btnTriggerUsuario');
+  const btnPerfil = document.getElementById('btnPerfilUsuario');
   const menu = document.getElementById('menuDropdownAdmin');
-  if (!trigger || !menu) return;
+  if (!btnPerfil || !menu) return;
 
   // Evitar vincular múltiples veces los mismos listeners si HTMX re-ejecuta
   if (dropdown.dataset.inicializado === 'true') return;
   dropdown.dataset.inicializado = 'true';
 
   const abrirMenu = () => {
-    trigger.setAttribute('aria-expanded', 'true');
+    btnPerfil.setAttribute('aria-expanded', 'true');
     menu.classList.add('abierto');
   };
 
   const cerrarMenu = () => {
-    trigger.setAttribute('aria-expanded', 'false');
+    btnPerfil.setAttribute('aria-expanded', 'false');
     menu.classList.remove('abierto');
   };
 
-  trigger.addEventListener('click', (e) => {
+  btnPerfil.addEventListener('click', (e) => {
     e.stopPropagation();
-    const estaAbierto = trigger.getAttribute('aria-expanded') === 'true';
+    const estaAbierto = btnPerfil.getAttribute('aria-expanded') === 'true';
     if (estaAbierto) {
       cerrarMenu();
     } else {
@@ -979,9 +985,98 @@ function inicializarDropdownAdmin() {
   });
 
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && trigger.getAttribute('aria-expanded') === 'true') {
+    if (e.key === 'Escape' && btnPerfil.getAttribute('aria-expanded') === 'true') {
       cerrarMenu();
-      trigger.focus();
+      btnPerfil.focus();
     }
+  });
+}
+
+/**
+ * Controlador de Vista Previa de Imagen con Soporte Drag & Drop y Remoción
+ */
+function inicializarUploaderPreviewAdmin() {
+  const panel = document.getElementById('panelCargaImagen');
+  if (!panel) return;
+
+  const inputValor = document.getElementById('inputImagenValor');
+  const inputArchivo = document.getElementById('inputArchivoImagen');
+  const zonaDrop = document.getElementById('zonaDropArchivos');
+  const imgElemento = document.getElementById('imagenPrevisualizada');
+  const placeholder = document.getElementById('placeholderPreviewArte');
+  const btnEliminar = document.getElementById('btnEliminarImagen');
+
+  if (!inputValor || !inputArchivo || !zonaDrop || !imgElemento || !placeholder || !btnEliminar) {
+    return;
+  }
+
+  // Evitar duplicación de listeners en ciclos HTMX
+  if (panel.dataset.inicializado === 'true') return;
+  panel.dataset.inicializado = 'true';
+
+  const mostrarImagen = (urlOData) => {
+    imgElemento.src = urlOData;
+    imgElemento.classList.remove('oculto');
+    placeholder.classList.add('oculto');
+    btnEliminar.classList.remove('oculto');
+    inputValor.value = urlOData;
+  };
+
+  const limpiarImagen = () => {
+    imgElemento.src = '';
+    imgElemento.classList.add('oculto');
+    placeholder.classList.remove('oculto');
+    btnEliminar.classList.add('oculto');
+    inputValor.value = '';
+    inputArchivo.value = '';
+  };
+
+  const procesarArchivo = (archivo) => {
+    if (!archivo || !archivo.type.startsWith('image/')) {
+      alert('Por favor, selecciona un archivo de imagen válido (JPG, PNG, WEBP).');
+      return;
+    }
+
+    const lector = new FileReader();
+    lector.onload = (e) => {
+      if (e.target && e.target.result) {
+        mostrarImagen(e.target.result);
+      }
+    };
+    lector.readAsDataURL(archivo);
+  };
+
+  inputArchivo.addEventListener('change', (e) => {
+    if (e.target.files && e.target.files[0]) {
+      procesarArchivo(e.target.files[0]);
+    }
+  });
+
+  ['dragenter', 'dragover'].forEach((nombreEvento) => {
+    zonaDrop.addEventListener(nombreEvento, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      zonaDrop.classList.add('drag-activo');
+    });
+  });
+
+  ['dragleave', 'drop'].forEach((nombreEvento) => {
+    zonaDrop.addEventListener(nombreEvento, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      zonaDrop.classList.remove('drag-activo');
+    });
+  });
+
+  zonaDrop.addEventListener('drop', (e) => {
+    const archivos = e.dataTransfer.files;
+    if (archivos && archivos.length > 0) {
+      procesarArchivo(archivos[0]);
+    }
+  });
+
+  btnEliminar.addEventListener('click', (e) => {
+    e.preventDefault();
+    limpiarImagen();
   });
 }

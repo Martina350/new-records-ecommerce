@@ -36,8 +36,8 @@
         <div class="dropdown-usuario-admin" id="dropdownUsuarioAdmin">
           <button 
             type="button" 
-            class="btn-trigger-usuario" 
-            id="btnTriggerUsuario"
+            class="btn-perfil-usuario" 
+            id="btnPerfilUsuario"
             aria-expanded="false" 
             aria-haspopup="true"
             aria-controls="menuDropdownAdmin"
@@ -53,7 +53,7 @@
             <span class="material-symbols-outlined icono-flecha-dropdown" aria-hidden="true">expand_more</span>
           </button>
 
-          <div class="menu-dropdown-admin" id="menuDropdownAdmin" role="menu" aria-labelledby="btnTriggerUsuario">
+          <div class="menu-dropdown-admin" id="menuDropdownAdmin" role="menu" aria-labelledby="btnPerfilUsuario">
             <div class="dropdown-header-info">
               <p class="dropdown-usuario-nombre">{{ usuario_actual.nombre if usuario_actual else session.usuario_nombre }}</p>
               <p class="dropdown-usuario-email">{{ usuario_actual.email if usuario_actual else session.usuario_email }}</p>
