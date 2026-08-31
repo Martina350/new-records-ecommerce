@@ -8,6 +8,7 @@ function inicializarAplicacion() {
   configurarFormularioTarjeta();
   inicializarResumenCarrito();
   inicializarCheckoutHorizontal();
+  inicializarAcordeonPedidosMovil();
 }
 
 function sincronizarClaseBody(evento) {
@@ -895,5 +896,45 @@ function inicializarCheckoutHorizontal() {
     });
   });
 }
+
+/**
+ * Control del Acordeón Táctil para Pedidos en Vista Móvil (< 768px)
+ */
+function inicializarAcordeonPedidosMovil() {
+  const filasPedidos = document.querySelectorAll('.fila-pedido-widescreen');
+  if (!filasPedidos.length) return;
+
+  filasPedidos.forEach((fila) => {
+    const btnToggle = fila.querySelector('.btn-toggle-acordeon-pedido');
+    if (!btnToggle) return;
+
+    const toggleFila = (e) => {
+      // Si se hizo click en un enlace dentro de la tarjeta, permitir navegación normal
+      if (e && e.target && e.target.closest('a') && !e.target.closest('.btn-toggle-acordeon-pedido')) return;
+
+      const estaDesplegado = fila.classList.toggle('desplegado');
+      btnToggle.setAttribute('aria-expanded', String(estaDesplegado));
+      const icono = btnToggle.querySelector('.material-symbols-outlined');
+      if (icono) {
+        icono.textContent = estaDesplegado ? 'expand_less' : 'expand_more';
+      }
+    };
+
+    btnToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleFila(e);
+    });
+
+    const celdaNum = fila.querySelector('.celda-numero-pedido');
+    if (celdaNum) {
+      celdaNum.addEventListener('click', (e) => {
+        if (window.innerWidth < 768 && !e.target.closest('a')) {
+          toggleFila(e);
+        }
+      });
+    }
+  });
+}
+
 
 

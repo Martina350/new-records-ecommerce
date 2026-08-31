@@ -82,11 +82,6 @@
                     </span>
                   </td>
 
-                  <!-- Total acumulado en verde neón tabular -->
-                  <td class="celda-total-pedido" data-label="Total">
-                    <span class="total-pedido-monto-neon">${{ "%.2f"|format(pedido.total) }}</span>
-                  </td>
-
                   <!-- Estado del pedido con badges de color -->
                   <td class="celda-estado-pedido" data-label="Estado">
                     <span class="badge-estado badge-estado-{{ pedido.estado | lower }}">
@@ -101,12 +96,17 @@
                     </span>
                   </td>
 
-                  <!-- Acciones: Detalle y PDF -->
+                  <!-- Total acumulado en verde neón tabular -->
+                  <td class="celda-total-pedido" data-label="Total">
+                    <span class="total-pedido-monto-neon">${{ "%.2f"|format(pedido.total) }}</span>
+                  </td>
+
+                  <!-- Acciones: Detalle y PDF (Siempre visibles y destacadas) -->
                   <td class="celda-acciones-pedido" data-label="Acciones">
                     <div class="grupo-acciones-pedido">
                       <a class="boton boton-secundario boton-chico boton-ver-pedido" href="{{ url_for('ver_pedido', numero=pedido.numero) }}">
                         <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
-                        <span>Detalle</span>
+                        <span>Ver Detalle</span>
                       </a>
                       <a class="boton boton-secundario boton-chico boton-pdf-pedido" href="{{ url_for('descargar_comprobante', numero=pedido.numero) }}" title="Descargar Comprobante PDF" target="_blank">
                         <span class="material-symbols-outlined" aria-hidden="true">picture_as_pdf</span>
