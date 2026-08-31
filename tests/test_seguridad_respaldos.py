@@ -82,6 +82,43 @@ def test_todos_los_formularios_post_declaran_token_csrf():
     assert formularios_sin_token == []
 
 
+def test_plantillas_no_exponen_tecnologia_o_logica_interna():
+    """El HTML entregado debe utilizar únicamente lenguaje funcional y comercial."""
+    raiz = Path(__file__).resolve().parent.parent / "templates"
+    terminos_prohibidos = (
+        "postgres",
+        "sqlalchemy",
+        "python",
+        "flask",
+        "jinja",
+        "herencia",
+        "polimorf",
+        "transaccional",
+        "procedimiento almacenado",
+        "trigger",
+        "backend",
+        "frontend",
+        "base de datos",
+        "smtp",
+        "modo desarrollo",
+        "cobro simulado",
+        "slug url",
+        "ruta de imagen",
+        "ruta de portada",
+    )
+    coincidencias = []
+
+    for plantilla in raiz.rglob("*.html"):
+        contenido = plantilla.read_text(encoding="utf-8").lower()
+        for termino in terminos_prohibidos:
+            if termino in contenido:
+                coincidencias.append(
+                    f"{plantilla.relative_to(raiz)}: {termino}"
+                )
+
+    assert coincidencias == []
+
+
 # ── Tests de Restricciones Relacionales e Integridad en PostgreSQL ────────────
 
 def test_postgresql_rechaza_disco_precio_invalido(client):

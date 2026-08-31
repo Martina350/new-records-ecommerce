@@ -2,6 +2,7 @@
 
 import os
 from datetime import date, timedelta
+from unittest.mock import patch
 
 from app import app
 from models import MetodoPago, VerificacionTarjeta, ahora_utc, db
@@ -77,6 +78,29 @@ def test_agregar_crea_verificacion_pendiente(client):
             assert verificacion is not None
             assert verificacion.verificada is False
             assert verificacion.intentos == 0
+
+
+def test_pin_alternativo_no_expone_configuracion_interna(client):
+    with client:
+        autenticar_cliente(client)
+        with patch("app.enviar_pin", return_value=False):
+            respuesta = client.post(
+                "/pago/agregar",
+                data={
+                    "titular": "Cliente Demo",
+                    "marca": "VISA",
+                    "numero": "4111111111111111",
+                    "mes_vencimiento": "12",
+                    "anio_vencimiento": "2030",
+                },
+                follow_redirects=True,
+            )
+
+        contenido = respuesta.data.decode("utf-8")
+        assert respuesta.status_code == 200
+        assert "Tu PIN de verificación es:" in contenido
+        assert "MODO DESARROLLO" not in contenido
+        assert "SMTP" not in contenido
 
 
 def test_agregar_rechaza_tarjeta_vencida(client):

@@ -20,7 +20,7 @@
           </h1>
           <p class="subtitulo-admin">
             {% if categoria %}
-              Modifica la información, slug URL y visualización del género musical.
+              Modifica la información y presentación del género musical.
             {% else %}
               Registra un nuevo género musical para organizar el catálogo de álbumes.
             {% endif %}
@@ -45,22 +45,8 @@
             />
           </div>
 
-          <div class="campo-admin">
-            <label class="etiqueta-tarjeta" for="slug">Slug URL <span class="requerido">*</span></label>
-            <input
-              class="entrada-formulario entrada-tarjeta"
-              type="text"
-              id="slug"
-              name="slug"
-              value="{{ categoria.slug if categoria else slug | default('') }}"
-              placeholder="Ej. heavy-metal"
-              required
-            />
-            <span class="nota-campo">Identificador único en la URL (letras minúsculas, números y guiones).</span>
-          </div>
-
           {% set prefijo_bloqueado = categoria and categoria.discos %}
-          <div class="campo-admin col-span-2">
+          <div class="campo-admin">
             <label class="etiqueta-tarjeta" for="prefijo_codigo">Prefijo para Códigos de Discos <span class="requerido">*</span></label>
             <input
               class="entrada-formulario entrada-tarjeta{% if prefijo_bloqueado %} entrada-bloqueada{% endif %}"
@@ -96,17 +82,6 @@
             >{{ categoria.descripcion if categoria else descripcion | default('') }}</textarea>
           </div>
 
-          <div class="campo-admin col-span-2">
-            <label class="etiqueta-tarjeta" for="imagen">Ruta de Imagen Representativa (Opcional)</label>
-            <input
-              class="entrada-formulario entrada-tarjeta"
-              type="text"
-              id="imagen"
-              name="imagen"
-              value="{{ categoria.imagen if categoria else imagen | default('') }}"
-              placeholder="Ej. img/genero.jpg"
-            />
-          </div>
         </div>
 
         <div class="grupo-botones-tarjeta">

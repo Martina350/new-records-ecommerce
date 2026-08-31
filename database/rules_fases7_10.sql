@@ -147,7 +147,7 @@ BEGIN
     IF NOT EXISTS (
         SELECT 1 FROM transacciones_pago WHERE pedido_id = v_pedido_id
     ) THEN
-        p_mensaje := 'El pedido no tiene una transacción de pago asociada.';
+        p_mensaje := 'No se pudo validar el pago del pedido.';
         RETURN;
     END IF;
 

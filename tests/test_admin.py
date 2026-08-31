@@ -131,6 +131,66 @@ def test_formulario_nuevo_disco_no_permite_escribir_codigo(client):
         assert "Código Único Automático" in contenido
 
 
+def test_formularios_admin_no_exponen_campos_tecnicos(client):
+    with client:
+        autenticar_admin(client)
+        formulario_disco = client.get("/admin/discos/nuevo").data.decode("utf-8")
+        formulario_categoria = client.get("/admin/categorias/nueva").data.decode(
+            "utf-8"
+        )
+
+        assert 'name="imagen"' not in formulario_disco
+        assert 'name="slug"' not in formulario_categoria
+        assert 'name="imagen"' not in formulario_categoria
+
+
+def test_edicion_sin_campos_tecnicos_conserva_datos_existentes(client):
+    with client:
+        autenticar_admin(client)
+        with app.app_context():
+            categoria = Categoria.query.filter_by(slug="rock").first()
+            disco = Disco.query.filter_by(codigo="NR-ROC-001").first()
+            categoria_id = categoria.id
+            categoria_imagen = categoria.imagen
+            categoria_slug = categoria.slug
+            disco_id = disco.id
+            disco_imagen = disco.imagen
+            datos_disco = {
+                "album": disco.album,
+                "artista": disco.artista,
+                "descripcion": disco.descripcion,
+                "categoria_id": str(disco.categoria_id),
+                "precio_base": str(disco.precio_base),
+                "stock": str(disco.stock),
+                "peso_kg": str(disco.peso_kg),
+                "costo_envio_por_kg": str(disco.costo_envio_por_kg),
+                "costo_embalaje": str(disco.costo_embalaje),
+            }
+
+        respuesta_categoria = client.post(
+            f"/admin/categorias/{categoria_id}/editar",
+            data={
+                "nombre": "Rock",
+                "descripcion": "Del rock clásico al grunge y el sonido alternativo.",
+            },
+            follow_redirects=True,
+        )
+        respuesta_disco = client.post(
+            f"/admin/discos/{disco_id}/editar",
+            data=datos_disco,
+            follow_redirects=True,
+        )
+
+        assert respuesta_categoria.status_code == 200
+        assert respuesta_disco.status_code == 200
+        with app.app_context():
+            categoria_actualizada = db.session.get(Categoria, categoria_id)
+            disco_actualizado = db.session.get(Disco, disco_id)
+            assert categoria_actualizada.slug == categoria_slug
+            assert categoria_actualizada.imagen == categoria_imagen
+            assert disco_actualizado.imagen == disco_imagen
+
+
 def test_crud_disco_crear_y_editar(client):
     with client:
         autenticar_admin(client)

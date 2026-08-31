@@ -78,7 +78,7 @@
                 value="NR-PREFIJO-###"
                 disabled
               />
-              <span class="nota-campo">PostgreSQL asignará el siguiente número disponible del género al guardar.</span>
+              <span class="nota-campo">El código se asignará automáticamente al guardar el disco.</span>
             </div>
           {% else %}
             <div class="campo-admin col-span-2">
@@ -178,19 +178,7 @@
               name="costo_embalaje"
               value="{{ disco.costo_embalaje if disco and disco.formato == 'VINILO' else costo_embalaje | default('3.50') }}"
             />
-            <span class="nota-campo">Aplica exclusivamente al formato Vinilo para el cálculo polimórfico de precio final.</span>
-          </div>
-
-          <div class="campo-admin col-span-2">
-            <label class="etiqueta-tarjeta" for="imagen">Ruta de Portada (Opcional)</label>
-            <input
-              class="entrada-formulario entrada-tarjeta"
-              type="text"
-              id="imagen"
-              name="imagen"
-              value="{{ disco.imagen if disco else imagen | default('') }}"
-              placeholder="Ej. img/album.jpg"
-            />
+            <span class="nota-campo">Este costo se incluye únicamente en el precio final de los vinilos.</span>
           </div>
         </div>
 

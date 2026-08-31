@@ -3208,7 +3208,7 @@ select option {
   font-family: monospace;
 }
 
-.resumen-nota-polimorfismo {
+.resumen-nota-precio {
   display: flex;
   gap: 0.5rem;
   align-items: flex-start;

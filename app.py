@@ -714,9 +714,8 @@ def pago_agregar():
                 "info",
             )
         else:
-            # Modo desarrollo: mostrar PIN en flash si SMTP no está configurado
             flash(
-                f"[MODO DESARROLLO] El SMTP no está configurado. Tu PIN de verificación es: {pin}",
+                f"Tu PIN de verificación es: {pin}",
                 "warning",
             )
 
@@ -941,7 +940,7 @@ def admin_discos_nuevo():
             return redirect(url_for("admin_discos_lista"))
         except Exception:
             db.session.rollback()
-            flash("Error al guardar el disco en la base de datos.", "error")
+            flash("No se pudo guardar el disco. Inténtalo nuevamente.", "error")
 
     return render_template("admin/discos/formulario.html", categorias=categorias, disco=None)
 
@@ -963,7 +962,7 @@ def admin_discos_editar(id):
         peso_kg = request.form.get("peso_kg", "0")
         costo_envio = request.form.get("costo_envio_por_kg", "0")
         costo_embalaje = request.form.get("costo_embalaje", "0")
-        imagen = request.form.get("imagen", "").strip()
+        imagen = request.form.get("imagen", disco.imagen or "").strip()
 
         errores = []
         if not album:
@@ -1088,9 +1087,9 @@ def admin_categorias_nueva():
         if not nombre or len(nombre) < 2:
             errores.append("El nombre de la categoría es obligatorio (mínimo 2 caracteres).")
         if not slug:
-            errores.append("El slug de la categoría es obligatorio.")
+            errores.append("No se pudo generar el identificador de la categoría.")
         elif Categoria.query.filter_by(slug=slug).first() is not None:
-            errores.append(f"Ya existe una categoría con el slug '{slug}'.")
+            errores.append("Ya existe una categoría con un nombre equivalente.")
         if not re.fullmatch(r"[A-Z0-9]{3,5}", prefijo_codigo):
             errores.append(
                 "El prefijo debe contener entre 3 y 5 letras mayúsculas o números."
@@ -1142,22 +1141,22 @@ def admin_categorias_editar(id):
 
     if request.method == "POST":
         nombre = request.form.get("nombre", "").strip()
-        slug = request.form.get("slug", "").strip().lower()
+        slug = request.form.get("slug", categoria.slug).strip().lower()
         prefijo_codigo = request.form.get(
             "prefijo_codigo", categoria.prefijo_codigo
         ).strip().upper()
         descripcion = request.form.get("descripcion", "").strip()
-        imagen = request.form.get("imagen", "").strip()
+        imagen = request.form.get("imagen", categoria.imagen or "").strip()
 
         errores = []
         if not nombre or len(nombre) < 2:
             errores.append("El nombre de la categoría es obligatorio.")
         if not slug:
-            errores.append("El slug de la categoría es obligatorio.")
+            errores.append("No se pudo conservar el identificador de la categoría.")
         else:
             cat_existente = Categoria.query.filter_by(slug=slug).first()
             if cat_existente and cat_existente.id != categoria.id:
-                errores.append(f"El slug '{slug}' ya está en uso por otra categoría.")
+                errores.append("Ya existe una categoría con un identificador equivalente.")
         if not re.fullmatch(r"[A-Z0-9]{3,5}", prefijo_codigo):
             errores.append(
                 "El prefijo debe contener entre 3 y 5 letras mayúsculas o números."

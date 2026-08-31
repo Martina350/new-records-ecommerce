@@ -15,7 +15,7 @@
             Gestión de <span class="degradado">Categorías</span>
           </h1>
           <p class="subtitulo-admin">
-            Clasificación por géneros musicales, identificadores slug y control de visibilidad.
+            Clasificación por géneros musicales y control de visibilidad en el catálogo.
           </p>
         </div>
       </div>
@@ -38,7 +38,6 @@
           <thead>
             <tr>
               <th>Nombre del Género</th>
-              <th>Slug (URL)</th>
               <th>Prefijo</th>
               <th>Discos Vinculados</th>
               <th>Descripción</th>
@@ -50,7 +49,6 @@
             {% for cat in categorias %}
               <tr class="{% if not cat.activo %}fila-inactiva{% endif %}">
                 <td><strong>{{ cat.nombre }}</strong></td>
-                <td><code>{{ cat.slug }}</code></td>
                 <td><code>NR-{{ cat.prefijo_codigo }}-###</code></td>
                 <td>
                   <span class="badge-activo-admin" style="margin-top: 0;">
@@ -99,7 +97,7 @@
               </tr>
             {% else %}
               <tr>
-                <td colspan="7" class="texto-centrado">No hay categorías registradas.</td>
+                <td colspan="6" class="texto-centrado">No hay categorías registradas.</td>
               </tr>
             {% endfor %}
           </tbody>

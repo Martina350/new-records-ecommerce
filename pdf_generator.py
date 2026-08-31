@@ -294,7 +294,7 @@ def generar_pdf_pedido(pedido, tipo="COMPROBANTE_PENDIENTE"):
         aviso_texto = (
             "<b>NOTA DE SEGURIDAD:</b> Este comprobante confirma la recepción de tu orden de compra en New Records. "
             "El pedido se encuentra actualmente en estado <b>PENDIENTE</b> de revisión y control de inventario por parte de nuestro equipo. "
-            "Una vez aprobado, el cobro simulado será formalizado y recibirás tu Factura Oficial definitiva."
+            "Una vez aprobado, el pago será confirmado y recibirás tu Factura Oficial definitiva."
         )
     else:
         aviso_texto = (

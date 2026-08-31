@@ -88,14 +88,14 @@
       <a class="admin-tarjeta-modulo enlace-modulo" href="{{ url_for('admin_categorias_lista') }}">
         <span class="material-symbols-outlined admin-modulo-icono" aria-hidden="true">category</span>
         <h3>Gestión de Categorías</h3>
-        <p>Crear y editar géneros musicales, slugs URL y organización general.</p>
+        <p>Crear y editar géneros musicales y organizar el catálogo.</p>
         <span class="badge-activo-admin">Administrar géneros</span>
       </a>
 
       <a class="admin-tarjeta-modulo enlace-modulo" href="{{ url_for('admin_pedidos_lista') }}">
         <span class="material-symbols-outlined admin-modulo-icono" aria-hidden="true">shopping_cart_checkout</span>
         <h3>Bandeja de Pedidos</h3>
-        <p>Revisión transaccional, aprobación y control de stock en tiempo real.</p>
+        <p>Revisar pedidos, confirmar ventas y controlar las existencias disponibles.</p>
         <span class="badge-activo-admin">
           {% if stats.pedidos_pendientes > 0 %}
             {{ stats.pedidos_pendientes }} pendiente(s)
