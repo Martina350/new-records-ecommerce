@@ -63,10 +63,10 @@
                   {% endif %}
                   <form action="{{ url_for('pago_eliminar', metodo_id=metodo.id) }}" method="post">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <button class="boton-eliminar-item" type="submit" title="Eliminar tarjeta"
+                    <button class="boton boton-peligro boton-chico" type="submit" title="Eliminar tarjeta"
                       onclick="return confirm('¿Deseas eliminar esta tarjeta?')">
                       <span class="material-symbols-outlined" aria-hidden="true">delete</span>
-                      Eliminar
+                      <span>Eliminar</span>
                     </button>
                   </form>
                 </div>
