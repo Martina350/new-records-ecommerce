@@ -128,8 +128,9 @@
       </form>
     </div>
 
-    <div class="admin-seccion-bloque">
-      <div class="tabla-carrito-contenedor">
+    <div class="admin-seccion-bloque admin-seccion-bloque-discos">
+      <!-- Vista Desktop: Tabla Panorámica de 9 Columnas -->
+      <div class="tabla-carrito-contenedor vista-desktop-admin-discos">
         <table class="tabla-carrito">
           <thead>
             <tr>
@@ -209,9 +210,43 @@
         </table>
       </div>
 
-      <!-- Paginación Condicional (Se oculta automáticamente si total_paginas <= 1) -->
+      <!-- Vista Móvil: Cards de Discos con Jerarquía Visual de Primer Nivel -->
+      <div class="admin-discos-cards-movil-grid vista-movil-admin-discos" id="contenedorCardsDiscosMovil">
+        {% if discos %}
+          {% include "admin/discos/_cards_movil.html" %}
+        {% else %}
+          <div class="sin-resultados-admin-card">
+            <span class="material-symbols-outlined" aria-hidden="true">search_off</span>
+            <p>No hay discos registrados que coincidan con los filtros.</p>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Botón Cargar Más Álbumes (Exclusivo para Vista Móvil) -->
       {% if total_paginas > 1 %}
-        <div class="paginacion-admin-contenedor">
+        <div class="contenedor-cargar-mas-movil vista-movil-admin-discos" id="bloqueCargarMasDiscos">
+          <button
+            type="button"
+            class="boton boton-principal resplandor-neon btn-cargar-mas-discos"
+            id="btnCargarMasDiscos"
+            data-pagina-siguiente="{{ pagina + 1 }}"
+            data-total-paginas="{{ total_paginas }}"
+            data-categoria="{{ categoria_filtro }}"
+            data-formato="{{ formato_filtro }}"
+            data-url="{{ url_for('admin_discos_lista') }}"
+          >
+            <span class="material-symbols-outlined icono-cargar-mas" aria-hidden="true">autorenew</span>
+            <span class="texto-btn-cargar">Cargar más álbumes</span>
+          </button>
+          <span class="contador-progreso-movil" id="contadorProgresoDiscos">
+            Mostrando {{ [pagina * por_pagina, total]|min }} de {{ total }} discos
+          </span>
+        </div>
+      {% endif %}
+
+      <!-- Paginación Desktop Panorámica (Se oculta automáticamente en móvil) -->
+      {% if total_paginas > 1 %}
+        <div class="paginacion-admin-contenedor vista-desktop-admin-discos">
           <div class="paginacion-admin-info">
             Mostrando <strong>{{ ((pagina - 1) * por_pagina) + 1 }}</strong> a <strong>{{ [pagina * por_pagina, total]|min }}</strong> de <strong>{{ total }}</strong> discos
           </div>

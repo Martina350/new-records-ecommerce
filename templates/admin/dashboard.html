@@ -112,11 +112,19 @@
     <!-- Últimos Pedidos Registrados -->
     {% if ultimos_pedidos %}
       <div class="admin-seccion-bloque">
-        <h3 class="admin-subtitulo-bloque">
-          <span class="material-symbols-outlined" aria-hidden="true">history</span>
-          <span>Últimos Pedidos Registrados</span>
-        </h3>
-        <div class="tabla-carrito-contenedor">
+        <div class="admin-bloque-cabecera-flex">
+          <h3 class="admin-subtitulo-bloque">
+            <span class="material-symbols-outlined" aria-hidden="true">history</span>
+            <span>Últimos Pedidos Registrados</span>
+          </h3>
+          <a class="enlace-admin-ver-todo" href="{{ url_for('admin_pedidos_lista') }}">
+            <span>Ver todos los pedidos</span>
+            <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+          </a>
+        </div>
+
+        <!-- Vista Desktop: Tabla panorámica -->
+        <div class="tabla-carrito-contenedor vista-desktop-admin-pedidos">
           <table class="tabla-carrito">
             <thead>
               <tr>
@@ -150,6 +158,52 @@
               {% endfor %}
             </tbody>
           </table>
+        </div>
+
+        <!-- Vista Móvil: Cards compactos y clickables -->
+        <div class="admin-pedidos-cards-movil-grid vista-movil-admin-pedidos">
+          {% for p in ultimos_pedidos %}
+            <a class="admin-pedido-card-enlace" href="{{ url_for('admin_pedido_detalle', numero=p.numero) }}" aria-label="Ver pedido {{ p.numero }}">
+              <div class="admin-pedido-card-top">
+                <div class="admin-pedido-chip-codigo">
+                  <span class="material-symbols-outlined icono-chip-pedido" aria-hidden="true">receipt_long</span>
+                  <code>{{ p.numero }}</code>
+                </div>
+                <span class="badge-estado badge-estado-{{ p.estado | lower }} badge-estado-admin-card" title="Estado: {{ p.estado }}">
+                  {% if p.estado == "PENDIENTE" %}
+                    <span class="material-symbols-outlined icono-estado-chico" aria-hidden="true">schedule</span>
+                  {% elif p.estado == "APROBADO" %}
+                    <span class="material-symbols-outlined icono-estado-chico" aria-hidden="true">check_circle</span>
+                  {% else %}
+                    <span class="material-symbols-outlined icono-estado-chico" aria-hidden="true">cancel</span>
+                  {% endif %}
+                  <span class="texto-estado-desktop">{{ p.estado }}</span>
+                </span>
+              </div>
+
+              <div class="admin-pedido-card-cuerpo">
+                <div class="admin-pedido-cliente-linea">
+                  <span class="material-symbols-outlined icono-mini-meta" aria-hidden="true">person</span>
+                  <span class="nombre-cliente-card">{{ p.cliente.nombre }}</span>
+                </div>
+                <div class="admin-pedido-fecha-linea">
+                  <span class="material-symbols-outlined icono-mini-meta" aria-hidden="true">calendar_today</span>
+                  <span>{{ p.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}</span>
+                </div>
+              </div>
+
+              <div class="admin-pedido-card-pie">
+                <div class="admin-pedido-total-monto">
+                  <span class="etiqueta-total-mini">TOTAL</span>
+                  <span class="monto-total-neon">${{ "%.2f"|format(p.total) }}</span>
+                </div>
+                <div class="admin-pedido-btn-link">
+                  <span>Revisar</span>
+                  <span class="material-symbols-outlined icono-flecha-card" aria-hidden="true">chevron_right</span>
+                </div>
+              </div>
+            </a>
+          {% endfor %}
         </div>
       </div>
     {% endif %}

@@ -309,7 +309,7 @@ img { max-width: 100%; height: auto; display: block; }
   backdrop-filter: blur(12px);
   position: sticky;
   top: 0;
-  z-index: 40;
+  z-index: 9999;
 }
 
 .btn-toggle-sidebar-mobile {
@@ -9918,7 +9918,7 @@ body.modal-pedido-abierto {
   .admin-cabecera-principal {
     flex-direction: column;
     align-items: flex-start;
-    padding: 1.25rem;
+    padding: 1.5rem;
   }
   
   .admin-cabecera-acciones {
@@ -9928,14 +9928,61 @@ body.modal-pedido-abierto {
   }
 }
 
-@media (max-width: 580px) {
+@media (max-width: 768px) {
+  .seccion-admin {
+    padding: 1.25rem 0.75rem 3rem 0.75rem;
+  }
+
+  .admin-cabecera-principal {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1.25rem 1.1rem;
+    gap: 1.15rem;
+    border-radius: 0.85rem;
+  }
+
+  .admin-cabecera-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.85rem;
+    width: 100%;
+  }
+
+  .admin-icono-grande {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.75rem;
+  }
+
+  .admin-icono-grande .material-symbols-outlined {
+    font-size: 1.65rem;
+  }
+
+  .titulo-admin {
+    font-size: 1.45rem;
+    line-height: 1.25;
+    margin-bottom: 0.25rem;
+  }
+
+  .subtitulo-admin {
+    font-size: 0.85rem;
+    line-height: 1.45;
+  }
+
   .admin-cabecera-acciones {
     flex-direction: column;
     align-items: stretch;
+    width: 100%;
+    gap: 0.65rem;
   }
 
   .admin-cabecera-acciones > * {
     width: 100%;
+  }
+
+  .admin-cabecera-acciones .boton {
+    width: 100%;
+    justify-content: center;
   }
 
   .btn-perfil-usuario {
@@ -11685,6 +11732,1271 @@ body.modal-pedido-abierto {
     max-width: 100%;
   }
 }
+
+/* ==========================================================================
+   Cards Móviles para Pedidos en Panel de Administración (Compactos y Clickables)
+   ========================================================================== */
+.admin-bloque-cabecera-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.enlace-admin-ver-todo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.enlace-admin-ver-todo:hover {
+  text-decoration: underline;
+  opacity: 0.85;
+}
+
+.vista-desktop-admin-pedidos {
+  display: block;
+}
+
+.vista-movil-admin-pedidos {
+  display: none;
+}
+
+.admin-pedidos-cards-movil-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  width: 100%;
+}
+
+.admin-pedido-card-enlace {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  background: rgba(18, 18, 26, 0.88);
+  border: 1px solid rgba(138, 44, 226, 0.25);
+  border-radius: 0.85rem;
+  padding: 0.85rem 1rem;
+  text-decoration: none;
+  color: var(--text-page);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(12px);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.admin-pedido-card-enlace:hover,
+.admin-pedido-card-enlace:active {
+  background: rgba(28, 22, 38, 0.95);
+  border-color: var(--primary);
+  box-shadow: 0 8px 24px rgba(138, 44, 226, 0.25);
+  transform: translateY(-2px);
+}
+
+.admin-pedido-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.admin-pedido-chip-codigo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+}
+
+.admin-pedido-chip-codigo .icono-chip-pedido {
+  font-size: 1rem;
+  color: var(--primary);
+  background: rgba(138, 44, 226, 0.15);
+  border: 1px solid rgba(138, 44, 226, 0.3);
+  padding: 0.25rem;
+  border-radius: 0.4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.admin-pedido-chip-codigo code {
+  font-family: monospace;
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: #c084fc;
+  background: rgba(138, 44, 226, 0.15);
+  padding: 0.25rem 0.6rem;
+  border-radius: 0.4rem;
+  border: 1px solid rgba(138, 44, 226, 0.3);
+  white-space: nowrap;
+}
+
+.badge-estado-admin-card {
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.badge-estado-admin-card .texto-estado-desktop {
+  display: none !important;
+}
+
+.badge-estado-admin-card .icono-estado-chico {
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+.admin-pedido-card-cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px dashed rgba(138, 44, 226, 0.15);
+}
+
+.admin-pedido-cliente-linea,
+.admin-pedido-fecha-linea {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.825rem;
+  color: var(--text-muted-page);
+}
+
+.icono-mini-meta {
+  font-size: 0.95rem;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.nombre-cliente-card {
+  font-weight: 700;
+  color: var(--text-heading);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-pedido-card-pie {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-pedido-total-monto {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
+.etiqueta-total-mini {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--text-muted-page);
+  letter-spacing: 0.05em;
+}
+
+.monto-total-neon {
+  font-family: monospace;
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: var(--accent);
+}
+
+.admin-pedido-btn-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--primary);
+  background: rgba(138, 44, 226, 0.12);
+  border: 1px solid rgba(138, 44, 226, 0.3);
+  padding: 0.3rem 0.65rem;
+  border-radius: 0.45rem;
+  transition: all 0.2s ease;
+}
+
+.admin-pedido-card-enlace:hover .admin-pedido-btn-link {
+  background: var(--primary);
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(138, 44, 226, 0.4);
+}
+
+.icono-flecha-card {
+  font-size: 1.1rem;
+}
+
+.sin-resultados-admin-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 2rem 1rem;
+  background: rgba(18, 18, 24, 0.6);
+  border: 1px dashed rgba(138, 44, 226, 0.25);
+  border-radius: 0.85rem;
+  color: var(--text-muted-page);
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+  .vista-desktop-admin-pedidos {
+    display: none !important;
+  }
+
+  .vista-movil-admin-pedidos {
+    display: flex !important;
+  }
+}
+
+/* ==========================================================================
+   Gestión de Discos Admin: Filtros, Cards Móviles y Paginación Fluida
+   ========================================================================== */
+
+/* Barra de Filtros Avanzados */
+.admin-barra-filtros-avanzados {
+  background: rgba(18, 18, 26, 0.85);
+  border: 1px solid rgba(138, 44, 226, 0.25);
+  border-radius: 1rem;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 2rem;
+  backdrop-filter: blur(14px);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-filtros-grid {
+  display: flex;
+  align-items: flex-end;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.campo-filtro-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 220px;
+  flex: 1;
+}
+
+.etiqueta-filtro-mini {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.825rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.etiqueta-filtro-mini .material-symbols-outlined {
+  font-size: 1rem;
+}
+
+/* Control de vistas Desktop vs Móvil en Discos */
+.vista-desktop-admin-discos {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.vista-movil-admin-discos {
+  display: none;
+}
+
+/* Cards Móviles para Gestión de Discos */
+.admin-discos-cards-movil-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.admin-disco-card-item {
+  background: rgba(18, 18, 26, 0.9);
+  border: 1px solid rgba(138, 44, 226, 0.28);
+  border-radius: 1rem;
+  padding: 1.15rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(14px);
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.admin-disco-card-item.disco-card-inactivo {
+  opacity: 0.75;
+  border-color: rgba(239, 68, 68, 0.3);
+  background: rgba(26, 16, 18, 0.85);
+}
+
+.admin-disco-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.admin-disco-chip-codigo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+}
+
+.icono-chip-disco {
+  font-size: 0.95rem;
+  color: var(--primary);
+  background: rgba(138, 44, 226, 0.15);
+  border: 1px solid rgba(138, 44, 226, 0.3);
+  padding: 0.2rem;
+  border-radius: 0.35rem;
+}
+
+.admin-disco-chip-codigo code {
+  font-family: monospace;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #c084fc;
+  background: rgba(138, 44, 226, 0.15);
+  padding: 0.2rem 0.55rem;
+  border-radius: 0.35rem;
+  border: 1px solid rgba(138, 44, 226, 0.3);
+  white-space: nowrap;
+}
+
+.admin-disco-badges-grupo {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.badge-estado-chip-mini {
+  font-size: 0.725rem;
+  padding: 0.2rem 0.6rem;
+  font-weight: 700;
+  border-radius: 9999px;
+}
+
+/* Jerarquía Principal: Álbum y Artista */
+.admin-disco-card-principal {
+  padding-bottom: 0.65rem;
+  border-bottom: 1px dashed rgba(138, 44, 226, 0.18);
+}
+
+.admin-disco-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.admin-disco-titulo-album {
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.admin-disco-artista {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #c084fc;
+  margin: 0;
+  line-height: 1.4;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.admin-disco-genero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.775rem;
+  font-weight: 600;
+  color: var(--text-muted-page);
+  margin-top: 0.25rem;
+}
+
+.icono-genero-mini {
+  font-size: 0.95rem;
+  color: var(--accent);
+}
+
+/* Grilla de Métricas Clave */
+.admin-disco-card-metricas-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+  width: 100%;
+}
+
+.admin-disco-metrica-caja {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(138, 44, 226, 0.18);
+  border-radius: 0.55rem;
+  padding: 0.5rem 0.65rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.caja-stock-span {
+  grid-column: span 2;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.55rem 0.75rem;
+}
+
+.etiqueta-metrica-disco {
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+}
+
+.valor-metrica-disco {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-heading);
+}
+
+.valor-metrica-neon {
+  font-family: monospace;
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: var(--accent);
+}
+
+.badge-stock-normal {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #86efac;
+}
+
+/* Acciones de Tarjeta */
+.admin-disco-card-acciones {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem;
+  width: 100%;
+  margin-top: 0.25rem;
+}
+
+.btn-editar-disco {
+  width: 100%;
+  justify-content: center;
+  padding: 0.6rem 1rem;
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+
+.btn-toggle-disco {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.6rem 0.85rem;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.texto-btn-accion-movil {
+  display: inline;
+}
+
+/* ==========================================================================
+   Paginación Administrativa Fluida (Previene Desborde Horizontal)
+   ========================================================================== */
+.paginacion-admin-contenedor {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(138, 44, 226, 0.18);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.paginacion-admin-info {
+  font-size: 0.85rem;
+  color: var(--text-muted-page);
+  text-align: center;
+}
+
+.paginacion-admin-controles {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.btn-paginacion {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.45rem 0.75rem;
+  background: rgba(18, 18, 26, 0.85);
+  border: 1px solid rgba(138, 44, 226, 0.3);
+  border-radius: 0.5rem;
+  color: var(--text-heading);
+  text-decoration: none;
+  font-size: 0.825rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-paginacion:hover:not(.deshabilitado) {
+  background: rgba(138, 44, 226, 0.25);
+  border-color: var(--primary);
+  color: #ffffff;
+}
+
+.btn-paginacion.deshabilitado {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.paginacion-numeros {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.btn-num-pag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.15rem;
+  height: 2.15rem;
+  padding: 0 0.45rem;
+  background: rgba(18, 18, 26, 0.85);
+  border: 1px solid rgba(138, 44, 226, 0.3);
+  border-radius: 0.45rem;
+  color: var(--text-heading);
+  text-decoration: none;
+  font-size: 0.825rem;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.btn-num-pag:hover {
+  background: rgba(138, 44, 226, 0.25);
+  border-color: var(--primary);
+  color: #ffffff;
+}
+
+.btn-num-pag.activo {
+  background: var(--primary);
+  border-color: var(--accent);
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+}
+
+@media (max-width: 768px) {
+  .vista-desktop-admin-discos {
+    display: none !important;
+  }
+
+  .vista-movil-admin-discos {
+    display: flex !important;
+  }
+
+  .admin-seccion-bloque-discos {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .admin-barra-filtros-avanzados {
+    padding: 1rem;
+  }
+
+  .campo-filtro-item {
+    min-width: 100%;
+  }
+
+  .admin-disco-card-item {
+    padding: 1rem;
+  }
+
+  .admin-disco-badges-grupo {
+    gap: 0.25rem;
+  }
+
+  .badge-formato-tarjeta {
+    font-size: 0.68rem;
+    padding: 0.18rem 0.45rem;
+    border-radius: 0.35rem;
+    font-weight: 800;
+  }
+
+  .badge-estado-chip-mini {
+    font-size: 0.68rem;
+    padding: 0.18rem 0.45rem;
+    border-radius: 9999px;
+    font-weight: 800;
+  }
+}
+
+/* ==========================================================================
+   Responsive Toggle para Pedidos en Admin: Tabla en Desktop, Cards en Móvil
+   ========================================================================== */
+.vista-desktop-admin-pedidos {
+  display: block !important;
+}
+
+.vista-movil-admin-pedidos {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .vista-desktop-admin-pedidos {
+    display: none !important;
+  }
+
+  .vista-movil-admin-pedidos {
+    display: flex !important;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+}
+
+.admin-pedido-card-enlace {
+  display: flex;
+  flex-direction: column;
+  background: rgba(18, 18, 26, 0.85);
+  border: 1px solid rgba(138, 44, 226, 0.25);
+  border-radius: 0.85rem;
+  padding: 1.15rem;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s ease;
+  gap: 0.85rem;
+}
+
+.admin-pedido-card-enlace:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.admin-pedido-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.admin-pedido-chip-codigo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(138, 44, 226, 0.15);
+  padding: 0.25rem 0.6rem;
+  border-radius: 0.4rem;
+  border: 1px solid rgba(138, 44, 226, 0.3);
+}
+
+.admin-pedido-chip-codigo code {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.icono-chip-pedido {
+  font-size: 1.1rem;
+  color: var(--primary);
+}
+
+.admin-pedido-card-cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.admin-pedido-cliente-linea,
+.admin-pedido-fecha-linea {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.85rem;
+  color: var(--text-page);
+}
+
+.nombre-cliente-card {
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.icono-mini-meta {
+  font-size: 1rem;
+  color: var(--primary);
+}
+
+.admin-pedido-card-pie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.75rem;
+  border-top: 1px dashed rgba(138, 44, 226, 0.2);
+}
+
+.admin-pedido-total-monto {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+}
+
+.etiqueta-total-mini {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--text-muted-page);
+  letter-spacing: 0.05em;
+}
+
+.monto-total-neon {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: var(--accent);
+}
+
+.admin-pedido-btn-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.825rem;
+  font-weight: 700;
+  color: var(--primary);
+  background: rgba(138, 44, 226, 0.12);
+  border: 1px solid rgba(138, 44, 226, 0.25);
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.5rem;
+}
+
+.sin-resultados-admin-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-muted-page);
+  gap: 0.5rem;
+}
+
+/* ==========================================================================
+   Botón Móvil Cargar Más Álbumes
+   ========================================================================== */
+.contenedor-cargar-mas-movil {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  margin: 1.5rem 0 1rem;
+}
+
+.btn-cargar-mas-discos {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 320px;
+  padding: 0.85rem 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-cargar-mas-discos.cargando {
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.btn-cargar-mas-discos.cargando .icono-cargar-mas {
+  animation: rotarCargando 1s linear infinite;
+}
+
+@keyframes rotarCargando {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.contador-progreso-movil {
+  font-size: 0.8rem;
+  color: var(--text-muted-page);
+  font-weight: 600;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .contenedor-cargar-mas-movil {
+    display: flex;
+  }
+}
+
+/* ==========================================================================
+   Formularios Panorámicos de Administración (Aprovechamiento Completo de Escritorio)
+   ========================================================================== */
+.admin-cabecera-principal {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 0 1.25rem 0 !important;
+  margin-bottom: 1.25rem;
+  width: 100% !important;
+}
+
+.contenedor-admin-fluido {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding-left: 1.75rem !important;
+  padding-right: 1.75rem !important;
+  box-sizing: border-box !important;
+}
+
+@media (min-width: 1400px) {
+  .contenedor-admin-fluido {
+    padding-left: 2.25rem !important;
+    padding-right: 2.25rem !important;
+  }
+}
+
+.caja-formulario-admin-amplia {
+  background: rgba(18, 18, 26, 0.88);
+  border: 1px solid rgba(138, 44, 226, 0.28);
+  border-radius: 1.25rem;
+  padding: 1.75rem 2.25rem !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(16px);
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.formulario-admin-split {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.layout-formulario-split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .layout-formulario-split {
+    grid-template-columns: 1fr 340px !important;
+    gap: 2.5rem !important;
+  }
+}
+
+@media (min-width: 1500px) {
+  .layout-formulario-split {
+    grid-template-columns: 1fr 380px !important;
+    gap: 3rem !important;
+  }
+}
+
+.columna-datos-formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.form-bloque-seccion {
+  background: rgba(14, 14, 20, 0.65);
+  border: 1px solid rgba(138, 44, 226, 0.2);
+  border-radius: 1rem;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.form-bloque-cabecera {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px dashed rgba(138, 44, 226, 0.22);
+}
+
+.icono-bloque {
+  font-size: 1.35rem;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.form-bloque-titulo {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+/* Grilla Compacta de Información Musical */
+.grid-form-admin-compacto {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .grid-form-admin-compacto {
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  .grid-form-admin-compacto .campo-admin {
+    grid-column: span 2;
+  }
+
+  .grid-form-admin-compacto .campo-admin.col-span-2-lg {
+    grid-column: span 3;
+  }
+
+  .grid-form-admin-compacto .campo-admin.col-span-full,
+  .col-span-full {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+  }
+}
+
+/* Grilla de Métricas de Precios e Inventario (4 Columnas Horizontales) */
+.grid-form-admin-metricas {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (min-width: 640px) {
+  .grid-form-admin-metricas {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-form-admin-metricas {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .grid-form-admin-metricas .campo-admin.col-span-full,
+  .grid-form-admin-metricas .col-span-full {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+  }
+}
+
+.campo-admin {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.campo-admin label {
+  font-size: 0.825rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  letter-spacing: 0.02em;
+}
+
+.nota-campo {
+  font-size: 0.75rem;
+  color: var(--text-muted-page);
+  line-height: 1.3;
+}
+
+/* Columna de Previsualización y Carga de Imagen (Estática y Compacta) */
+.columna-preview-imagen {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+  position: static !important;
+}
+
+.panel-carga-imagen {
+  background: rgba(14, 14, 20, 0.65);
+  border: 1px solid rgba(138, 44, 226, 0.2);
+  border-radius: 1rem;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.marco-preview-arte {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-height: 280px;
+  margin: 0 auto;
+  border-radius: 0.85rem;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(138, 44, 226, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.imagen-preview-elemento {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0.85rem;
+  transition: transform 0.3s ease;
+}
+
+.marco-preview-arte:hover .imagen-preview-elemento {
+  transform: scale(1.02);
+}
+
+.placeholder-preview-arte {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.icono-placeholder-disco {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  background: rgba(138, 44, 226, 0.15);
+  border: 1px dashed rgba(138, 44, 226, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icono-placeholder-disco .material-symbols-outlined {
+  font-size: 2rem;
+  color: var(--primary);
+}
+
+.texto-placeholder-principal {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  margin: 0;
+}
+
+.texto-placeholder-secundario {
+  font-size: 0.775rem;
+  color: var(--text-muted-page);
+  margin: 0;
+}
+
+.btn-eliminar-preview {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  background: rgba(220, 38, 38, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  padding: 0.3rem 0.6rem;
+  border-radius: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.btn-eliminar-preview:hover {
+  background: rgba(239, 68, 68, 1);
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.5);
+  transform: translateY(-1px);
+}
+
+/* Zona de Arrastre Drag & Drop */
+.zona-drop-archivos {
+  position: relative;
+  border: 2px dashed rgba(138, 44, 226, 0.35);
+  border-radius: 0.85rem;
+  padding: 1.15rem 0.85rem;
+  text-align: center;
+  background: rgba(138, 44, 226, 0.05);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  transition: all 0.2s ease;
+}
+
+.zona-drop-archivos:hover,
+.zona-drop-archivos.drag-activo {
+  border-color: var(--accent);
+  background: rgba(0, 255, 65, 0.08);
+  box-shadow: 0 0 16px rgba(0, 255, 65, 0.15);
+}
+
+.input-archivo-oculto {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 5;
+}
+
+.icono-drop {
+  font-size: 1.75rem;
+  color: var(--primary);
+}
+
+.zona-drop-archivos:hover .icono-drop,
+.zona-drop-archivos.drag-activo .icono-drop {
+  color: var(--accent);
+}
+
+.texto-drop-instruccion {
+  font-size: 0.825rem;
+  color: var(--text-page);
+  margin: 0;
+}
+
+.texto-drop-instruccion strong {
+  color: var(--accent);
+}
+
+.info-drop-formatos {
+  font-size: 0.7rem;
+  color: var(--text-muted-page);
+}
+
+/* Acciones Pie de Formulario Admin */
+.form-admin-acciones-pie {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(138, 44, 226, 0.2);
+  flex-wrap: wrap;
+}
+
+.boton-guardar-admin,
+.boton-cancelar-admin {
+  min-width: 160px;
+  justify-content: center;
+  font-size: 0.925rem;
+  font-weight: 700;
+  padding: 0.75rem 1.4rem;
+  border-radius: 0.65rem;
+}
+
+@media (max-width: 768px) {
+  .contenedor-admin-fluido {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .caja-formulario-admin-amplia {
+    padding: 1.15rem;
+    border-radius: 1rem;
+  }
+
+  .form-admin-acciones-pie {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .boton-guardar-admin,
+  .boton-cancelar-admin {
+    width: 100%;
+  }
+}
+
+
+
+
+
+
 
 
 

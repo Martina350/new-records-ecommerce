@@ -4,9 +4,10 @@
 
 {% block contenido %}
 <main class="seccion-admin">
-  <div class="contenedor">
-    <div class="caja-formulario-admin-amplia">
-      <div class="admin-cabecera-info" style="margin-bottom: 2rem;">
+  <div class="contenedor-admin-fluido">
+    <!-- Cabecera Superior Fuera del Formulario -->
+    <div class="admin-cabecera-principal">
+      <div class="admin-cabecera-info">
         <div class="admin-icono-grande">
           <span class="material-symbols-outlined" aria-hidden="true">category</span>
         </div>
@@ -28,6 +29,16 @@
         </div>
       </div>
 
+      <div class="admin-cabecera-acciones">
+        <a class="boton boton-secundario" href="{{ url_for('admin_categorias_lista') }}">
+          <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+          <span>Volver a Categorías</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Caja del Formulario Panorámica -->
+    <div class="caja-formulario-admin-amplia">
       <form class="formulario-admin-split" method="post" id="formAdminCategoria">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" id="inputImagenValor" value="{{ categoria.imagen if categoria else imagen | default('') }}">
@@ -35,55 +46,62 @@
         <div class="layout-formulario-split">
           <!-- Columna Izquierda: Datos de la Categoría -->
           <div class="columna-datos-formulario">
-            <div class="grid-form-admin-2col">
-              <div class="campo-admin col-span-2">
-                <label class="etiqueta-tarjeta" for="nombre">Nombre de la Categoría <span class="requerido">*</span></label>
-                <input
-                  class="entrada-formulario entrada-tarjeta"
-                  type="text"
-                  id="nombre"
-                  name="nombre"
-                  value="{{ categoria.nombre if categoria else nombre | default('') }}"
-                  placeholder="Ej. Heavy Metal, Jazz Fusión, Synthpop..."
-                  required
-                />
+            <div class="form-bloque-seccion">
+              <div class="form-bloque-cabecera">
+                <span class="material-symbols-outlined icono-bloque" aria-hidden="true">tune</span>
+                <h2 class="form-bloque-titulo">Configuración del Género Musical</h2>
               </div>
 
-              {% set prefijo_bloqueado = categoria and categoria.discos %}
-              <div class="campo-admin col-span-2">
-                <label class="etiqueta-tarjeta" for="prefijo_codigo">Prefijo para Códigos de Discos <span class="requerido">*</span></label>
-                <input
-                  class="entrada-formulario entrada-tarjeta{% if prefijo_bloqueado %} entrada-bloqueada{% endif %}"
-                  type="text"
-                  id="prefijo_codigo"
-                  name="prefijo_codigo"
-                  value="{{ prefijo_codigo | default(categoria.prefijo_codigo if categoria else '') }}"
-                  placeholder="Ej. ROC, POP, REG, JAZ"
-                  minlength="3"
-                  maxlength="5"
-                  pattern="[A-Za-z0-9]{3,5}"
-                  autocomplete="off"
-                  required
-                  {% if prefijo_bloqueado %}disabled{% endif %}
-                />
-                <span class="nota-campo">
-                  {% if prefijo_bloqueado %}
-                    No puede modificarse porque esta categoría ya tiene discos registrados.
-                  {% else %}
-                    Usa entre 3 y 5 letras o números. Se normalizará a mayúsculas; por ejemplo: NR-JAZ-001.
-                  {% endif %}
-                </span>
-              </div>
+              <div class="grid-form-admin-2col">
+                <div class="campo-admin col-span-2">
+                  <label class="etiqueta-tarjeta" for="nombre">Nombre de la Categoría <span class="requerido">*</span></label>
+                  <input
+                    class="entrada-formulario entrada-tarjeta"
+                    type="text"
+                    id="nombre"
+                    name="nombre"
+                    value="{{ categoria.nombre if categoria else nombre | default('') }}"
+                    placeholder="Ej. Heavy Metal, Jazz Fusión, Synthpop..."
+                    required
+                  />
+                </div>
 
-              <div class="campo-admin col-span-2">
-                <label class="etiqueta-tarjeta" for="descripcion">Descripción del Género</label>
-                <textarea
-                  class="entrada-formulario entrada-tarjeta"
-                  id="descripcion"
-                  name="descripcion"
-                  rows="4"
-                  placeholder="Breve reseña e historia del género musical..."
-                >{{ categoria.descripcion if categoria else descripcion | default('') }}</textarea>
+                {% set prefijo_bloqueado = categoria and categoria.discos %}
+                <div class="campo-admin col-span-2">
+                  <label class="etiqueta-tarjeta" for="prefijo_codigo">Prefijo para Códigos de Discos <span class="requerido">*</span></label>
+                  <input
+                    class="entrada-formulario entrada-tarjeta{% if prefijo_bloqueado %} entrada-bloqueada{% endif %}"
+                    type="text"
+                    id="prefijo_codigo"
+                    name="prefijo_codigo"
+                    value="{{ prefijo_codigo | default(categoria.prefijo_codigo if categoria else '') }}"
+                    placeholder="Ej. ROC, POP, REG, JAZ"
+                    minlength="3"
+                    maxlength="5"
+                    pattern="[A-Za-z0-9]{3,5}"
+                    autocomplete="off"
+                    required
+                    {% if prefijo_bloqueado %}disabled{% endif %}
+                  />
+                  <span class="nota-campo">
+                    {% if prefijo_bloqueado %}
+                      No puede modificarse porque esta categoría ya tiene discos registrados.
+                    {% else %}
+                      Usa entre 3 y 5 letras o números. Se normalizará a mayúsculas; por ejemplo: NR-JAZ-001.
+                    {% endif %}
+                  </span>
+                </div>
+
+                <div class="campo-admin col-span-2">
+                  <label class="etiqueta-tarjeta" for="descripcion">Descripción del Género</label>
+                  <textarea
+                    class="entrada-formulario entrada-tarjeta"
+                    id="descripcion"
+                    name="descripcion"
+                    rows="4"
+                    placeholder="Breve reseña e historia del género musical..."
+                  >{{ categoria.descripcion if categoria else descripcion | default('') }}</textarea>
+                </div>
               </div>
             </div>
           </div>
@@ -91,7 +109,10 @@
           <!-- Columna Derecha: Vista Previa y Carga de Arte de Categoría -->
           <div class="columna-preview-imagen">
             <div class="panel-carga-imagen" id="panelCargaImagen">
-              <span class="etiqueta-tarjeta">Portada / Arte del Género</span>
+              <div class="form-bloque-cabecera">
+                <span class="material-symbols-outlined icono-bloque" aria-hidden="true">image</span>
+                <h2 class="form-bloque-titulo">Portada / Arte del Género</h2>
+              </div>
 
               <!-- Marco de Previsualización (Aspect Ratio 1:1) -->
               <div class="marco-preview-arte" id="marcoPreviewArte">
@@ -139,13 +160,13 @@
           </div>
         </div>
 
-        <div class="grupo-botones-tarjeta" style="margin-top: 2rem;">
-          <button class="boton boton-principal resplandor-neon boton-accion-tarjeta" type="submit">
+        <div class="form-admin-acciones-pie">
+          <button class="boton boton-principal resplandor-neon boton-guardar-admin" type="submit">
             <span class="material-symbols-outlined" aria-hidden="true">save</span>
             <span>{% if categoria %}Guardar Cambios{% else %}Crear Categoría{% endif %}</span>
           </button>
-          <a class="boton boton-secundario boton-accion-tarjeta" href="{{ url_for('admin_categorias_lista') }}">
-            <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+          <a class="boton boton-secundario boton-cancelar-admin" href="{{ url_for('admin_categorias_lista') }}">
+            <span class="material-symbols-outlined" aria-hidden="true">cancel</span>
             <span>Cancelar</span>
           </a>
         </div>

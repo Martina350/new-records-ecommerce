@@ -11,6 +11,7 @@ from flask import (
     Flask,
     Response,
     flash,
+    jsonify,
     redirect,
     render_template,
     request,
@@ -856,6 +857,16 @@ def admin_discos_lista():
 
     discos = query.offset((pagina - 1) * por_pagina).limit(por_pagina).all()
     categorias = Categoria.query.filter_by(activo=True).order_by(Categoria.nombre).all()
+
+    if request.args.get("ajax") == "1" or request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        html_cards = render_template("admin/discos/_cards_movil.html", discos=discos)
+        return jsonify({
+            "html": html_cards,
+            "pagina": pagina,
+            "total_paginas": total_paginas,
+            "total": total,
+            "tiene_mas": pagina < total_paginas
+        })
 
     return render_template(
         "admin/discos/lista.html",

@@ -13,6 +13,7 @@ function inicializarAplicacion() {
   inicializarDropdownAdmin();
   inicializarUploaderPreviewAdmin();
   inicializarGraficosReportes();
+  inicializarCargarMasDiscosAdmin();
 }
 
 function sincronizarClaseBody(evento) {
@@ -1184,3 +1185,78 @@ function inicializarToggleInfoSeguridad() {
     btnToggle.setAttribute('aria-expanded', estaVisible ? 'true' : 'false');
   });
 }
+
+/**
+ * Carga dinámica asíncrona de álbumes en móvil (Botón "Cargar más")
+ */
+function inicializarCargarMasDiscosAdmin() {
+  const btnCargar = document.getElementById('btnCargarMasDiscos');
+  const contenedorCards = document.getElementById('contenedorCardsDiscosMovil');
+  const contadorProgreso = document.getElementById('contadorProgresoDiscos');
+  const bloqueCargar = document.getElementById('bloqueCargarMasDiscos');
+
+  if (!btnCargar || !contenedorCards) return;
+
+  btnCargar.addEventListener('click', async () => {
+    const paginaSiguiente = parseInt(btnCargar.dataset.paginaSiguiente, 10);
+    const totalPaginas = parseInt(btnCargar.dataset.totalPaginas, 10);
+    const categoria = btnCargar.dataset.categoria || '';
+    const formato = btnCargar.dataset.formato || '';
+    const baseUrl = btnCargar.dataset.url;
+
+    if (btnCargar.classList.contains('cargando') || paginaSiguiente > totalPaginas) return;
+
+    btnCargar.classList.add('cargando');
+    const texto = btnCargar.querySelector('.texto-btn-cargar');
+    if (texto) texto.textContent = 'Cargando álbumes...';
+
+    try {
+      const url = new URL(baseUrl, window.location.origin);
+      url.searchParams.set('pagina', paginaSiguiente);
+      if (categoria) url.searchParams.set('categoria_id', categoria);
+      if (formato) url.searchParams.set('formato', formato);
+      url.searchParams.set('ajax', '1');
+
+      const respuesta = await fetch(url.toString(), {
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!respuesta.ok) throw new Error('Error al cargar más discos');
+
+      const data = await respuesta.json();
+      if (data.html) {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = data.html;
+        while (tempDiv.firstChild) {
+          contenedorCards.appendChild(tempDiv.firstChild);
+        }
+      }
+
+      const totalMostrados = Math.min(paginaSiguiente * 5, data.total);
+      if (contadorProgreso) {
+        contadorProgreso.textContent = `Mostrando ${totalMostrados} de ${data.total} discos`;
+      }
+
+      if (data.tiene_mas && paginaSiguiente < totalPaginas) {
+        btnCargar.dataset.paginaSiguiente = (paginaSiguiente + 1).toString();
+      } else {
+        if (bloqueCargar) {
+          bloqueCargar.style.display = 'none';
+        }
+      }
+    } catch (err) {
+      console.error('Error al cargar más álbumes:', err);
+      if (texto) texto.textContent = 'Reintentar cargar más';
+    } finally {
+      btnCargar.classList.remove('cargando');
+      const siguienteNum = parseInt(btnCargar.dataset.paginaSiguiente, 10);
+      if (siguienteNum <= totalPaginas && texto) {
+        texto.textContent = 'Cargar más álbumes';
+      }
+    }
+  });
+}
+
