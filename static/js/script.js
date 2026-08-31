@@ -130,6 +130,12 @@ function inicializarSidebar() {
 
   // Apertura y Cierre en Dispositivos Móviles
   const toggleMobileSidebar = (abrir) => {
+    if (abrir) {
+      document.querySelectorAll('.custom-select-contenedor.abierto').forEach((c) => {
+        c.classList.remove('abierto');
+        c.querySelector('.custom-select-boton')?.setAttribute('aria-expanded', 'false');
+      });
+    }
     sidebar.classList.toggle('abierto-movil', abrir);
     if (backdrop) backdrop.classList.toggle('visible', abrir);
     if (btnMobileToggle) btnMobileToggle.setAttribute('aria-expanded', String(abrir));

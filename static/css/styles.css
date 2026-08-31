@@ -402,7 +402,7 @@ img { max-width: 100%; height: auto; display: block; }
   inset: 0;
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(8px);
-  z-index: 55;
+  z-index: 99990;
   opacity: 0;
   transition: opacity 0.3s ease;
   pointer-events: none;
@@ -421,7 +421,7 @@ img { max-width: 100%; height: auto; display: block; }
   left: 0;
   bottom: 0;
   width: 280px;
-  z-index: 60;
+  z-index: 99999;
   display: flex;
   flex-direction: column;
   background: rgba(18, 18, 18, 0.96);
@@ -978,11 +978,13 @@ img { max-width: 100%; height: auto; display: block; }
     width: 280px;
     max-width: 85vw;
     box-shadow: none;
+    z-index: 99999 !important;
   }
 
   .sidebar.abierto-movil {
     transform: translateX(0);
     box-shadow: 0 0 50px rgba(0, 0, 0, 0.9);
+    z-index: 99999 !important;
   }
 
   .layout-contenido {
