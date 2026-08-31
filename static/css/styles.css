@@ -4406,134 +4406,286 @@ select option {
   color: var(--accent);
 }
 
-/* ===== Métodos de Pago - Layout ===== */
-.pago-layout {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 2rem;
+/* ===== Vista de Mis Métodos de Pago (Rediseño Widescreen Desktop) ===== */
+.pago-seccion-desktop {
+  padding: 2rem 0 3.5rem;
+  width: 100%;
 }
 
-@media (min-width: 1024px) {
-  .pago-layout {
-    grid-template-columns: 1fr 22rem;
-    align-items: start;
+.contenedor-pago-wide {
+  width: 100%;
+  max-width: 90rem;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+@media (min-width: 1280px) {
+  .contenedor-pago-wide {
+    padding: 0 2rem;
   }
 }
 
-.pago-lista-columna,
-.pago-info-columna {
+.pago-cabecera-wide {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1.5rem;
+  margin-bottom: 1.75rem;
+  flex-wrap: wrap;
+}
+
+.pago-cabecera-titulos {
+  flex: 1;
+  min-width: 18rem;
+}
+
+.pago-titulo-principal {
+  font-size: 2.25rem;
+  font-weight: 900;
+  color: var(--text-heading);
+  margin: 0 0 0.35rem 0;
+  letter-spacing: -0.02em;
+}
+
+.pago-subtitulo-principal {
+  color: var(--text-muted-page);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.pago-cabecera-controles {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.chip-total-tarjetas-contador {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(138, 44, 226, 0.12);
+  border: 1px solid rgba(138, 44, 226, 0.3);
+  color: var(--text-heading);
+  padding: 0.5rem 0.95rem;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.chip-total-tarjetas-contador .material-symbols-outlined {
+  color: var(--primary);
+  font-size: 1.15rem;
+}
+
+/* Grid de Tarjetas Bancarias Superiores */
+.pago-seccion-tarjetas-widescreen {
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+.grid-tarjetas-bancarias-wide {
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 1.5rem;
 }
 
-/* ===== Tarjeta de Crédito Item ===== */
-.lista-metodos-pago {
+@media (min-width: 900px) {
+  .grid-tarjetas-bancarias-wide {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.tarjeta-bancaria-item {
+  background: rgba(16, 16, 20, 0.85);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(138, 44, 226, 0.22);
+  border-radius: 1rem;
+  padding: 1.35rem 1.5rem;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  transition: all 0.25s ease;
+  position: relative;
 }
 
-.tarjeta-credito-item {
-  background: rgba(18, 18, 18, 0.8);
-  border: 1px solid var(--border-light);
-  border-radius: 0.75rem;
-  padding: 1.25rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
+.tarjeta-bancaria-item:hover {
+  border-color: rgba(138, 44, 226, 0.45);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.6), 0 0 20px rgba(138, 44, 226, 0.15);
+  transform: translateY(-2px);
 }
 
-.tarjeta-credito-item:hover {
-  border-color: rgba(138, 44, 226, 0.5);
-}
-
-.tarjeta-credito-item.predeterminada {
+.tarjeta-bancaria-item.tarjeta-predeterminada {
   border-color: var(--accent);
-  box-shadow: 0 0 12px rgba(0, 255, 65, 0.15);
+  background: rgba(16, 22, 18, 0.88);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 255, 65, 0.12);
 }
 
-.tarjeta-cabecera {
+.tarjeta-bancaria-cabecera {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.tarjeta-info-izq {
-  display: flex;
   align-items: center;
   gap: 1rem;
 }
 
-.icono-marca-tarjeta {
+.marca-tarjeta-grupo {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 0.15rem;
-  background: rgba(138, 44, 226, 0.12);
-  border: 1px solid var(--border-light);
-  border-radius: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  min-width: 3.5rem;
+  gap: 0.75rem;
 }
 
-.marca-texto {
-  font-size: 0.625rem;
+.icono-marca-bancaria {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(138, 44, 226, 0.15);
+  border: 1px solid rgba(138, 44, 226, 0.35);
+  padding: 0.35rem 0.65rem;
+  border-radius: 0.4rem;
   font-weight: 800;
-  letter-spacing: 0.06em;
-  color: var(--primary);
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  color: #c084fc;
 }
 
-.tarjeta-datos {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
+.icono-marca-bancaria .material-symbols-outlined {
+  font-size: 1.1rem;
 }
 
-.enmascarado {
-  font-family: monospace;
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--text-heading);
-  letter-spacing: 0.08em;
+.icono-marca-bancaria.icono-visa {
+  background: rgba(37, 99, 235, 0.15);
+  border-color: rgba(37, 99, 235, 0.4);
+  color: #60a5fa;
 }
 
-.tarjeta-titular {
-  font-size: 0.875rem;
-  color: var(--text-page);
+.icono-marca-bancaria.icono-mastercard {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
 }
 
-.tarjeta-vencimiento {
+.tipo-tarjeta-tag {
   font-size: 0.75rem;
   color: var(--text-muted-page);
+  font-weight: 600;
 }
 
-.badge-predeterminado {
+.badge-predeterminado-chip {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
   background: rgba(0, 255, 65, 0.12);
   color: var(--accent);
-  border: 1px solid rgba(0, 255, 65, 0.3);
-  padding: 0.3rem 0.65rem;
+  border: 1px solid rgba(0, 255, 65, 0.35);
+  padding: 0.3rem 0.75rem;
   border-radius: 9999px;
-  font-size: 0.75rem;
+  font-size: 0.775rem;
   font-weight: 700;
 }
 
-.badge-chico {
-  padding: 0.2rem 0.5rem;
-  font-size: 0.7rem;
+.badge-predeterminado-chip .material-symbols-outlined {
+  font-size: 0.95rem;
 }
 
-.tarjeta-acciones {
-  display: flex;
-  gap: 0.75rem;
-  justify-content: flex-end;
+.boton-establecer-predeterminada {
+  display: inline-flex;
   align-items: center;
+  gap: 0.35rem;
+  background: rgba(138, 44, 226, 0.08);
+  border: 1px solid rgba(138, 44, 226, 0.25);
+  color: var(--text-muted-page);
+  padding: 0.35rem 0.7rem;
+  border-radius: 0.4rem;
+  font-size: 0.775rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.boton-establecer-predeterminada:hover {
+  background: rgba(138, 44, 226, 0.2);
+  color: #fff;
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.boton-establecer-predeterminada .material-symbols-outlined {
+  font-size: 1rem;
+  color: var(--primary);
+}
+
+/* Número de Tarjeta Bancaria */
+.tarjeta-bancaria-numero {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: monospace;
+  font-size: 1.25rem;
+  letter-spacing: 0.12em;
+  padding: 0.4rem 0;
+}
+
+.mascara-puntos {
+  color: var(--text-muted-page);
+  letter-spacing: 0.15em;
+  font-size: 1.05rem;
+}
+
+.ultimos4-codigo {
+  font-weight: 900;
+  color: #c084fc;
+  font-size: 1.25rem;
+  background: rgba(138, 44, 226, 0.15);
+  padding: 0.2rem 0.6rem;
+  border-radius: 0.4rem;
+  border: 1px solid rgba(138, 44, 226, 0.3);
+}
+
+/* Pie de Tarjeta Bancaria */
+.tarjeta-bancaria-pie {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1.25rem;
+  border-top: 1px dashed rgba(138, 44, 226, 0.15);
+  padding-top: 0.85rem;
   flex-wrap: wrap;
-  padding-top: 0.75rem;
-  border-top: 1px solid rgba(138, 44, 226, 0.1);
+}
+
+.tarjeta-campo-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.campo-etiqueta-mini {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted-page);
+}
+
+.campo-valor-titular {
+  font-size: 0.95rem;
+  color: var(--text-heading);
+  font-weight: 700;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.campo-valor-vence {
+  font-family: monospace;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #c084fc;
+}
+
+.tarjeta-accion-eliminar {
+  margin-left: auto;
 }
 
 /* Botón Peligro / Eliminar */
@@ -4570,49 +4722,179 @@ select option {
   color: inherit;
 }
 
-.pago-acciones-principales {
+/* Estado Vacío de Tarjetas */
+.pago-card-vacio-widescreen {
+  background: rgba(16, 16, 20, 0.85);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(138, 44, 226, 0.2);
+  border-radius: 1rem;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+  min-height: 380px;
   display: flex;
-  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  width: 100%;
+}
+
+.pago-vacio-contenido {
+  max-width: 32rem;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.25rem;
+}
+
+/* ===== Sección Inferior: Banner Horizontal de Seguridad (4 Columnas) ===== */
+.seguridad-banner-horizontal-wide {
+  background: rgba(16, 16, 22, 0.85);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 255, 65, 0.25);
+  border-radius: 1rem;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 25px rgba(0, 255, 65, 0.06);
+  padding: 1.5rem 1.75rem;
+  width: 100%;
+}
+
+.seguridad-banner-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(0, 255, 65, 0.18);
+  margin-bottom: 1.25rem;
   flex-wrap: wrap;
 }
 
-/* ===== Seguridad Info Card ===== */
-.seguridad-info-card {
-  padding: 1.5rem;
-}
-
-.seguridad-titulo {
+.seguridad-banner-titulo-grupo {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 1.05rem;
-  font-weight: 700;
-  margin: 0 0 1rem 0;
-  color: var(--text-heading);
+  gap: 0.85rem;
 }
 
-.seguridad-lista {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.seguridad-icono-glow-mini {
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 50%;
+  background: rgba(0, 255, 65, 0.12);
+  border: 1px solid rgba(0, 255, 65, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 12px rgba(0, 255, 65, 0.2);
+  flex-shrink: 0;
+}
+
+.seguridad-icono-glow-mini .material-symbols-outlined {
+  font-size: 1.45rem;
+  color: var(--accent);
+}
+
+.seguridad-banner-titulo {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-heading);
+  margin: 0 0 0.15rem 0;
+  letter-spacing: -0.01em;
+}
+
+.seguridad-banner-subtitulo {
+  font-size: 0.8rem;
+  color: var(--text-muted-page);
+  display: block;
+}
+
+.insignia-certificacion-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(0, 255, 65, 0.08);
+  border: 1px solid rgba(0, 255, 65, 0.3);
+  color: var(--accent);
+  padding: 0.4rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.775rem;
+  font-weight: 700;
+}
+
+.insignia-certificacion-badge .material-symbols-outlined {
+  font-size: 1.1rem;
+}
+
+/* Grid Horizontal de 4 Columnas para los puntos de seguridad */
+.seguridad-grid-horizontal-4cols {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .seguridad-grid-horizontal-4cols {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1080px) {
+  .seguridad-grid-horizontal-4cols {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.seguridad-tarjeta-horizontal {
+  background: rgba(18, 18, 26, 0.65);
+  border: 1px solid rgba(138, 44, 226, 0.18);
+  border-radius: 0.75rem;
+  padding: 1.1rem 1.15rem;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.65rem;
+  transition: all 0.25s ease;
 }
 
-.seguridad-lista li {
+.seguridad-tarjeta-horizontal:hover {
+  background: rgba(138, 44, 226, 0.1);
+  border-color: rgba(0, 255, 65, 0.35);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.seguridad-item-icono-circulo {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+  background: rgba(0, 255, 65, 0.1);
+  border: 1px solid rgba(0, 255, 65, 0.25);
   display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  color: var(--text-muted-page);
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
 }
 
-.icono-check-seguridad {
-  color: var(--accent);
-  font-size: 1.1rem;
-  flex-shrink: 0;
-  margin-top: 0.05rem;
+.seguridad-item-icono-circulo .material-symbols-outlined {
+  font-size: 1.25rem;
+}
+
+.seguridad-item-contenido {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.seguridad-item-titulo {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  margin: 0;
+}
+
+.seguridad-item-desc {
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--text-muted-page);
+  margin: 0;
 }
 
 /* ===== Formulario de Tarjeta — Vista Horizontal Desktop y Espaciado Óptimo ===== */
