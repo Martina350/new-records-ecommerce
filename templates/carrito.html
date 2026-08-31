@@ -265,17 +265,23 @@
       </aside>
 
     {% else %}
-      <!-- Estado Vacío -->
-      <div class="estado-vacio caja-formulario">
-        <div class="icono-vacio-wrapper">
-          <span class="material-symbols-outlined icono-vacio" aria-hidden="true">shopping_cart</span>
+      <!-- Estado Vacío a Pantalla Completa Widescreen -->
+      <div class="carrito-card-pantalla-completa carrito-card-vacio-widescreen">
+        <div class="carrito-vacio-contenido-centrado">
+          <div class="icono-vacio-wrapper-neon">
+            <span class="material-symbols-outlined icono-vacio-neon" aria-hidden="true">shopping_cart</span>
+          </div>
+          <h2 class="titulo-vacio-widescreen">Tu carrito de compras está vacío</h2>
+          <p class="texto-vacio-widescreen">
+            Aún no has agregado discos a tu selección. Explora nuestro catálogo dinámico de CD y Vinilos para comenzar tu colección.
+          </p>
+          <div class="carrito-vacio-acciones">
+            <a class="boton boton-destacado resplandor-neon boton-explorar-vacio" href="{{ url_for('productos') }}">
+              <span class="material-symbols-outlined" aria-hidden="true">album</span>
+              <span>Explorar Catálogo de Discos</span>
+            </a>
+          </div>
         </div>
-        <h2 class="titulo-vacio">Tu carrito de compras está vacío</h2>
-        <p class="texto-vacio">Aún no has agregado discos a tu selección. Explora nuestro catálogo de CD y Vinilos para comenzar.</p>
-        <a class="boton boton-principal resplandor-neon" href="{{ url_for('productos') }}">
-          <span class="material-symbols-outlined" aria-hidden="true">album</span>
-          <span>Explorar Catálogo de Discos</span>
-        </a>
       </div>
     {% endif %}
   </div>

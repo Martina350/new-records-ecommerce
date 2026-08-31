@@ -3405,6 +3405,73 @@ select option {
   font-size: 0.925rem;
 }
 
+/* ===== Estado Vacío a Pantalla Completa Widescreen (Carrito & Pedidos) ===== */
+.carrito-card-vacio-widescreen,
+.pedidos-card-vacio-widescreen {
+  min-height: 480px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4.5rem 2rem;
+  width: 100%;
+}
+
+.carrito-vacio-contenido-centrado,
+.pedidos-vacio-contenido-centrado {
+  max-width: 38rem;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin: 0 auto;
+  gap: 1.25rem;
+}
+
+.icono-vacio-wrapper-neon {
+  width: 5.5rem;
+  height: 5.5rem;
+  border-radius: 50%;
+  background: rgba(138, 44, 226, 0.12);
+  border: 1px solid rgba(138, 44, 226, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 28px rgba(138, 44, 226, 0.25);
+  margin-bottom: 0.5rem;
+}
+
+.icono-vacio-neon {
+  font-size: 2.75rem;
+  color: var(--primary);
+}
+
+.titulo-vacio-widescreen {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: var(--text-heading);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.texto-vacio-widescreen {
+  color: var(--text-muted-page);
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.carrito-vacio-acciones,
+.pedidos-vacio-acciones {
+  margin-top: 0.5rem;
+}
+
+.boton-explorar-vacio {
+  padding: 0.85rem 1.75rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
 /* ===== Panel Desplegable / Slide-Over Modal: Resumen de Pedido ===== */
 .resumen-overlay {
   position: fixed;
