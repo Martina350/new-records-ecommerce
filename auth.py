@@ -13,10 +13,8 @@ def login_requerido(vista):
     @wraps(vista)
     def vista_decorada(*args, **kwargs):
         if obtener_usuario_actual() is None:
-            flash(
-                "Debes iniciar sesión para acceder a esta página.", "warning"
-            )
-            return redirect(url_for("login", next=request.full_path))
+            flash("Debes iniciar sesión para acceder a esta página.", "warning")
+            return redirect(url_for("auth.login", next=request.full_path))
         return vista(*args, **kwargs)
 
     return vista_decorada
@@ -34,7 +32,7 @@ def rol_requerido(*roles_permitidos):
                     "Debes iniciar sesión para acceder a esta página.",
                     "warning",
                 )
-                return redirect(url_for("login", next=request.full_path))
+                return redirect(url_for("auth.login", next=request.full_path))
 
             if usuario.rol not in roles_permitidos:
                 abort(403)

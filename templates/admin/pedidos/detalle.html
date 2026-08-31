@@ -8,7 +8,7 @@
     <div class="admin-cabecera-principal admin-cabecera-auditoria">
       <!-- Fila Superior Móvil: Volver a Bandeja + Badge Estado -->
       <div class="admin-auditoria-meta-top-movil">
-        <a class="enlace-volver-auditoria" href="{{ url_for('admin_pedidos_lista') }}">
+        <a class="enlace-volver-auditoria" href="{{ url_for('admin.admin_pedidos_lista') }}">
           <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
           <span>Bandeja de Pedidos</span>
         </a>
@@ -37,7 +37,7 @@
       </div>
 
       <div class="admin-cabecera-acciones admin-acciones-desktop-only">
-        <a class="boton boton-secundario" href="{{ url_for('admin_pedidos_lista') }}">
+        <a class="boton boton-secundario" href="{{ url_for('admin.admin_pedidos_lista') }}">
           <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
           <span>Bandeja de Pedidos</span>
         </a>
@@ -247,7 +247,7 @@
               <h4 style="margin: 0 0 0.5rem 0; font-size: 1.1rem; color: var(--accent);">Aprobar Pedido</h4>
               <p style="margin: 0; font-size: 0.875rem; color: var(--text-muted-page);">Confirma el stock y autoriza la entrega del pedido al cliente.</p>
             </div>
-            <form action="{{ url_for('admin_pedido_aprobar', numero=pedido.numero) }}" method="post" onsubmit="return confirm('¿Aprobar este pedido y descontar el stock del inventario?');">
+            <form action="{{ url_for('admin.admin_pedido_aprobar', numero=pedido.numero) }}" method="post" onsubmit="return confirm('¿Aprobar este pedido y descontar el stock del inventario?');">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <button class="boton boton-principal resplandor-neon" type="submit" id="btn-aprobar-pedido" style="width: 100%;">
                 <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
@@ -262,7 +262,7 @@
               <h4 style="margin: 0 0 0.5rem 0; font-size: 1.1rem; color: #f87171;">Rechazar Pedido</h4>
               <p style="margin: 0; font-size: 0.875rem; color: var(--text-muted-page);">Especifica la razón técnica o comercial del rechazo.</p>
             </div>
-            <form action="{{ url_for('admin_pedido_rechazar', numero=pedido.numero) }}" method="post" onsubmit="return confirm('¿Rechazar este pedido?');">
+            <form action="{{ url_for('admin.admin_pedido_rechazar', numero=pedido.numero) }}" method="post" onsubmit="return confirm('¿Rechazar este pedido?');">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <div style="margin-bottom: 1rem;">
                 <input
@@ -290,12 +290,12 @@
           <span>Comprobantes y Facturas Emitidas</span>
         </h3>
         <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-          <a class="boton boton-pdf" href="{{ url_for('descargar_comprobante', numero=pedido.numero) }}" target="_blank">
+          <a class="boton boton-pdf" href="{{ url_for('pedidos.descargar_comprobante', numero=pedido.numero) }}" target="_blank">
             <span class="material-symbols-outlined icono-pdf" aria-hidden="true">download</span>
             <span>Ver Comprobante Preliminar</span>
           </a>
           {% if pedido.estado == "APROBADO" %}
-            <a class="boton boton-destacado boton-pdf resplandor-neon" href="{{ url_for('descargar_factura', numero=pedido.numero) }}" target="_blank">
+            <a class="boton boton-destacado boton-pdf resplandor-neon" href="{{ url_for('pedidos.descargar_factura', numero=pedido.numero) }}" target="_blank">
               <span class="material-symbols-outlined icono-pdf" aria-hidden="true">receipt</span>
               <span>Ver Factura Oficial Emitida</span>
             </a>

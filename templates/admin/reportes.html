@@ -22,7 +22,7 @@
       </div>
 
       <div class="admin-cabecera-acciones">
-        <a class="boton boton-secundario" href="{{ url_for('admin_dashboard') }}">
+        <a class="boton boton-secundario" href="{{ url_for('admin.admin_dashboard') }}">
           <span class="material-symbols-outlined" aria-hidden="true">dashboard</span>
           <span>Dashboard</span>
         </a>
@@ -87,19 +87,19 @@
 
         <!-- Filtros por Período -->
         <div class="admin-filtros-pedidos admin-filtros-reportes-grid">
-          <a href="{{ url_for('admin_reportes', periodo='diario') }}" class="boton-filtro-tab {% if periodo == 'diario' %}activo{% endif %}">
+          <a href="{{ url_for('admin.admin_reportes', periodo='diario') }}" class="boton-filtro-tab {% if periodo == 'diario' %}activo{% endif %}">
             <span class="material-symbols-outlined" aria-hidden="true">today</span>
             <span>Diario</span>
           </a>
-          <a href="{{ url_for('admin_reportes', periodo='semanal') }}" class="boton-filtro-tab {% if periodo == 'semanal' %}activo{% endif %}">
+          <a href="{{ url_for('admin.admin_reportes', periodo='semanal') }}" class="boton-filtro-tab {% if periodo == 'semanal' %}activo{% endif %}">
             <span class="material-symbols-outlined" aria-hidden="true">date_range</span>
             <span>Semanal</span>
           </a>
-          <a href="{{ url_for('admin_reportes', periodo='mensual') }}" class="boton-filtro-tab {% if periodo == 'mensual' %}activo{% endif %}">
+          <a href="{{ url_for('admin.admin_reportes', periodo='mensual') }}" class="boton-filtro-tab {% if periodo == 'mensual' %}activo{% endif %}">
             <span class="material-symbols-outlined" aria-hidden="true">calendar_month</span>
             <span>Mensual</span>
           </a>
-          <a href="{{ url_for('admin_reportes', periodo='anual') }}" class="boton-filtro-tab {% if periodo == 'anual' %}activo{% endif %}">
+          <a href="{{ url_for('admin.admin_reportes', periodo='anual') }}" class="boton-filtro-tab {% if periodo == 'anual' %}activo{% endif %}">
             <span class="material-symbols-outlined" aria-hidden="true">event_note</span>
             <span>Anual</span>
           </a>
@@ -330,7 +330,7 @@
 
     <!-- Acciones del pie -->
     <div class="admin-acciones-pie">
-      <a class="boton boton-destacado" href="{{ url_for('admin_pedidos_lista') }}">
+      <a class="boton boton-destacado" href="{{ url_for('admin.admin_pedidos_lista') }}">
         <span class="material-symbols-outlined" aria-hidden="true">shopping_cart_checkout</span>
         <span>Bandeja de Pedidos</span>
       </a>

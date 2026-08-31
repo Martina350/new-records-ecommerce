@@ -1,7 +1,7 @@
 """Servicios y lógica transaccional para pedidos y pagos en New Records."""
 
 import secrets
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import text
 
@@ -16,11 +16,12 @@ from models import (
     db,
 )
 from payments import vencimiento_tarjeta_valido
+from report_repository import ejecutar_consulta
 
 
 def generar_numero_pedido():
     """Genera un identificador único para el pedido con formato NR-YYYYMMDD-XXXX."""
-    fecha_str = datetime.now(timezone.utc).strftime("%Y%m%d")
+    fecha_str = datetime.now(UTC).strftime("%Y%m%d")
     sufijo = secrets.token_hex(2).upper()
     return f"NR-{fecha_str}-{sufijo}"
 
@@ -62,7 +63,10 @@ def procesar_checkout(cliente_id, metodo_pago_id):
     ).first()
 
     if not metodo_pago:
-        return False, "El método de pago seleccionado no es válido o no está disponible."
+        return (
+            False,
+            "El método de pago seleccionado no es válido o no está disponible.",
+        )
     if not vencimiento_tarjeta_valido(
         metodo_pago.mes_vencimiento, metodo_pago.anio_vencimiento
     ):
@@ -85,11 +89,17 @@ def procesar_checkout(cliente_id, metodo_pago_id):
             disco = db.session.get(Disco, disco_id)
             if not disco or not disco.activo:
                 db.session.rollback()
-                return False, f"El disco '{disco.album if disco else 'desconocido'}' ya no está disponible."
+                return (
+                    False,
+                    f"El disco '{disco.album if disco else 'desconocido'}' ya no está disponible.",
+                )
 
             if disco.stock < cantidad:
                 db.session.rollback()
-                return False, f"Stock insuficiente para '{disco.album}' (disponible: {disco.stock} unidades)."
+                return (
+                    False,
+                    f"Stock insuficiente para '{disco.album}' (disponible: {disco.stock} unidades).",
+                )
 
             precio_unitario = disco.precio_final()
             subtotal = precio_unitario * cantidad
@@ -165,7 +175,10 @@ def procesar_checkout(cliente_id, metodo_pago_id):
             from pdf_generator import eliminar_pdf_pedido
 
             eliminar_pdf_pedido(pedido, "COMPROBANTE_PENDIENTE")
-        return False, "Ocurrió un error inesperado al procesar el pedido. Inténtalo nuevamente."
+        return (
+            False,
+            "Ocurrió un error inesperado al procesar el pedido. Inténtalo nuevamente.",
+        )
 
 
 def obtener_pedidos_cliente(cliente_id):
@@ -243,10 +256,7 @@ def aprobar_pedido(numero, admin_id):
     pedido = None
     try:
         resultado = db.session.execute(
-            text(
-                "CALL aprobar_pedido_new_records("
-                ":numero, :admin_id, false, '')"
-            ),
+            text("CALL aprobar_pedido_new_records(" ":numero, :admin_id, false, '')"),
             {"numero": numero, "admin_id": admin_id},
         ).one()
         exito, mensaje = bool(resultado[0]), resultado[1]
@@ -272,7 +282,10 @@ def aprobar_pedido(numero, admin_id):
         db.session.rollback()
         if pedido is not None:
             eliminar_pdf_pedido(pedido, "FACTURA_FINAL")
-        return False, "Ocurrió un error inesperado al procesar la aprobación del pedido."
+        return (
+            False,
+            "Ocurrió un error inesperado al procesar la aprobación del pedido.",
+        )
 
 
 def rechazar_pedido(numero, admin_id, motivo):
@@ -283,11 +296,7 @@ def rechazar_pedido(numero, admin_id, motivo):
         return False, "Debes ingresar un motivo explícito para rechazar el pedido."
 
     try:
-        pedido = (
-            Pedido.query.filter_by(numero=numero)
-            .with_for_update()
-            .first()
-        )
+        pedido = Pedido.query.filter_by(numero=numero).with_for_update().first()
         if not pedido:
             db.session.rollback()
             return False, "Pedido no encontrado."
@@ -321,21 +330,11 @@ def rechazar_pedido(numero, admin_id, motivo):
 
 # ── Reportes y Analítica de Ventas (Fase 11) ──────────────────────────────────
 
+
 def obtener_resumen_metricas_ventas():
-    """Calcula métricas consolidadas de ventas aprobadas (ticket promedio, ítems, ingresos)."""
-    resultado = db.session.execute(
-        text(
-            """
-            SELECT
-                COALESCE(COUNT(DISTINCT p.id), 0) AS total_pedidos,
-                COALESCE(SUM(dp.cantidad), 0) AS total_unidades,
-                COALESCE(SUM(dp.cantidad * dp.precio_unitario), 0.00) AS total_facturado
-            FROM pedidos p
-            JOIN detalles_pedido dp ON dp.pedido_id = p.id
-            WHERE p.estado = 'APROBADO'
-            """
-        )
-    ).mappings().first()
+    """Calcula métricas consolidadas a partir de la consulta SQL canónica."""
+    filas = ejecutar_consulta("resumen_metricas")
+    resultado = filas[0] if filas else None
 
     total_pedidos = int(resultado["total_pedidos"]) if resultado else 0
     total_unidades = int(resultado["total_unidades"]) if resultado else 0
@@ -343,7 +342,6 @@ def obtener_resumen_metricas_ventas():
     ticket_promedio = (
         round(total_facturado / total_pedidos, 2) if total_pedidos > 0 else 0.0
     )
-
     return {
         "total_pedidos": total_pedidos,
         "total_unidades": total_unidades,
@@ -353,166 +351,45 @@ def obtener_resumen_metricas_ventas():
 
 
 def obtener_reporte_ventas_temporal(agrupacion="diario"):
-    """Genera ventas aprobadas agrupadas por día, semana, mes o año.
-    
-    agrupacion: 'diario', 'semanal', 'mensual' o 'anual'.
-    """
-    if agrupacion == "semanal":
-        sql = """
-            WITH ventas_base AS (
-                SELECT
-                    p.id AS pedido_id,
-                    DATE_TRUNC('week', p.fecha_creacion)::date AS fecha_semana,
-                    dp.cantidad AS cantidad,
-                    (dp.cantidad * dp.precio_unitario) AS subtotal
-                FROM pedidos p
-                JOIN detalles_pedido dp ON dp.pedido_id = p.id
-                WHERE p.estado = 'APROBADO'
-            )
-            SELECT
-                fecha_semana AS fecha_inicio,
-                EXTRACT(YEAR FROM fecha_semana)::integer AS anio,
-                EXTRACT(WEEK FROM fecha_semana)::integer AS periodo_num,
-                'Semana ' || EXTRACT(WEEK FROM fecha_semana)::text || ' (' || EXTRACT(YEAR FROM fecha_semana)::text || ')' AS etiqueta,
-                COUNT(DISTINCT pedido_id) AS total_pedidos,
-                SUM(cantidad) AS total_unidades,
-                SUM(subtotal) AS total_facturado
-            FROM ventas_base
-            GROUP BY fecha_semana
-            ORDER BY fecha_inicio DESC
-        """
-    elif agrupacion == "mensual":
-        sql = """
-            WITH ventas_base AS (
-                SELECT
-                    p.id AS pedido_id,
-                    DATE_TRUNC('month', p.fecha_creacion)::date AS fecha_mes,
-                    dp.cantidad AS cantidad,
-                    (dp.cantidad * dp.precio_unitario) AS subtotal
-                FROM pedidos p
-                JOIN detalles_pedido dp ON dp.pedido_id = p.id
-                WHERE p.estado = 'APROBADO'
-            )
-            SELECT
-                fecha_mes AS fecha_inicio,
-                EXTRACT(YEAR FROM fecha_mes)::integer AS anio,
-                EXTRACT(MONTH FROM fecha_mes)::integer AS periodo_num,
-                TO_CHAR(fecha_mes, 'YYYY-MM') AS etiqueta,
-                COUNT(DISTINCT pedido_id) AS total_pedidos,
-                SUM(cantidad) AS total_unidades,
-                SUM(subtotal) AS total_facturado
-            FROM ventas_base
-            GROUP BY fecha_mes
-            ORDER BY fecha_inicio DESC
-        """
-    elif agrupacion == "anual":
-        sql = """
-            WITH ventas_base AS (
-                SELECT
-                    p.id AS pedido_id,
-                    DATE_TRUNC('year', p.fecha_creacion)::date AS fecha_anio,
-                    dp.cantidad AS cantidad,
-                    (dp.cantidad * dp.precio_unitario) AS subtotal
-                FROM pedidos p
-                JOIN detalles_pedido dp ON dp.pedido_id = p.id
-                WHERE p.estado = 'APROBADO'
-            )
-            SELECT
-                fecha_anio AS fecha_inicio,
-                EXTRACT(YEAR FROM fecha_anio)::integer AS anio,
-                EXTRACT(YEAR FROM fecha_anio)::integer AS periodo_num,
-                TO_CHAR(fecha_anio, 'YYYY') AS etiqueta,
-                COUNT(DISTINCT pedido_id) AS total_pedidos,
-                SUM(cantidad) AS total_unidades,
-                SUM(subtotal) AS total_facturado
-            FROM ventas_base
-            GROUP BY fecha_anio
-            ORDER BY fecha_inicio DESC
-        """
-    else:  # diario por defecto
-        sql = """
-            WITH ventas_base AS (
-                SELECT
-                    p.id AS pedido_id,
-                    DATE_TRUNC('day', p.fecha_creacion)::date AS fecha_dia,
-                    dp.cantidad AS cantidad,
-                    (dp.cantidad * dp.precio_unitario) AS subtotal
-                FROM pedidos p
-                JOIN detalles_pedido dp ON dp.pedido_id = p.id
-                WHERE p.estado = 'APROBADO'
-            )
-            SELECT
-                fecha_dia AS fecha_inicio,
-                EXTRACT(YEAR FROM fecha_dia)::integer AS anio,
-                EXTRACT(DOY FROM fecha_dia)::integer AS periodo_num,
-                TO_CHAR(fecha_dia, 'YYYY-MM-DD') AS etiqueta,
-                COUNT(DISTINCT pedido_id) AS total_pedidos,
-                SUM(cantidad) AS total_unidades,
-                SUM(subtotal) AS total_facturado
-            FROM ventas_base
-            GROUP BY fecha_dia
-            ORDER BY fecha_inicio DESC
-        """
-
-    filas = db.session.execute(text(sql)).mappings().all()
-    resultado = []
-    for f in filas:
-        resultado.append(
-            {
-                "fecha_inicio": f["fecha_inicio"],
-                "etiqueta": f["etiqueta"],
-                "total_pedidos": int(f["total_pedidos"]),
-                "total_unidades": int(f["total_unidades"]),
-                "total_facturado": float(f["total_facturado"]),
-            }
-        )
-    return resultado
+    """Genera ventas aprobadas agrupadas por día, semana, mes o año."""
+    agrupaciones = {"diario", "semanal", "mensual", "anual"}
+    periodo = agrupacion if agrupacion in agrupaciones else "diario"
+    filas = ejecutar_consulta(f"ventas_{periodo}")
+    return [
+        {
+            "fecha_inicio": fila["fecha_inicio"],
+            "etiqueta": fila["etiqueta"],
+            "total_pedidos": int(fila["total_pedidos"]),
+            "total_unidades": int(fila["total_unidades"]),
+            "total_facturado": float(fila["total_facturado"]),
+        }
+        for fila in filas
+    ]
 
 
 def obtener_ranking_discos(limite=10):
-    """Obtiene los discos más vendidos filtrando exclusivamente por pedidos aprobados."""
-    sql = """
-        SELECT
-            d.id AS disco_id,
-            dp.album,
-            dp.artista,
-            dp.formato,
-            d.imagen,
-            d.stock AS stock_actual,
-            c.nombre AS categoria_nombre,
-            SUM(dp.cantidad) AS total_unidades,
-            SUM(dp.cantidad * dp.precio_unitario) AS total_facturado,
-            COUNT(DISTINCT p.id) AS total_pedidos
-        FROM detalles_pedido dp
-        JOIN pedidos p ON p.id = dp.pedido_id
-        JOIN discos d ON d.id = dp.disco_id
-        JOIN categorias c ON c.id = d.categoria_id
-        WHERE p.estado = 'APROBADO'
-        GROUP BY d.id, dp.album, dp.artista, dp.formato, d.imagen, d.stock, c.nombre
-        ORDER BY total_unidades DESC, total_facturado DESC
-        LIMIT :limite
-    """
-    filas = db.session.execute(text(sql), {"limite": limite}).mappings().all()
+    """Obtiene los discos más vendidos en pedidos aprobados."""
+    filas = ejecutar_consulta("ranking_discos", {"limite": limite})
+    max_unidades = max((int(fila["total_unidades"]) for fila in filas), default=1)
     resultado = []
-    max_unidades = max((int(f["total_unidades"]) for f in filas), default=1)
-    for index, f in enumerate(filas, start=1):
-        unidades = int(f["total_unidades"])
+    for posicion, fila in enumerate(filas, start=1):
+        unidades = int(fila["total_unidades"])
         porcentaje = (
             round((unidades / max_unidades) * 100, 1) if max_unidades > 0 else 0.0
         )
         resultado.append(
             {
-                "posicion": index,
-                "disco_id": f["disco_id"],
-                "album": f["album"],
-                "artista": f["artista"],
-                "formato": f["formato"],
-                "imagen": f["imagen"],
-                "stock_actual": f["stock_actual"],
-                "categoria_nombre": f["categoria_nombre"],
+                "posicion": posicion,
+                "disco_id": fila["disco_id"],
+                "album": fila["album"],
+                "artista": fila["artista"],
+                "formato": fila["formato"],
+                "imagen": fila["imagen"],
+                "stock_actual": fila["stock_actual"],
+                "categoria_nombre": fila["categoria_nombre"],
                 "total_unidades": unidades,
-                "total_facturado": float(f["total_facturado"]),
-                "total_pedidos": int(f["total_pedidos"]),
+                "total_facturado": float(fila["total_facturado"]),
+                "total_pedidos": int(fila["total_pedidos"]),
                 "porcentaje_relativo": porcentaje,
             }
         )
@@ -520,47 +397,24 @@ def obtener_ranking_discos(limite=10):
 
 
 def obtener_ranking_categorias():
-    """Obtiene los géneros/categorías más vendidos con participación relativa."""
-    sql = """
-        SELECT
-            c.id AS categoria_id,
-            c.nombre AS categoria_nombre,
-            c.slug AS categoria_slug,
-            c.imagen AS categoria_imagen,
-            COUNT(DISTINCT p.id) AS total_pedidos,
-            SUM(dp.cantidad) AS total_unidades,
-            SUM(dp.cantidad * dp.precio_unitario) AS total_facturado
-        FROM detalles_pedido dp
-        JOIN pedidos p ON p.id = dp.pedido_id
-        JOIN discos d ON d.id = dp.disco_id
-        JOIN categorias c ON c.id = d.categoria_id
-        WHERE p.estado = 'APROBADO'
-        GROUP BY c.id, c.nombre, c.slug, c.imagen
-        ORDER BY total_facturado DESC, total_unidades DESC
-    """
-    filas = db.session.execute(text(sql)).mappings().all()
+    """Obtiene géneros vendidos y su participación sobre ventas aprobadas."""
+    filas = ejecutar_consulta("ranking_categorias")
+    gran_total = sum((float(fila["total_facturado"]) for fila in filas), 0.0)
     resultado = []
-    gran_total_facturado = sum((float(f["total_facturado"]) for f in filas), 0.0)
-    for index, f in enumerate(filas, start=1):
-        facturado = float(f["total_facturado"])
-        porcentaje = (
-            round((facturado / gran_total_facturado) * 100, 1)
-            if gran_total_facturado > 0
-            else 0.0
-        )
+    for posicion, fila in enumerate(filas, start=1):
+        facturado = float(fila["total_facturado"])
+        porcentaje = round((facturado / gran_total) * 100, 1) if gran_total else 0.0
         resultado.append(
             {
-                "posicion": index,
-                "categoria_id": f["categoria_id"],
-                "categoria_nombre": f["categoria_nombre"],
-                "categoria_slug": f["categoria_slug"],
-                "categoria_imagen": f["categoria_imagen"],
-                "total_pedidos": int(f["total_pedidos"]),
-                "total_unidades": int(f["total_unidades"]),
+                "posicion": posicion,
+                "categoria_id": fila["categoria_id"],
+                "categoria_nombre": fila["categoria_nombre"],
+                "categoria_slug": fila["categoria_slug"],
+                "categoria_imagen": fila["categoria_imagen"],
+                "total_pedidos": int(fila["total_pedidos"]),
+                "total_unidades": int(fila["total_unidades"]),
                 "total_facturado": facturado,
                 "porcentaje_participacion": porcentaje,
             }
         )
     return resultado
-
-

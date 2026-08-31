@@ -3,12 +3,15 @@
 import os
 import secrets
 from io import BytesIO
-from app import app
+
 from pypdf import PdfReader
+
+from app import app
 from mailer import notificar_cambio_estado, notificar_creacion_pedido
-from models import Disco, Factura, MetodoPago, Pedido, Usuario, db
+from models import Disco, MetodoPago, Pedido, Usuario, db
 from payments import crear_verificacion, verificar_pin
 from pdf_generator import generar_pdf_pedido
+
 
 def pass_cliente():
     return os.environ["CLIENTE_DEMO_PASSWORD"]
@@ -42,9 +45,9 @@ def obtener_o_crear_tarjeta_verificada(usuario_id):
 def crear_pedido_cliente(client):
     """Crea un pedido completo para que cada prueba de PDF sea independiente."""
     with app.app_context():
-        usuario_id = Usuario.query.filter_by(
-            email="cliente@newrecords.local"
-        ).first().id
+        usuario_id = (
+            Usuario.query.filter_by(email="cliente@newrecords.local").first().id
+        )
         tarjeta_id = obtener_o_crear_tarjeta_verificada(usuario_id).id
         disco_id = Disco.query.filter_by(codigo="NR-POP-001").first().id
 
@@ -68,6 +71,7 @@ def crear_pedido_cliente(client):
 
 # ── Tests de generación directa con ReportLab ────────────────────────────────
 
+
 def test_generar_pdf_comprobante_valido(client):
     with client:
         autenticar_cliente(client)
@@ -79,26 +83,29 @@ def test_generar_pdf_comprobante_valido(client):
                 pedido, tipo="COMPROBANTE_PENDIENTE"
             )
 
-        # Comprobar que es un PDF válido (comienza con %PDF-)
+            # Comprobar que es un PDF válido (comienza con %PDF-)
             assert pdf_bytes.startswith(b"%PDF-")
             assert len(pdf_bytes) > 500
             assert nombre_archivo.endswith(".pdf")
             assert "COMP-" in nombre_archivo
 
             lector = PdfReader(BytesIO(pdf_bytes))
-            texto_pdf = "\n".join(pagina.extract_text() or "" for pagina in lector.pages)
+            texto_pdf = "\n".join(
+                pagina.extract_text() or "" for pagina in lector.pages
+            )
             assert len(lector.pages) >= 1
             assert "NEW RECORDS" in texto_pdf
             assert pedido.numero in texto_pdf
             assert "Future Nostalgia" in texto_pdf
 
-        # Comprobar persistencia de Factura
+            # Comprobar persistencia de Factura
             assert factura is not None
             assert factura.tipo == "COMPROBANTE_PENDIENTE"
             assert factura.pedido_id == pedido.id
 
 
 # ── Tests de descarga mediante endpoints HTTP ────────────────────────────────
+
 
 def test_descargar_comprobante_cliente_autenticado(client):
     with client:
@@ -146,7 +153,9 @@ def test_factura_final_bloqueada_si_no_esta_aprobado(client):
 
         resp = client.get(f"/pedidos/{numero}/factura", follow_redirects=True)
         assert resp.status_code == 200
-        assert "Factura Oficial de venta solo está disponible" in resp.data.decode("utf-8")
+        assert "Factura Oficial de venta solo está disponible" in resp.data.decode(
+            "utf-8"
+        )
 
 
 def test_descargar_factura_final_cuando_aprobado(client):
@@ -171,6 +180,7 @@ def test_descargar_factura_final_cuando_aprobado(client):
 
 
 # ── Tests de notificaciones ──────────────────────────────────────────────────
+
 
 def test_notificaciones_ejecutan_sin_error(client):
     with client:

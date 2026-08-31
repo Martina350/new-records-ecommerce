@@ -1,17 +1,16 @@
 """Modelos relacionales y POO del dominio New Records."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash, generate_password_hash
-
 
 db = SQLAlchemy()
 
 
 def ahora_utc():
     """Retorna una fecha UTC consciente de zona horaria."""
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class Usuario(db.Model):
@@ -89,6 +88,10 @@ class Categoria(db.Model):
     __tablename__ = "categorias"
     __table_args__ = (
         db.CheckConstraint(
+            "char_length(btrim(nombre)) BETWEEN 2 AND 80",
+            name="ck_categorias_nombre_valido",
+        ),
+        db.CheckConstraint(
             "prefijo_codigo ~ '^[A-Z0-9]{3,5}$'",
             name="ck_categorias_prefijo_codigo",
         ),
@@ -97,9 +100,7 @@ class Categoria(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(80), nullable=False, unique=True)
     slug = db.Column(db.String(90), nullable=False, unique=True, index=True)
-    prefijo_codigo = db.Column(
-        db.String(5), nullable=False, unique=True, index=True
-    )
+    prefijo_codigo = db.Column(db.String(5), nullable=False, unique=True, index=True)
     descripcion = db.Column(db.Text)
     imagen = db.Column(db.String(255))
     activo = db.Column(db.Boolean, nullable=False, default=True, server_default="true")
@@ -145,9 +146,7 @@ class SecuenciaCodigoCategoria(db.Model):
         db.ForeignKey("categorias.id", ondelete="CASCADE"),
         primary_key=True,
     )
-    ultimo_numero = db.Column(
-        db.Integer, nullable=False, default=0, server_default="0"
-    )
+    ultimo_numero = db.Column(db.Integer, nullable=False, default=0, server_default="0")
 
     categoria = db.relationship("Categoria", back_populates="secuencia_codigo")
 
@@ -157,15 +156,23 @@ class Disco(db.Model):
 
     __tablename__ = "discos"
     __table_args__ = (
+        db.CheckConstraint(
+            "char_length(btrim(album)) BETWEEN 1 AND 150",
+            name="ck_discos_album_valido",
+        ),
+        db.CheckConstraint(
+            "char_length(btrim(artista)) BETWEEN 1 AND 120",
+            name="ck_discos_artista_valido",
+        ),
+        db.CheckConstraint(
+            "char_length(btrim(descripcion)) > 0",
+            name="ck_discos_descripcion_valida",
+        ),
         db.CheckConstraint("precio_base > 0", name="ck_discos_precio"),
         db.CheckConstraint("stock >= 0", name="ck_discos_stock"),
         db.CheckConstraint("peso_kg > 0", name="ck_discos_peso"),
-        db.CheckConstraint(
-            "costo_envio_por_kg >= 0", name="ck_discos_costo_envio"
-        ),
-        db.CheckConstraint(
-            "costo_embalaje >= 0", name="ck_discos_costo_embalaje"
-        ),
+        db.CheckConstraint("costo_envio_por_kg >= 0", name="ck_discos_costo_envio"),
+        db.CheckConstraint("costo_embalaje >= 0", name="ck_discos_costo_embalaje"),
         db.CheckConstraint("formato IN ('CD', 'VINILO')", name="ck_discos_formato"),
     )
 
@@ -248,8 +255,10 @@ class MetodoPago(db.Model):
     __tablename__ = "metodos_pago"
     __table_args__ = (
         db.CheckConstraint(
-            "ultimos4 ~ '^[0-9]{4}$'", name="ck_metodos_pago_ultimos4"
+            "char_length(btrim(titular)) BETWEEN 3 AND 120",
+            name="ck_metodos_pago_titular_valido",
         ),
+        db.CheckConstraint("ultimos4 ~ '^[0-9]{4}$'", name="ck_metodos_pago_ultimos4"),
         db.CheckConstraint(
             "mes_vencimiento BETWEEN 1 AND 12",
             name="ck_metodos_pago_mes_vencimiento",
@@ -291,6 +300,10 @@ class MetodoPago(db.Model):
 class VerificacionTarjeta(db.Model):
     __tablename__ = "verificaciones_tarjeta"
     __table_args__ = (
+        db.CheckConstraint(
+            "char_length(btrim(titular)) BETWEEN 3 AND 120",
+            name="ck_verificaciones_titular_valido",
+        ),
         db.CheckConstraint(
             "intentos BETWEEN 0 AND 3", name="ck_verificaciones_intentos"
         ),
@@ -413,12 +426,8 @@ class DetallePedido(db.Model):
     __tablename__ = "detalles_pedido"
     __table_args__ = (
         db.CheckConstraint("cantidad > 0", name="ck_detalles_cantidad"),
-        db.CheckConstraint(
-            "precio_unitario >= 0", name="ck_detalles_precio_unitario"
-        ),
-        db.UniqueConstraint(
-            "pedido_id", "disco_id", name="uq_detalles_pedido_disco"
-        ),
+        db.CheckConstraint("precio_unitario >= 0", name="ck_detalles_precio_unitario"),
+        db.UniqueConstraint("pedido_id", "disco_id", name="uq_detalles_pedido_disco"),
     )
 
     id = db.Column(db.Integer, primary_key=True)

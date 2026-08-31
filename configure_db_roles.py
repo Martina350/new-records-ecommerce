@@ -7,7 +7,6 @@ import psycopg2
 from dotenv import load_dotenv
 from psycopg2 import sql
 
-
 load_dotenv()
 
 ROLES_ESPERADOS = {
@@ -29,7 +28,9 @@ def validar_nombres_roles():
     for variable, esperado in ROLES_ESPERADOS.items():
         actual = os.getenv(variable, esperado).strip()
         if actual != esperado:
-            raise RuntimeError(f"{variable} debe ser {esperado} para aplicar la política definida.")
+            raise RuntimeError(
+                f"{variable} debe ser {esperado} para aplicar la política definida."
+            )
 
 
 def configurar_roles():
@@ -54,7 +55,9 @@ def configurar_roles():
         with conexion.cursor() as cursor:
             cursor.execute(RUTA_ROLES.read_text(encoding="utf-8"))
             for rol, clave in claves.items():
-                atributo_createdb = "CREATEDB" if rol == "new_records_admin" else "NOCREATEDB"
+                atributo_createdb = (
+                    "CREATEDB" if rol == "new_records_admin" else "NOCREATEDB"
+                )
                 consulta = sql.SQL(
                     "ALTER ROLE {} WITH LOGIN NOSUPERUSER NOCREATEROLE {} PASSWORD {}"
                 ).format(

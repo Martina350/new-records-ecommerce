@@ -29,12 +29,12 @@
           </div>
         {% endif %}
 
-        <a class="boton boton-principal resplandor-neon boton-chico" href="{{ url_for('pago_agregar') }}">
+        <a class="boton boton-principal resplandor-neon boton-chico" href="{{ url_for('pagos.pago_agregar') }}">
           <span class="material-symbols-outlined" aria-hidden="true">add_card</span>
           <span>Agregar Nueva Tarjeta</span>
         </a>
 
-        <a class="boton boton-secundario boton-chico" href="{{ url_for('checkout_resumen') }}">
+        <a class="boton boton-secundario boton-chico" href="{{ url_for('pedidos.checkout_resumen') }}">
           <span class="material-symbols-outlined" aria-hidden="true">shopping_cart_checkout</span>
           <span>Ir al Checkout</span>
         </a>
@@ -64,7 +64,7 @@
                       Predeterminada
                     </span>
                   {% else %}
-                    <form action="{{ url_for('pago_predeterminado', metodo_id=metodo.id) }}" method="post">
+                    <form action="{{ url_for('pagos.pago_predeterminado', metodo_id=metodo.id) }}" method="post">
                       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                       <button class="boton-establecer-predeterminada" type="submit" title="Establecer como predeterminada">
                         <span class="material-symbols-outlined" aria-hidden="true">star_border</span>
@@ -94,7 +94,7 @@
                 </div>
 
                 <div class="tarjeta-accion-eliminar">
-                  <form action="{{ url_for('pago_eliminar', metodo_id=metodo.id) }}" method="post">
+                  <form action="{{ url_for('pagos.pago_eliminar', metodo_id=metodo.id) }}" method="post">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button class="boton boton-peligro boton-chico boton-eliminar-tarjeta" type="submit" title="Eliminar tarjeta guardada"
                       onclick="return confirm('¿Deseas eliminar permanentemente esta tarjeta?')">
@@ -116,7 +116,7 @@
             </div>
             <h2 class="titulo-vacio-widescreen">No tienes métodos de pago registrados</h2>
             <p class="texto-vacio-widescreen">Agrega una tarjeta verificada mediante PIN seguro para agilizar tus compras en New Records.</p>
-            <a class="boton boton-principal resplandor-neon boton-explorar-vacio" href="{{ url_for('pago_agregar') }}">
+            <a class="boton boton-principal resplandor-neon boton-explorar-vacio" href="{{ url_for('pagos.pago_agregar') }}">
               <span class="material-symbols-outlined" aria-hidden="true">add_card</span>
               <span>Agregar Mi Primera Tarjeta</span>
             </a>

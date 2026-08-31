@@ -28,7 +28,7 @@
       </div>
 
       <div class="barra-filtros-catalogo">
-        <form class="formulario-catalogo-filtros" action="{{ url_for('productos') }}" method="get" id="formFiltroProductos">
+        <form class="formulario-catalogo-filtros" action="{{ url_for('catalogo.productos') }}" method="get" id="formFiltroProductos">
           <div class="grupo-filtro-categoria">
             <label for="filtroCategoria" class="etiqueta-filtro-select">
               <span class="material-symbols-outlined icono-filtro-select" aria-hidden="true">category</span>
@@ -65,7 +65,7 @@
               aria-label="Buscar discos por álbum o artista"
             />
             {% if busqueda or (categoria_slug and categoria_slug != 'todos') %}
-              <a class="limpiar-busqueda" href="{{ url_for('productos') }}" title="Limpiar todos los filtros">
+              <a class="limpiar-busqueda" href="{{ url_for('catalogo.productos') }}" title="Limpiar todos los filtros">
                 <span class="material-symbols-outlined" aria-hidden="true">close</span>
               </a>
             {% endif %}
@@ -89,7 +89,7 @@
               data-total-paginas="{{ total_paginas }}"
               data-categoria="{{ categoria_slug }}"
               data-q="{{ busqueda or '' }}"
-              data-url="{{ url_for('productos') }}"
+              data-url="{{ url_for('catalogo.productos') }}"
             >
               <span class="material-symbols-outlined icono-cargar-mas" aria-hidden="true">autorenew</span>
               <span class="texto-btn-cargar">Cargar más álbumes</span>
@@ -112,7 +112,7 @@
               {% if pagina > 1 %}
                 <a 
                   class="btn-paginacion" 
-                  href="{{ url_for('productos', categoria=categoria_slug, q=busqueda, pagina=pagina - 1) }}"
+                  href="{{ url_for('catalogo.productos', categoria=categoria_slug, q=busqueda, pagina=pagina - 1) }}"
                   title="Página anterior"
                 >
                   <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
@@ -133,7 +133,7 @@
                   {% else %}
                     <a 
                       class="btn-num-pag" 
-                      href="{{ url_for('productos', categoria=categoria_slug, q=busqueda, pagina=p) }}"
+                      href="{{ url_for('catalogo.productos', categoria=categoria_slug, q=busqueda, pagina=p) }}"
                     >{{ p }}</a>
                   {% endif %}
                 {% endfor %}
@@ -143,7 +143,7 @@
               {% if pagina < total_paginas %}
                 <a 
                   class="btn-paginacion" 
-                  href="{{ url_for('productos', categoria=categoria_slug, q=busqueda, pagina=pagina + 1) }}"
+                  href="{{ url_for('catalogo.productos', categoria=categoria_slug, q=busqueda, pagina=pagina + 1) }}"
                   title="Página siguiente"
                 >
                   <span>Siguiente</span>
@@ -169,7 +169,7 @@
               No hay productos disponibles en esta categoría actualmente.
             {% endif %}
           </p>
-          <a class="boton boton-secundario" href="{{ url_for('productos') }}">Ver todos los discos</a>
+          <a class="boton boton-secundario" href="{{ url_for('catalogo.productos') }}">Ver todos los discos</a>
         </div>
       {% endif %}
     </div>

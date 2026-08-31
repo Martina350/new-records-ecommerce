@@ -7,11 +7,11 @@
   <div class="contenedor">
     <!-- Migas de pan / navegación de retorno -->
     <nav class="migas-pan" aria-label="Ruta de navegación">
-      <a class="enlace-miga" href="{{ url_for('inicio') }}">Inicio</a>
+      <a class="enlace-miga" href="{{ url_for('catalogo.inicio') }}">Inicio</a>
       <span class="separador-miga">/</span>
-      <a class="enlace-miga" href="{{ url_for('productos') }}">Productos</a>
+      <a class="enlace-miga" href="{{ url_for('catalogo.productos') }}">Productos</a>
       <span class="separador-miga">/</span>
-      <a class="enlace-miga" href="{{ url_for('productos', categoria=disco.categoria.slug) }}">{{ disco.categoria.nombre }}</a>
+      <a class="enlace-miga" href="{{ url_for('catalogo.productos', categoria=disco.categoria.slug) }}">{{ disco.categoria.nombre }}</a>
       <span class="separador-miga">/</span>
       <span class="miga-activa">{{ disco.album }}</span>
     </nav>
@@ -38,7 +38,7 @@
       <div class="detalle-columna-info">
         <div class="detalle-encabezado">
           <span class="detalle-categoria-tag">
-            <a href="{{ url_for('productos', categoria=disco.categoria.slug) }}">
+            <a href="{{ url_for('catalogo.productos', categoria=disco.categoria.slug) }}">
               {{ disco.categoria.nombre }}
             </a>
           </span>
@@ -110,7 +110,7 @@
 
         <div class="detalle-acciones-compra">
           {% if not esta_autenticado or es_cliente %}
-            <form action="{{ url_for('agregar_al_carrito', disco_id=disco.id) }}" method="post" class="form-agregar-detalle">
+            <form action="{{ url_for('carrito.agregar_al_carrito', disco_id=disco.id) }}" method="post" class="form-agregar-detalle">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <input type="hidden" name="cantidad" value="1"/>
               <button
@@ -123,7 +123,7 @@
               </button>
             </form>
           {% endif %}
-          <a class="boton boton-secundario" href="{{ url_for('productos') }}">
+          <a class="boton boton-secundario" href="{{ url_for('catalogo.productos') }}">
             <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
             Volver al catálogo
           </a>
@@ -140,7 +140,7 @@
         <div class="grid-productos grid-recomendados">
           {% for rec in recomendados %}
             <article class="tarjeta-producto tarjeta-recomendada">
-              <a class="enlace-tarjeta-producto" href="{{ url_for('detalle_producto', codigo=rec.codigo) }}">
+              <a class="enlace-tarjeta-producto" href="{{ url_for('catalogo.detalle_producto', codigo=rec.codigo) }}">
                 <div class="tarjeta-producto-imagen">
                   <div 
                     class="tarjeta-producto-imagen-fondo" 
@@ -155,14 +155,14 @@
               </a>
               <div class="tarjeta-producto-encabezado">
                 <h3 class="tarjeta-producto-titulo">
-                  <a href="{{ url_for('detalle_producto', codigo=rec.codigo) }}">
+                  <a href="{{ url_for('catalogo.detalle_producto', codigo=rec.codigo) }}">
                     {{ rec.artista }} - {{ rec.album }}
                   </a>
                 </h3>
                 <span class="tarjeta-producto-precio">${{ "%.2f"|format(rec.precio_base) }}</span>
               </div>
               <div class="tarjeta-producto-acciones">
-                <a class="boton boton-secundario boton-tarjeta" href="{{ url_for('detalle_producto', codigo=rec.codigo) }}">
+                <a class="boton boton-secundario boton-tarjeta" href="{{ url_for('catalogo.detalle_producto', codigo=rec.codigo) }}">
                   Ver detalles
                 </a>
               </div>

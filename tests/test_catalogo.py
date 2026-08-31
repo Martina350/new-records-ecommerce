@@ -4,7 +4,7 @@ from decimal import Decimal
 from pathlib import Path
 
 from app import app
-from models import CD, Categoria, Disco, Vinilo, db
+from models import CD, Categoria, Disco, db
 
 
 def test_categorias_dinamicas_responden(client):
@@ -48,8 +48,6 @@ def test_catalogo_carga_mas_ajax(client):
     assert data["total_paginas"] >= 2
     assert "The Dark Side of the Moon" in data["html"]
     assert "Hit Me Hard and Soft" in data["html"]
-
-
 
 
 def test_filtro_productos_por_categoria(client):
@@ -125,7 +123,6 @@ def test_detalle_producto_inexistente_retorna_404(client):
 
 
 def test_disco_inactivo_no_se_muestra_en_catalogo_ni_detalle(client):
-    codigo_inactivo = f"NR-INACT-{Decimal('100')}"
     with app.app_context():
         # Limpieza previa por si acaso
         existente = Disco.query.filter_by(codigo="NR-TEST-INACTIVO").first()

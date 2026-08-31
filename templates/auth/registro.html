@@ -21,7 +21,7 @@
   <div class="modal-auth-overlay activo" id="modalRegistroOverlay">
     <div class="modal-auth-tarjeta" role="dialog" aria-modal="true" aria-labelledby="titulo-registro">
       <!-- Botón de Cerrar Modal (X) -->
-      <a class="btn-cerrar-modal" href="{{ url_for('inicio') }}" aria-label="Cerrar ventana y volver al inicio" title="Cerrar">
+      <a class="btn-cerrar-modal" href="{{ url_for('catalogo.inicio') }}" aria-label="Cerrar ventana y volver al inicio" title="Cerrar">
         <span class="material-symbols-outlined" aria-hidden="true">close</span>
       </a>
 
@@ -33,7 +33,7 @@
         <p class="auth-subtitulo">Únete a la comunidad de New Records para adquirir tus discos y vinilos favoritos.</p>
       </div>
 
-      <form class="formulario-auth" id="formRegistro" action="{{ url_for('registro') }}" method="post" novalidate>
+      <form class="formulario-auth" id="formRegistro" action="{{ url_for('auth.registro') }}" method="post" novalidate>
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         
         <div class="grupo-formulario">
@@ -114,7 +114,7 @@
         <div class="auth-pie-enlaces">
           <p class="auth-texto-enlace">
             ¿Ya tienes una cuenta? 
-            <a class="enlace-destacado" href="{{ url_for('login') }}">Inicia sesión aquí</a>
+            <a class="enlace-destacado" href="{{ url_for('auth.login') }}">Inicia sesión aquí</a>
           </p>
         </div>
       </form>

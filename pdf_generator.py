@@ -10,7 +10,14 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import inch
-from reportlab.platypus import HRFlowable, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+from reportlab.platypus import (
+    HRFlowable,
+    Paragraph,
+    SimpleDocTemplate,
+    Spacer,
+    Table,
+    TableStyle,
+)
 
 from models import Factura, ahora_utc, db
 
@@ -66,11 +73,9 @@ def generar_pdf_pedido(pedido, tipo="COMPROBANTE_PENDIENTE"):
     if tipo == "FACTURA_FINAL":
         prefijo = "FAC"
         titulo_doc = "FACTURA OFICIAL DE VENTA"
-        subtitulo_doc = "Documento mercantil y tributario emitido tras aprobación"
     else:
         prefijo = "COMP"
         titulo_doc = "COMPROBANTE DE PEDIDO"
-        subtitulo_doc = "Comprobante de orden en revisión administrativa"
 
     numero_documento = f"{prefijo}-{pedido.numero}"
     nombre_archivo = f"{numero_documento}.pdf"
@@ -102,15 +107,6 @@ def generar_pdf_pedido(pedido, tipo="COMPROBANTE_PENDIENTE"):
         textColor=colors.HexColor("#8a2be2"),  # Púrpura New Records
         fontName="Helvetica-Bold",
         alignment=0,
-    )
-
-    estilo_subtitulo = ParagraphStyle(
-        "SubtituloDoc",
-        parent=estilos["Normal"],
-        fontSize=10,
-        leading=13,
-        textColor=colors.HexColor("#4b5563"),
-        fontName="Helvetica",
     )
 
     estilo_normal = ParagraphStyle(
@@ -160,7 +156,10 @@ def generar_pdf_pedido(pedido, tipo="COMPROBANTE_PENDIENTE"):
     # 1. Cabecera con Logotipo y Datos de la Empresa
     datos_cabecera = [
         [
-            Paragraph("<b>NEW RECORDS</b><br/><font size=8 color='#6b7280'>Música Física en CD y Vinilo</font>", estilo_titulo),
+            Paragraph(
+                "<b>NEW RECORDS</b><br/><font size=8 color='#6b7280'>Música Física en CD y Vinilo</font>",
+                estilo_titulo,
+            ),
             Paragraph(
                 f"<b>{titulo_doc}</b><br/>"
                 f"<font size=8><b>N° Documento:</b> {numero_documento}<br/>"
@@ -183,7 +182,11 @@ def generar_pdf_pedido(pedido, tipo="COMPROBANTE_PENDIENTE"):
     )
     elementos.append(tabla_cabecera)
     elementos.append(Spacer(1, 12))
-    elementos.append(HRFlowable(width="100%", thickness=1.5, color=colors.HexColor("#8a2be2"), spaceAfter=12))
+    elementos.append(
+        HRFlowable(
+            width="100%", thickness=1.5, color=colors.HexColor("#8a2be2"), spaceAfter=12
+        )
+    )
 
     # 2. Información del Cliente y Método de Pago
     cliente = pedido.cliente
@@ -252,7 +255,14 @@ def generar_pdf_pedido(pedido, tipo="COMPROBANTE_PENDIENTE"):
 
     tabla_productos = Table(
         filas_productos,
-        colWidths=[2.3 * inch, 1.7 * inch, 0.9 * inch, 0.9 * inch, 0.6 * inch, 1.1 * inch],
+        colWidths=[
+            2.3 * inch,
+            1.7 * inch,
+            0.9 * inch,
+            0.9 * inch,
+            0.6 * inch,
+            1.1 * inch,
+        ],
     )
     tabla_productos.setStyle(
         TableStyle(
@@ -260,7 +270,12 @@ def generar_pdf_pedido(pedido, tipo="COMPROBANTE_PENDIENTE"):
                 ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#8a2be2")),
                 ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
                 ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e5e7eb")),
-                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#faf5ff")]),
+                (
+                    "ROWBACKGROUNDS",
+                    (0, 1),
+                    (-1, -1),
+                    [colors.white, colors.HexColor("#faf5ff")],
+                ),
                 ("PADDING", (0, 0), (-1, -1), 6),
             ]
         )
@@ -271,9 +286,21 @@ def generar_pdf_pedido(pedido, tipo="COMPROBANTE_PENDIENTE"):
     # 4. Resumen de Totales
     datos_totales = [
         [
-            Paragraph("<font size=7 color='#6b7280'>* Precios unitarios incluyen peso y embalaje protector por formato.</font>", estilo_normal),
-            Paragraph(f"<b>TOTAL A PAGAR:</b>", estilo_celda_derecha),
-            Paragraph(f"<b>${pedido.total:.2f}</b>", ParagraphStyle("TotalGrande", parent=estilo_negrita, fontSize=11, textColor=colors.HexColor("#008f39"), alignment=2)),
+            Paragraph(
+                "<font size=7 color='#6b7280'>* Precios unitarios incluyen peso y embalaje protector por formato.</font>",
+                estilo_normal,
+            ),
+            Paragraph("<b>TOTAL A PAGAR:</b>", estilo_celda_derecha),
+            Paragraph(
+                f"<b>${pedido.total:.2f}</b>",
+                ParagraphStyle(
+                    "TotalGrande",
+                    parent=estilo_negrita,
+                    fontSize=11,
+                    textColor=colors.HexColor("#008f39"),
+                    alignment=2,
+                ),
+            ),
         ]
     ]
 
@@ -302,7 +329,23 @@ def generar_pdf_pedido(pedido, tipo="COMPROBANTE_PENDIENTE"):
             "El pedido ha sido formalmente <b>APROBADO</b> y el stock físico reservado para despacho inmediato."
         )
 
-    tabla_aviso = Table([[Paragraph(aviso_texto, ParagraphStyle("Aviso", parent=estilo_normal, fontSize=7.5, leading=10, textColor=colors.HexColor("#4b5563")))]], colWidths=[7.5 * inch])
+    tabla_aviso = Table(
+        [
+            [
+                Paragraph(
+                    aviso_texto,
+                    ParagraphStyle(
+                        "Aviso",
+                        parent=estilo_normal,
+                        fontSize=7.5,
+                        leading=10,
+                        textColor=colors.HexColor("#4b5563"),
+                    ),
+                )
+            ]
+        ],
+        colWidths=[7.5 * inch],
+    )
     tabla_aviso.setStyle(
         TableStyle(
             [

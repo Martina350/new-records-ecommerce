@@ -54,7 +54,7 @@ El sistema cuenta con una arquitectura relacional sólida respaldada por procedi
 
 ```text
 new-records-ecommerce/
-├── app.py                      # Aplicación Flask principal y rutas
+├── app.py                      # Fábrica create_app(), errores, contexto y CLI
 ├── auth.py                     # Decoradores de autenticación y helpers de sesión
 ├── backup_manager.py           # Gestor y orquestador de respaldos pg_dump
 ├── config.py                   # Configuración y variables de entorno
@@ -64,7 +64,18 @@ new-records-ecommerce/
 ├── models.py                   # Modelos de datos y herencia polimórfica SQLAlchemy
 ├── payments.py                 # Lógica de métodos de pago y verificación por PIN
 ├── pdf_generator.py            # Generador de comprobantes y facturas en PDF
-├── services.py                 # Capa de servicios y lógica analítica de negocio
+├── report_repository.py        # Acceso único a las consultas SQL analíticas
+├── services.py                 # Servicios y transacciones de negocio
+├── validators.py               # Validadores compartidos por los Blueprints
+├── extensions.py               # CSRF y Flask-Migrate sin acoplar a la app
+├── routes/                     # Blueprints organizados por dominio
+│   ├── auth.py
+│   ├── catalogo.py
+│   ├── carrito.py
+│   ├── pagos.py
+│   ├── pedidos.py
+│   └── admin.py
+├── alembic/                    # Historial versionado de migraciones PostgreSQL
 ├── database/                   # Scripts SQL de esquema, reglas, procedimientos y roles
 │   ├── reports.sql             # Consultas analíticas de reportes
 │   ├── roles_seguridad.sql     # Roles de mínimo privilegio PostgreSQL
@@ -79,10 +90,27 @@ new-records-ecommerce/
 │   ├── MODELO_ENTIDAD_RELACION.md
 │   ├── REGLAS_NEGOCIO.md
 │   └── SEGURIDAD_Y_RESPALDOS.md
-├── static/                     # CSS, JavaScript e imágenes estáticas
+├── static/css/                 # CSS modular por área funcional
+│   ├── styles.css              # Punto de entrada y orden de importación
+│   ├── base.css
+│   ├── catalogo.css
+│   ├── carrito-checkout.css
+│   ├── pedidos-pagos.css
+│   ├── admin.css
+│   └── admin-formularios.css
+├── pyproject.toml              # Configuración de Black, Ruff y pytest
 ├── templates/                  # Plantillas Jinja2 organizadas por módulo
 └── tests/                      # Suite completa de pruebas automatizadas
 ```
+
+---
+
+### Documentación del diseño
+
+- [Modelo entidad-relación y normalización](docs/MODELO_ENTIDAD_RELACION.md)
+- [Diagrama UML de clases](docs/DIAGRAMA_CLASES.md)
+- [Diccionario de datos](docs/DICCIONARIO_DATOS.md)
+- [Reglas de negocio](docs/REGLAS_NEGOCIO.md)
 
 ---
 
@@ -161,7 +189,17 @@ python init_db.py
 
 `init_db.py` se conecta como `new_records_admin`. Flask utiliza
 `new_records_app`, que no es propietario de las tablas, y `pg_dump` utiliza
-`new_records_backup`, que solo tiene permisos de lectura.
+`new_records_backup`, que solo tiene permisos de lectura. El script ejecuta las
+migraciones Alembic pendientes, instala las reglas PostgreSQL y carga los datos
+iniciales de forma idempotente. Si detecta una instalación anterior sin
+`alembic_version`, adopta el esquema existente sin eliminar información.
+
+Para cambios de esquema posteriores:
+
+```powershell
+python -m flask --app app db migrate --directory alembic -m "descripcion"
+python -m flask --app app db upgrade --directory alembic
+```
 
 ### 6. Iniciar el Servidor de Desarrollo
 
@@ -183,6 +221,24 @@ Para ejecutar todas las pruebas:
 ```powershell
 python -m pytest -v
 ```
+
+Validar formato y calidad antes de crear un commit:
+
+```powershell
+python -m black --check .
+python -m ruff check .
+```
+
+Para aplicar formato automáticamente:
+
+```powershell
+python -m black .
+python -m ruff check . --fix
+```
+
+El workflow [`.github/workflows/tests.yml`](.github/workflows/tests.yml) repite
+estas validaciones en cada Pull Request hacia `main`, inicializa PostgreSQL en
+un servicio aislado y ejecuta también las pruebas reales de roles y restauración.
 
 Después de configurar los roles, ejecutar también la auditoría de privilegios:
 

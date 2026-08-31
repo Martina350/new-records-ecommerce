@@ -73,9 +73,7 @@ def test_fechas_de_creacion_tienen_default_en_postgresql():
         inspector = inspect(db.engine)
         for tabla, columna in columnas_esperadas:
             definicion = next(
-                item
-                for item in inspector.get_columns(tabla)
-                if item["name"] == columna
+                item for item in inspector.get_columns(tabla) if item["name"] == columna
             )
             assert definicion["default"] is not None
 

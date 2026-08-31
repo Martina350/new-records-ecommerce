@@ -6,8 +6,17 @@ from pathlib import Path
 from app import app
 from models import Disco, Usuario
 
-
 RAIZ_PROYECTO = Path(__file__).resolve().parent.parent
+
+
+def cargar_estilos_modulares():
+    """Concatena los módulos CSS en el mismo orden declarado por styles.css."""
+    directorio = RAIZ_PROYECTO / "static" / "css"
+    entrada = (directorio / "styles.css").read_text(encoding="utf-8")
+    modulos = re.findall(r'@import url\("([^"]+)"\)', entrada)
+    return "\n".join(
+        (directorio / modulo).read_text(encoding="utf-8") for modulo in modulos
+    )
 
 
 def test_base_activa_navegacion_parcial_con_indicador(client):
@@ -62,9 +71,7 @@ def test_accion_post_htmx_no_fuerza_recarga_completa(client):
 
 
 def test_recursos_contienen_respaldo_oscuro_y_reinicializacion():
-    estilos = (RAIZ_PROYECTO / "static" / "css" / "styles.css").read_text(
-        encoding="utf-8"
-    )
+    estilos = cargar_estilos_modulares()
     javascript = (RAIZ_PROYECTO / "static" / "js" / "script.js").read_text(
         encoding="utf-8"
     )
@@ -82,9 +89,7 @@ def test_recursos_contienen_respaldo_oscuro_y_reinicializacion():
 
 
 def test_submenu_admin_permanece_visible_al_expandirse():
-    estilos = (RAIZ_PROYECTO / "static" / "css" / "styles.css").read_text(
-        encoding="utf-8"
-    )
+    estilos = cargar_estilos_modulares()
 
     regla_expandida = re.search(
         r"\.sidebar:hover \.submodulo-sidebar\.abierto > \.sublista-sidebar,\s*"
@@ -101,9 +106,7 @@ def test_submenu_admin_permanece_visible_al_expandirse():
 
 
 def test_badge_formato_solo_es_absoluto_sobre_portadas():
-    estilos = (RAIZ_PROYECTO / "static" / "css" / "styles.css").read_text(
-        encoding="utf-8"
-    )
+    estilos = cargar_estilos_modulares()
 
     badge_general = re.search(
         r"\.badge-formato-tarjeta\s*\{(?P<declaraciones>[^}]*)\}", estilos

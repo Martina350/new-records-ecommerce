@@ -3,10 +3,22 @@
 import os
 import re
 import secrets
+
 from sqlalchemy import text
+
 from app import app
-from models import CD, Categoria, Disco, Factura, MetodoPago, Pedido, Usuario, Vinilo, db
+from models import (
+    Categoria,
+    Disco,
+    Factura,
+    MetodoPago,
+    Pedido,
+    Usuario,
+    Vinilo,
+    db,
+)
 from payments import crear_verificacion, verificar_pin
+
 
 def pass_admin():
     return os.environ["ADMIN_PASSWORD"]
@@ -50,6 +62,7 @@ def obtener_o_crear_tarjeta_verificada(usuario_id):
 
 
 # ── Tests de control de acceso por roles ────────────────────────────────────
+
 
 def test_rutas_admin_restringidas_a_clientes(client):
     """Los clientes comunes reciben 403 al intentar acceder a rutas administrativas."""
@@ -102,6 +115,7 @@ def test_procedimiento_aprobacion_instalado():
 
 
 # ── Tests de CRUD de Discos ──────────────────────────────────────────────────
+
 
 def test_generador_codigos_discos_instalado():
     """La reserva de códigos debe ejecutarse dentro de PostgreSQL."""
@@ -291,14 +305,18 @@ def test_crud_disco_desactivar_reactivar(client):
             disco_id = disco.id
 
         # Desactivar
-        resp_desact = client.post(f"/admin/discos/{disco_id}/desactivar", follow_redirects=True)
+        resp_desact = client.post(
+            f"/admin/discos/{disco_id}/desactivar", follow_redirects=True
+        )
         assert resp_desact.status_code == 200
 
         with app.app_context():
             assert db.session.get(Disco, disco_id).activo is False
 
         # Reactivar
-        resp_react = client.post(f"/admin/discos/{disco_id}/reactivar", follow_redirects=True)
+        resp_react = client.post(
+            f"/admin/discos/{disco_id}/reactivar", follow_redirects=True
+        )
         assert resp_react.status_code == 200
 
         with app.app_context():
@@ -306,6 +324,7 @@ def test_crud_disco_desactivar_reactivar(client):
 
 
 # ── Tests de CRUD de Categorías ──────────────────────────────────────────────
+
 
 def test_crud_categoria_crear_y_desactivar(client):
     with client:
@@ -378,10 +397,13 @@ def test_categoria_con_discos_exige_confirmacion_y_desactiva_en_cascada(client):
         assert respuesta_confirmada.status_code == 200
         with app.app_context():
             assert db.session.get(Categoria, categoria_id).activo is False
-            assert Disco.query.filter(Disco.id.in_(discos_ids), Disco.activo).count() == 0
+            assert (
+                Disco.query.filter(Disco.id.in_(discos_ids), Disco.activo).count() == 0
+            )
 
 
 # ── Tests de Aprobación y Rechazo de Pedidos ─────────────────────────────────
+
 
 def test_admin_aprobar_pedido_descuenta_stock(client):
     with client:
@@ -407,7 +429,11 @@ def test_admin_aprobar_pedido_descuenta_stock(client):
         assert "/pedidos/NR-" in resp_check.headers["Location"]
 
         with app.app_context():
-            pedido = Pedido.query.filter_by(cliente_id=usuario_id, estado="PENDIENTE").order_by(Pedido.id.desc()).first()
+            pedido = (
+                Pedido.query.filter_by(cliente_id=usuario_id, estado="PENDIENTE")
+                .order_by(Pedido.id.desc())
+                .first()
+            )
             assert pedido.detalles[0].cantidad == 2
             numero_pedido = pedido.numero
 
@@ -416,7 +442,9 @@ def test_admin_aprobar_pedido_descuenta_stock(client):
 
         # 2. El administrador aprueba el pedido
         autenticar_admin(client)
-        resp_aprobar = client.post(f"/admin/pedidos/{numero_pedido}/aprobar", follow_redirects=True)
+        resp_aprobar = client.post(
+            f"/admin/pedidos/{numero_pedido}/aprobar", follow_redirects=True
+        )
         assert resp_aprobar.status_code == 200
         assert "aprobado exitosamente" in resp_aprobar.data.decode("utf-8")
 
@@ -433,7 +461,9 @@ def test_admin_aprobar_pedido_descuenta_stock(client):
             assert cd_actualizado.stock == stock_inicial - 2
 
             # Factura oficial generada
-            factura = Factura.query.filter_by(pedido_id=p_actualizado.id, tipo="FACTURA_FINAL").first()
+            factura = Factura.query.filter_by(
+                pedido_id=p_actualizado.id, tipo="FACTURA_FINAL"
+            ).first()
             assert factura is not None
 
             stock_tras_aprobacion = cd_actualizado.stock
@@ -475,7 +505,11 @@ def test_admin_rechazar_pedido_con_motivo(client):
         )
 
         with app.app_context():
-            pedido = Pedido.query.filter_by(cliente_id=usuario_id, estado="PENDIENTE").order_by(Pedido.id.desc()).first()
+            pedido = (
+                Pedido.query.filter_by(cliente_id=usuario_id, estado="PENDIENTE")
+                .order_by(Pedido.id.desc())
+                .first()
+            )
             numero_pedido = pedido.numero
 
         # Cerrar sesión del cliente
@@ -506,9 +540,9 @@ def test_aprobacion_revierte_stock_si_falla_factura(client, monkeypatch):
     with client:
         autenticar_cliente(client)
         with app.app_context():
-            usuario_id = Usuario.query.filter_by(
-                email="cliente@newrecords.local"
-            ).first().id
+            usuario_id = (
+                Usuario.query.filter_by(email="cliente@newrecords.local").first().id
+            )
             tarjeta_id = obtener_o_crear_tarjeta_verificada(usuario_id).id
             disco = Disco.query.filter_by(codigo="NR-POP-001").first()
             disco_id = disco.id
@@ -541,9 +575,12 @@ def test_aprobacion_revierte_stock_si_falla_factura(client, monkeypatch):
             assert pedido.estado == "PENDIENTE"
             assert pedido.transaccion_pago.estado == "PENDIENTE"
             assert db.session.get(Disco, disco_id).stock == stock_inicial
-            assert Factura.query.filter_by(
-                pedido_id=pedido.id, tipo="FACTURA_FINAL"
-            ).first() is None
+            assert (
+                Factura.query.filter_by(
+                    pedido_id=pedido.id, tipo="FACTURA_FINAL"
+                ).first()
+                is None
+            )
 
 
 def test_admin_aprobar_falla_sin_stock(client):
@@ -567,7 +604,11 @@ def test_admin_aprobar_falla_sin_stock(client):
         )
 
         with app.app_context():
-            pedido = Pedido.query.filter_by(cliente_id=usuario_id, estado="PENDIENTE").order_by(Pedido.id.desc()).first()
+            pedido = (
+                Pedido.query.filter_by(cliente_id=usuario_id, estado="PENDIENTE")
+                .order_by(Pedido.id.desc())
+                .first()
+            )
             numero_pedido = pedido.numero
             # Forzar stock a 0 antes de la aprobación
             cd_obj = db.session.get(Disco, cd_id)
@@ -579,7 +620,9 @@ def test_admin_aprobar_falla_sin_stock(client):
 
         # El admin intenta aprobar
         autenticar_admin(client)
-        resp = client.post(f"/admin/pedidos/{numero_pedido}/aprobar", follow_redirects=True)
+        resp = client.post(
+            f"/admin/pedidos/{numero_pedido}/aprobar", follow_redirects=True
+        )
         assert resp.status_code == 200
         assert "No hay stock suficiente" in resp.data.decode("utf-8")
 

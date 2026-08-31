@@ -30,7 +30,7 @@
       </div>
 
       <div class="admin-cabecera-acciones">
-        <a class="boton boton-secundario" href="{{ url_for('admin_discos_lista') }}">
+        <a class="boton boton-secundario" href="{{ url_for('admin.admin_discos_lista') }}">
           <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
           <span>Volver al Catálogo</span>
         </a>
@@ -287,7 +287,7 @@
             <span class="material-symbols-outlined" aria-hidden="true">save</span>
             <span>{% if disco %}Guardar Cambios{% else %}Registrar Disco{% endif %}</span>
           </button>
-          <a class="boton boton-secundario boton-cancelar-admin" href="{{ url_for('admin_discos_lista') }}">
+          <a class="boton boton-secundario boton-cancelar-admin" href="{{ url_for('admin.admin_discos_lista') }}">
             <span class="material-symbols-outlined" aria-hidden="true">cancel</span>
             <span>Cancelar</span>
           </a>

@@ -14,7 +14,7 @@
 ## `categorias`
 
 - `id`: PK entera.
-- `nombre`: nombre del género, obligatorio y único.
+- `nombre`: nombre del género, obligatorio, único y de 2 a 80 caracteres sin contar espacios laterales.
 - `slug`: identificador para URL, obligatorio, único e indexado.
 - `prefijo_codigo`: prefijo único de 3 a 5 letras mayúsculas o números usado para generar los SKU de sus discos.
 - `descripcion`: explicación del género.
@@ -27,9 +27,9 @@
 - `id`: PK entera.
 - `categoria_id`: FK obligatoria hacia `categorias`, con eliminación restrictiva.
 - `codigo`: SKU obligatorio, único e indexado, generado en PostgreSQL con el formato `NR-PREFIJO-NÚMERO`.
-- `album`: nombre del álbum obligatorio.
-- `artista`: artista obligatorio e indexado.
-- `descripcion`: información comercial obligatoria.
+- `album`: nombre del álbum obligatorio, no vacío y de máximo 150 caracteres.
+- `artista`: artista obligatorio, no vacío, de máximo 120 caracteres e indexado.
+- `descripcion`: información comercial obligatoria y no vacía.
 - `precio_base`: valor decimal estrictamente positivo.
 - `stock`: entero no negativo, inicialmente cero.
 - `formato`: discriminador obligatorio limitado a `CD` o `VINILO`.
@@ -53,7 +53,7 @@
 - `token`: referencia simulada o del proveedor, obligatoria y única.
 - `marca`: marca comercial de la tarjeta.
 - `ultimos4`: exactamente cuatro dígitos; nunca contiene el número completo.
-- `titular`: nombre impreso o asociado a la tarjeta.
+- `titular`: nombre impreso o asociado a la tarjeta, entre 3 y 120 caracteres.
 - `mes_vencimiento`: entero entre 1 y 12.
 - `anio_vencimiento`: entero entre 2020 y 2100; un trigger exige que la tarjeta siga vigente y no supere veinte años desde la fecha actual.
 - `predeterminado`: indica si se precarga en checkout.
@@ -67,7 +67,7 @@
 - `token_verificacion`: identificador temporal único.
 - `pin_hash`: hash del PIN, nunca el código original.
 - `token_tarjeta`: token temporal; no contiene PAN ni CVV.
-- `marca`, `ultimos4`, `titular`, `mes_vencimiento`, `anio_vencimiento`: datos enmascarados pendientes de verificación.
+- `marca`, `ultimos4`, `titular`, `mes_vencimiento`, `anio_vencimiento`: datos enmascarados pendientes de verificación; el titular admite entre 3 y 120 caracteres.
 - `fecha_creacion`, `fecha_expiracion`: delimitan la vigencia; la fecha de creación tiene valor predeterminado en PostgreSQL.
 - `intentos`: entero entre 0 y 3, inicialmente cero.
 - `verificada`: confirma que el PIN fue utilizado correctamente.

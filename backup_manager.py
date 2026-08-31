@@ -5,14 +5,13 @@ import re
 import shutil
 import subprocess
 import tempfile
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
 import psycopg2
 
 from config import Config
-
 
 RUTA_BACKUPS = Path(__file__).resolve().parent / "backups"
 PREFIJO_DB_PRUEBA = "new_records_restore_check_"
@@ -26,7 +25,7 @@ def obtener_carpeta_backups() -> Path:
 
 def generar_nombre_backup(extension: str = "sql") -> str:
     """Genera un nombre descriptivo con timestamp UTC para el respaldo."""
-    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S_%f")
+    timestamp = datetime.now(UTC).strftime("%Y%m%d_%H%M%S_%f")
     return f"new_records_backup_{timestamp}.{extension.lstrip('.')}"
 
 
@@ -69,7 +68,9 @@ def buscar_ejecutable_postgresql(nombre: str) -> str | None:
     candidatos.extend(ruta / ejecutable for ruta in _directorios_postgresql_windows())
     if os.name == "nt":
         for version in ("18", "17", "16", "15"):
-            candidatos.append(Path(rf"C:\Program Files\PostgreSQL\{version}\bin") / ejecutable)
+            candidatos.append(
+                Path(rf"C:\Program Files\PostgreSQL\{version}\bin") / ejecutable
+            )
 
     for candidato in candidatos:
         if candidato.is_file():
@@ -108,14 +109,20 @@ def ejecutar_backup_pg_dump(
 
     comando = [
         pg_dump_bin,
-        "-h", Config.DB_HOST,
-        "-p", str(Config.DB_PORT),
-        "-U", Config.DB_BACKUP_USER,
-        "-d", Config.DB_NAME,
-        "-F", "p" if formato == "plain" else "c",
+        "-h",
+        Config.DB_HOST,
+        "-p",
+        str(Config.DB_PORT),
+        "-U",
+        Config.DB_BACKUP_USER,
+        "-d",
+        Config.DB_NAME,
+        "-F",
+        "p" if formato == "plain" else "c",
         "--no-owner",
         "--no-privileges",
-        "-f", str(ruta_destino),
+        "-f",
+        str(ruta_destino),
     ]
 
     try:
@@ -154,31 +161,52 @@ def verificar_restauracion_completa() -> tuple[bool, str, dict]:
         return False, "No se pudo generar un destino temporal seguro.", {}
 
     entorno_admin = _entorno_password(Config.DB_ADMIN_PASSWORD)
-    base_comando = ["-h", Config.DB_HOST, "-p", str(Config.DB_PORT), "-U", Config.DB_ADMIN_USER]
+    base_comando = [
+        "-h",
+        Config.DB_HOST,
+        "-p",
+        str(Config.DB_PORT),
+        "-U",
+        Config.DB_ADMIN_USER,
+    ]
     creada = False
 
     try:
         with tempfile.TemporaryDirectory(prefix="new_records_restore_") as temporal:
             exito, ruta_dump, _ = ejecutar_backup_pg_dump("custom", Path(temporal))
             if not exito:
-                return False, f"No se pudo crear el dump de verificación: {ruta_dump}", {}
+                return (
+                    False,
+                    f"No se pudo crear el dump de verificación: {ruta_dump}",
+                    {},
+                )
 
             crear = subprocess.run(
-                [herramientas["createdb"], *base_comando, "--maintenance-db=postgres", db_temporal],
+                [
+                    herramientas["createdb"],
+                    *base_comando,
+                    "--maintenance-db=postgres",
+                    db_temporal,
+                ],
                 env=entorno_admin,
                 capture_output=True,
                 text=True,
                 check=False,
             )
             if crear.returncode != 0:
-                return False, (crear.stderr or "No se pudo crear la base temporal.").strip(), {}
+                return (
+                    False,
+                    (crear.stderr or "No se pudo crear la base temporal.").strip(),
+                    {},
+                )
             creada = True
 
             restaurar = subprocess.run(
                 [
                     herramientas["pg_restore"],
                     *base_comando,
-                    "--dbname", db_temporal,
+                    "--dbname",
+                    db_temporal,
                     "--exit-on-error",
                     "--no-owner",
                     "--no-privileges",
@@ -214,12 +242,20 @@ def verificar_restauracion_completa() -> tuple[bool, str, dict]:
                 conexion.close()
 
             if tablas < 9 or categorias < 1 or discos < 1:
-                return False, "La restauración no contiene el esquema o los datos mínimos.", {}
-            return True, "Restauración completa verificada correctamente.", {
-                "tablas": tablas,
-                "categorias": categorias,
-                "discos": discos,
-            }
+                return (
+                    False,
+                    "La restauración no contiene el esquema o los datos mínimos.",
+                    {},
+                )
+            return (
+                True,
+                "Restauración completa verificada correctamente.",
+                {
+                    "tablas": tablas,
+                    "categorias": categorias,
+                    "discos": discos,
+                },
+            )
     finally:
         if creada:
             subprocess.run(
@@ -241,7 +277,9 @@ def listar_backups_locales() -> list[dict]:
     """Retorna metadatos de respaldos disponibles en la carpeta local."""
     carpeta = obtener_carpeta_backups()
     archivos = []
-    for elem in sorted(carpeta.iterdir(), key=lambda p: p.stat().st_mtime, reverse=True):
+    for elem in sorted(
+        carpeta.iterdir(), key=lambda p: p.stat().st_mtime, reverse=True
+    ):
         if elem.is_file() and elem.name != ".gitkeep":
             archivos.append(
                 {
@@ -249,7 +287,7 @@ def listar_backups_locales() -> list[dict]:
                     "ruta": str(elem),
                     "tamano_bytes": elem.stat().st_size,
                     "tamano_kb": round(elem.stat().st_size / 1024, 2),
-                    "fecha_creacion": datetime.fromtimestamp(elem.stat().st_mtime, timezone.utc),
+                    "fecha_creacion": datetime.fromtimestamp(elem.stat().st_mtime, UTC),
                     "formato": elem.suffix.lstrip(".").upper(),
                 }
             )

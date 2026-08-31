@@ -222,13 +222,13 @@
           </div>
 
           <div class="pedido-documentos-grid-botones">
-            <a class="boton boton-secundario resplandor-neon boton-descarga-doc" href="{{ url_for('descargar_comprobante', numero=pedido.numero) }}" target="_blank">
+            <a class="boton boton-secundario resplandor-neon boton-descarga-doc" href="{{ url_for('pedidos.descargar_comprobante', numero=pedido.numero) }}" target="_blank">
               <span class="material-symbols-outlined icono-doc-btn" aria-hidden="true">download</span>
               <span>Descargar Comprobante (PDF)</span>
             </a>
 
             {% if pedido.estado == "APROBADO" %}
-              <a class="boton boton-destacado resplandor-neon boton-descarga-doc" href="{{ url_for('descargar_factura', numero=pedido.numero) }}" target="_blank">
+              <a class="boton boton-destacado resplandor-neon boton-descarga-doc" href="{{ url_for('pedidos.descargar_factura', numero=pedido.numero) }}" target="_blank">
                 <span class="material-symbols-outlined icono-doc-btn" aria-hidden="true">receipt_long</span>
                 <span>Descargar Factura Oficial (PDF)</span>
               </a>
@@ -243,11 +243,11 @@
 
         <!-- Barra de Navegación Inferior -->
         <div class="pedido-acciones-pie-wide">
-          <a class="boton boton-secundario" href="{{ url_for('lista_pedidos') }}">
+          <a class="boton boton-secundario" href="{{ url_for('pedidos.lista_pedidos') }}">
             <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
             <span>Volver a Mis Pedidos</span>
           </a>
-          <a class="boton boton-principal" href="{{ url_for('productos') }}">
+          <a class="boton boton-principal" href="{{ url_for('catalogo.productos') }}">
             <span class="material-symbols-outlined" aria-hidden="true">album</span>
             <span>Seguir Explorando el Catálogo</span>
           </a>

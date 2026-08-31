@@ -9,10 +9,17 @@ Verifica el ciclo de vida completo de New Records:
 
 import os
 import secrets
-from decimal import Decimal
 
 from app import app
-from models import CD, Categoria, Disco, Factura, MetodoPago, Pedido, Usuario, VerificacionTarjeta, Vinilo, db
+from models import (
+    Categoria,
+    Disco,
+    Factura,
+    MetodoPago,
+    Pedido,
+    Usuario,
+    db,
+)
 from payments import crear_verificacion
 
 
@@ -73,8 +80,12 @@ def test_flujo_completo_e2e_compra_aprobacion_factura_y_reportes(client):
             cliente_id = cliente_obj.id
 
         # Agregar CD y Vinilo al carrito
-        client.post(f"/carrito/agregar/{cd_id}", data={"cantidad": 1}, follow_redirects=True)
-        client.post(f"/carrito/agregar/{vinilo_id}", data={"cantidad": 1}, follow_redirects=True)
+        client.post(
+            f"/carrito/agregar/{cd_id}", data={"cantidad": 1}, follow_redirects=True
+        )
+        client.post(
+            f"/carrito/agregar/{vinilo_id}", data={"cantidad": 1}, follow_redirects=True
+        )
 
         resp_carrito = client.get("/carrito")
         assert resp_carrito.status_code == 200
@@ -101,7 +112,9 @@ def test_flujo_completo_e2e_compra_aprobacion_factura_y_reportes(client):
         assert resp_pin.status_code == 200
 
         with app.app_context():
-            metodo = MetodoPago.query.filter_by(usuario_id=cliente_id, activo=True).first()
+            metodo = MetodoPago.query.filter_by(
+                usuario_id=cliente_id, activo=True
+            ).first()
             assert metodo is not None
             metodo_id = metodo.id
 
@@ -114,13 +127,19 @@ def test_flujo_completo_e2e_compra_aprobacion_factura_y_reportes(client):
         assert resp_checkout.status_code == 200
 
         with app.app_context():
-            pedido_creado = Pedido.query.filter_by(cliente_id=cliente_id).order_by(Pedido.id.desc()).first()
+            pedido_creado = (
+                Pedido.query.filter_by(cliente_id=cliente_id)
+                .order_by(Pedido.id.desc())
+                .first()
+            )
             assert pedido_creado is not None
             assert pedido_creado.estado == "PENDIENTE"
             numero_pedido = pedido_creado.numero
 
             # Comprobar que existe el comprobante inicial
-            comprobante = Factura.query.filter_by(pedido_id=pedido_creado.id, tipo="COMPROBANTE_PENDIENTE").first()
+            comprobante = Factura.query.filter_by(
+                pedido_id=pedido_creado.id, tipo="COMPROBANTE_PENDIENTE"
+            ).first()
             assert comprobante is not None
 
         # Descargar comprobante en PDF como cliente
@@ -143,7 +162,9 @@ def test_flujo_completo_e2e_compra_aprobacion_factura_y_reportes(client):
         assert resp_admin_det.status_code == 200
 
         # Aprobar pedido
-        resp_aprobar = client.post(f"/admin/pedidos/{numero_pedido}/aprobar", follow_redirects=True)
+        resp_aprobar = client.post(
+            f"/admin/pedidos/{numero_pedido}/aprobar", follow_redirects=True
+        )
         assert resp_aprobar.status_code == 200
 
         with app.app_context():
@@ -158,7 +179,9 @@ def test_flujo_completo_e2e_compra_aprobacion_factura_y_reportes(client):
             assert vinilo_actual.stock == stock_inicial_vinilo - 1
 
             # Verificar factura final emitida
-            factura_final = Factura.query.filter_by(pedido_id=ped_aprobado.id, tipo="FACTURA_FINAL").first()
+            factura_final = Factura.query.filter_by(
+                pedido_id=ped_aprobado.id, tipo="FACTURA_FINAL"
+            ).first()
             assert factura_final is not None
 
         # ── 7. Administrador consulta reportes analíticos de ventas ────────────────
@@ -186,7 +209,12 @@ def test_flujo_rechazo_pedido_con_motivo_no_altera_stock(client):
         # 1. Crear cliente y pedido
         client.post(
             "/registro",
-            data={"nombre": "Cliente Rechazo", "email": email_cliente, "password": password, "confirmar_password": password},
+            data={
+                "nombre": "Cliente Rechazo",
+                "email": email_cliente,
+                "password": password,
+                "confirmar_password": password,
+            },
             follow_redirects=True,
         )
         autenticar_usuario(client, email_cliente, password)
@@ -211,17 +239,33 @@ def test_flujo_rechazo_pedido_con_motivo_no_altera_stock(client):
             )
             token_verif = verificacion.token_verificacion
 
-        client.post(f"/pago/verificar/{token_verif}", data={"pin": pin_plano}, follow_redirects=True)
+        client.post(
+            f"/pago/verificar/{token_verif}",
+            data={"pin": pin_plano},
+            follow_redirects=True,
+        )
 
         with app.app_context():
-            metodo = MetodoPago.query.filter_by(usuario_id=cliente_id, activo=True).first()
+            metodo = MetodoPago.query.filter_by(
+                usuario_id=cliente_id, activo=True
+            ).first()
             metodo_id = metodo.id
 
-        client.post(f"/carrito/agregar/{disco_id}", data={"cantidad": 2}, follow_redirects=True)
-        client.post("/checkout/confirmar", data={"metodo_pago_id": str(metodo_id)}, follow_redirects=True)
+        client.post(
+            f"/carrito/agregar/{disco_id}", data={"cantidad": 2}, follow_redirects=True
+        )
+        client.post(
+            "/checkout/confirmar",
+            data={"metodo_pago_id": str(metodo_id)},
+            follow_redirects=True,
+        )
 
         with app.app_context():
-            pedido = Pedido.query.filter_by(cliente_id=cliente_id).order_by(Pedido.id.desc()).first()
+            pedido = (
+                Pedido.query.filter_by(cliente_id=cliente_id)
+                .order_by(Pedido.id.desc())
+                .first()
+            )
             numero_ped = pedido.numero
 
         client.post("/logout", follow_redirects=True)
@@ -229,7 +273,11 @@ def test_flujo_rechazo_pedido_con_motivo_no_altera_stock(client):
         # 2. Administrador rechaza con motivo
         autenticar_usuario(client, "admin@newrecords.local", pass_admin())
         motivo = "Dirección de entrega fuera de la zona de cobertura"
-        resp_rechazo = client.post(f"/admin/pedidos/{numero_ped}/rechazar", data={"motivo": motivo}, follow_redirects=True)
+        resp_rechazo = client.post(
+            f"/admin/pedidos/{numero_ped}/rechazar",
+            data={"motivo": motivo},
+            follow_redirects=True,
+        )
         assert resp_rechazo.status_code == 200
 
         with app.app_context():

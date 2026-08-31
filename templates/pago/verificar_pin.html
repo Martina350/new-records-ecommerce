@@ -42,7 +42,7 @@
         </div>
 
         {% if intentos_restantes > 0 and not verificacion.verificada %}
-          <form class="formulario-contacto form-verificar-pin" action="{{ url_for('pago_verificar', token=token) }}" method="post">
+          <form class="formulario-contacto form-verificar-pin" action="{{ url_for('pagos.pago_verificar', token=token) }}" method="post">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="campo-formulario campo-pin">
               <label class="etiqueta-formulario" for="pin">Código PIN <span class="requerido">*</span></label>
@@ -78,11 +78,11 @@
         {% endif %}
 
         <div class="pin-acciones-extra">
-          <a class="boton boton-secundario btn-reintentar-pin" href="{{ url_for('pago_agregar') }}">
+          <a class="boton boton-secundario btn-reintentar-pin" href="{{ url_for('pagos.pago_agregar') }}">
             <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
             <span>Reintentar con nueva tarjeta</span>
           </a>
-          <a class="enlace-destacado enlace-volver-metodos" href="{{ url_for('pago_metodos') }}">
+          <a class="enlace-destacado enlace-volver-metodos" href="{{ url_for('pagos.pago_metodos') }}">
             Volver a mis métodos de pago
           </a>
         </div>

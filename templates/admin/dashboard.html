@@ -22,7 +22,7 @@
       </div>
 
       <div class="admin-cabecera-acciones">
-        <a class="boton boton-principal resplandor-neon" href="{{ url_for('admin_discos_nuevo') }}">
+        <a class="boton boton-principal resplandor-neon" href="{{ url_for('admin.admin_discos_nuevo') }}">
           <span class="material-symbols-outlined" aria-hidden="true">add_circle</span>
           <span>Nuevo Disco</span>
         </a>
@@ -74,21 +74,21 @@
 
     <!-- Accesos Directos a Módulos Administrativos -->
     <div class="admin-grid-modulos">
-      <a class="admin-tarjeta-modulo enlace-modulo" href="{{ url_for('admin_discos_lista') }}">
+      <a class="admin-tarjeta-modulo enlace-modulo" href="{{ url_for('admin.admin_discos_lista') }}">
         <span class="material-symbols-outlined admin-modulo-icono" aria-hidden="true">album</span>
         <h3>Gestión de Discos</h3>
         <p>Crear, editar, controlar stock físico y desactivar CD o Vinilos del catálogo.</p>
         <span class="badge-activo-admin">Administrar catálogo</span>
       </a>
 
-      <a class="admin-tarjeta-modulo enlace-modulo" href="{{ url_for('admin_categorias_lista') }}">
+      <a class="admin-tarjeta-modulo enlace-modulo" href="{{ url_for('admin.admin_categorias_lista') }}">
         <span class="material-symbols-outlined admin-modulo-icono" aria-hidden="true">category</span>
         <h3>Gestión de Categorías</h3>
         <p>Crear y editar géneros musicales y organizar el catálogo.</p>
         <span class="badge-activo-admin">Administrar géneros</span>
       </a>
 
-      <a class="admin-tarjeta-modulo enlace-modulo" href="{{ url_for('admin_pedidos_lista') }}">
+      <a class="admin-tarjeta-modulo enlace-modulo" href="{{ url_for('admin.admin_pedidos_lista') }}">
         <span class="material-symbols-outlined admin-modulo-icono" aria-hidden="true">shopping_cart_checkout</span>
         <h3>Bandeja de Pedidos</h3>
         <p>Revisar pedidos, confirmar ventas y controlar las existencias disponibles.</p>
@@ -101,7 +101,7 @@
         </span>
       </a>
 
-      <a class="admin-tarjeta-modulo enlace-modulo" href="{{ url_for('admin_reportes') }}">
+      <a class="admin-tarjeta-modulo enlace-modulo" href="{{ url_for('admin.admin_reportes') }}">
         <span class="material-symbols-outlined admin-modulo-icono" aria-hidden="true">monitoring</span>
         <h3>Reportes de Ventas</h3>
         <p>Analítica temporal, rankings de discos y cuota de ventas por género.</p>
@@ -117,7 +117,7 @@
             <span class="material-symbols-outlined" aria-hidden="true">history</span>
             <span>Últimos Pedidos Registrados</span>
           </h3>
-          <a class="enlace-admin-ver-todo" href="{{ url_for('admin_pedidos_lista') }}">
+          <a class="enlace-admin-ver-todo" href="{{ url_for('admin.admin_pedidos_lista') }}">
             <span>Ver todos los pedidos</span>
             <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
           </a>
@@ -149,7 +149,7 @@
                     </span>
                   </td>
                   <td data-label="Acción">
-                    <a class="boton boton-secundario boton-chico" href="{{ url_for('admin_pedido_detalle', numero=p.numero) }}">
+                    <a class="boton boton-secundario boton-chico" href="{{ url_for('admin.admin_pedido_detalle', numero=p.numero) }}">
                       <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
                       <span>Revisar</span>
                     </a>
@@ -163,7 +163,7 @@
         <!-- Vista Móvil: Cards compactos y clickables -->
         <div class="admin-pedidos-cards-movil-grid vista-movil-admin-pedidos">
           {% for p in ultimos_pedidos %}
-            <a class="admin-pedido-card-enlace" href="{{ url_for('admin_pedido_detalle', numero=p.numero) }}" aria-label="Ver pedido {{ p.numero }}">
+            <a class="admin-pedido-card-enlace" href="{{ url_for('admin.admin_pedido_detalle', numero=p.numero) }}" aria-label="Ver pedido {{ p.numero }}">
               <div class="admin-pedido-card-top">
                 <div class="admin-pedido-chip-codigo">
                   <span class="material-symbols-outlined icono-chip-pedido" aria-hidden="true">receipt_long</span>

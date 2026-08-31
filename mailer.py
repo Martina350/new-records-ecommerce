@@ -3,7 +3,6 @@
 from flask import current_app, has_app_context, has_request_context, url_for
 from flask_mail import Mail, Message
 
-
 mail = Mail()
 
 
@@ -36,14 +35,16 @@ def smtp_configurado():
         "MAIL_PASSWORD",
         "MAIL_DEFAULT_SENDER",
     )
-    return all(_es_valor_real(current_app.config.get(clave)) for clave in claves_requeridas)
+    return all(
+        _es_valor_real(current_app.config.get(clave)) for clave in claves_requeridas
+    )
 
 
 def _url_pedidos():
     """Genera el enlace al historial cuando existe una solicitud web activa."""
     if not has_request_context():
         return None
-    return url_for("lista_pedidos", _external=True)
+    return url_for("pedidos.lista_pedidos", _external=True)
 
 
 def _enviar_mensaje(asunto, destinatario, cuerpo, plantilla, **contexto):

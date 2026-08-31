@@ -1,6 +1,7 @@
 """Pruebas del sistema de autenticación, sesiones, roles y perfil de la Fase 4."""
 
 import os
+
 from flask import session
 
 from app import app
@@ -143,7 +144,9 @@ def test_login_rechaza_credenciales_invalidas_con_mensaje_generico(client):
     )
 
     assert respuesta.status_code == 200
-    assert b"Correo electr\xc3\xb3nico o contrase\xc3\xb1a incorrectos." in respuesta.data
+    assert (
+        b"Correo electr\xc3\xb3nico o contrase\xc3\xb1a incorrectos." in respuesta.data
+    )
 
 
 def test_logout_limpia_la_sesion(client):

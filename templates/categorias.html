@@ -39,7 +39,7 @@
                 <p class="tarjeta-categoria-descripcion">
                   {{ categoria.descripcion }}
                 </p>
-                <a class="boton boton-principal resplandor-neon" href="{{ url_for('productos', categoria=categoria.slug) }}">
+                <a class="boton boton-principal resplandor-neon" href="{{ url_for('catalogo.productos', categoria=categoria.slug) }}">
                   Ver discos
                   <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
                 </a>

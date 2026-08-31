@@ -6,6 +6,51 @@
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------
+-- 0. Restricciones de texto compartidas con la validación de formularios
+-- -----------------------------------------------------------------------------
+DO $$ BEGIN
+    ALTER TABLE categorias
+        ADD CONSTRAINT ck_categorias_nombre_valido
+        CHECK (char_length(btrim(nombre)) BETWEEN 2 AND 80);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+    ALTER TABLE discos
+        ADD CONSTRAINT ck_discos_album_valido
+        CHECK (char_length(btrim(album)) BETWEEN 1 AND 150);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+    ALTER TABLE discos
+        ADD CONSTRAINT ck_discos_artista_valido
+        CHECK (char_length(btrim(artista)) BETWEEN 1 AND 120);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+    ALTER TABLE discos
+        ADD CONSTRAINT ck_discos_descripcion_valida
+        CHECK (char_length(btrim(descripcion)) > 0);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+    ALTER TABLE metodos_pago
+        ADD CONSTRAINT ck_metodos_pago_titular_valido
+        CHECK (char_length(btrim(titular)) BETWEEN 3 AND 120);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+    ALTER TABLE verificaciones_tarjeta
+        ADD CONSTRAINT ck_verificaciones_titular_valido
+        CHECK (char_length(btrim(titular)) BETWEEN 3 AND 120);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+-- -----------------------------------------------------------------------------
 -- 1. Restricciones de Calidad en Catálogo de Discos
 -- -----------------------------------------------------------------------------
 ALTER TABLE discos

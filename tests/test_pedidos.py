@@ -3,12 +3,13 @@
 import os
 import secrets
 from pathlib import Path
+
 from flask import session
 
 from app import app
 from models import Disco, Factura, MetodoPago, Pedido, Usuario, db
 from payments import crear_verificacion, verificar_pin
-from services import procesar_checkout
+
 
 def pass_cliente():
     return os.environ["CLIENTE_DEMO_PASSWORD"]
@@ -43,9 +44,9 @@ def obtener_o_crear_tarjeta_verificada(usuario_id):
 def crear_pedido_cliente(client, codigo="NR-POP-001", cantidad=1):
     """Crea y retorna el número de un pedido propio dentro de la prueba actual."""
     with app.app_context():
-        usuario_id = Usuario.query.filter_by(
-            email="cliente@newrecords.local"
-        ).first().id
+        usuario_id = (
+            Usuario.query.filter_by(email="cliente@newrecords.local").first().id
+        )
         tarjeta_id = obtener_o_crear_tarjeta_verificada(usuario_id).id
         disco_id = Disco.query.filter_by(codigo=codigo).first().id
 
@@ -69,6 +70,7 @@ def crear_pedido_cliente(client, codigo="NR-POP-001", cantidad=1):
 
 # ── Tests de control de acceso ──────────────────────────────────────────────
 
+
 def test_pedidos_requiere_login(client):
     resp = client.get("/pedidos", follow_redirects=False)
     assert resp.status_code == 302
@@ -80,6 +82,7 @@ def test_pedidos_requiere_login(client):
 
 
 # ── Tests de creación y flujo de pedidos ────────────────────────────────────
+
 
 def test_crear_pedido_exitoso(client):
     with client:
@@ -110,11 +113,17 @@ def test_crear_pedido_exitoso(client):
         assert "/pedidos/NR-" in resp.headers["Location"]
 
         # Verificar que el carrito se vació
-        assert session.get("carrito") == {} or str(cd_id) not in session.get("carrito", {})
+        assert session.get("carrito") == {} or str(cd_id) not in session.get(
+            "carrito", {}
+        )
 
         # Verificar persistencia en base de datos
         with app.app_context():
-            pedido = Pedido.query.filter_by(cliente_id=usuario_id).order_by(Pedido.id.desc()).first()
+            pedido = (
+                Pedido.query.filter_by(cliente_id=usuario_id)
+                .order_by(Pedido.id.desc())
+                .first()
+            )
             assert pedido is not None
             assert pedido.estado == "PENDIENTE"
             assert pedido.total > 0
@@ -137,7 +146,9 @@ def test_formato_inmutable_detalles(client):
             usuario_id = usuario.id
             tarjeta = obtener_o_crear_tarjeta_verificada(usuario_id)
             tarjeta_id = tarjeta.id
-            vinilo = Disco.query.filter_by(codigo="NR-ROC-001").first()  # Dark Side of the Moon
+            vinilo = Disco.query.filter_by(
+                codigo="NR-ROC-001"
+            ).first()  # Dark Side of the Moon
             vinilo_id = vinilo.id
             precio_esperado = vinilo.precio_final()
 
@@ -151,7 +162,11 @@ def test_formato_inmutable_detalles(client):
         )
 
         with app.app_context():
-            pedido = Pedido.query.filter_by(cliente_id=usuario_id).order_by(Pedido.id.desc()).first()
+            pedido = (
+                Pedido.query.filter_by(cliente_id=usuario_id)
+                .order_by(Pedido.id.desc())
+                .first()
+            )
             detalle = pedido.detalles[0]
             assert detalle.album == "The Dark Side of the Moon"
             assert detalle.artista == "Pink Floyd"
@@ -195,16 +210,18 @@ def test_checkout_falla_con_tarjeta_ajena(client):
             follow_redirects=True,
         )
         assert resp.status_code == 200
-        assert "no es válido" in resp.data.decode("utf-8") or "no está disponible" in resp.data.decode("utf-8")
+        assert "no es válido" in resp.data.decode(
+            "utf-8"
+        ) or "no está disponible" in resp.data.decode("utf-8")
 
 
 def test_checkout_revierte_pedido_si_falla_el_comprobante(client, monkeypatch):
     with client:
         autenticar_cliente(client)
         with app.app_context():
-            usuario_id = Usuario.query.filter_by(
-                email="cliente@newrecords.local"
-            ).first().id
+            usuario_id = (
+                Usuario.query.filter_by(email="cliente@newrecords.local").first().id
+            )
             tarjeta_id = obtener_o_crear_tarjeta_verificada(usuario_id).id
             disco_id = Disco.query.filter_by(codigo="NR-POP-001").first().id
             pedidos_iniciales = Pedido.query.filter_by(cliente_id=usuario_id).count()
@@ -225,7 +242,10 @@ def test_checkout_revierte_pedido_si_falla_el_comprobante(client, monkeypatch):
         assert "error inesperado" in respuesta.data.decode("utf-8").lower()
         assert session["carrito"].get(str(disco_id)) == 1
         with app.app_context():
-            assert Pedido.query.filter_by(cliente_id=usuario_id).count() == pedidos_iniciales
+            assert (
+                Pedido.query.filter_by(cliente_id=usuario_id).count()
+                == pedidos_iniciales
+            )
 
 
 def test_ver_historial_pedidos_cliente(client):
@@ -256,7 +276,7 @@ def test_cliente_no_puede_ver_pedido_ajeno(client):
             admin = Usuario.query.filter_by(rol="administrador").first()
             tarjeta_admin = obtener_o_crear_tarjeta_verificada(admin.id)
             numero_pedido_admin = f"NR-ADM-{secrets.token_hex(4).upper()}"
-            
+
             # Crear un pedido para el administrador
             pedido_admin = Pedido(
                 numero=numero_pedido_admin,

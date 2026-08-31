@@ -12,7 +12,6 @@ from mailer import (
     smtp_configurado,
 )
 
-
 CONFIGURACION_VALIDA = {
     "MAIL_SERVER": "in-v3.mailjet.com",
     "MAIL_PORT": 587,
@@ -47,13 +46,19 @@ def test_configuracion_mailjet_completa_activa_el_envio():
 
 def test_pin_se_dirige_al_correo_del_cliente():
     with app.app_context():
-        with patch.dict(app.config, CONFIGURACION_VALIDA), patch.object(mail, "send") as enviar:
-            assert enviar_pin(
-                "cliente-real@example.org",
-                "Martina",
-                "123456",
-                "https://newrecords.example/pago/verificar/token",
-            ) is True
+        with (
+            patch.dict(app.config, CONFIGURACION_VALIDA),
+            patch.object(mail, "send") as enviar,
+        ):
+            assert (
+                enviar_pin(
+                    "cliente-real@example.org",
+                    "Martina",
+                    "123456",
+                    "https://newrecords.example/pago/verificar/token",
+                )
+                is True
+            )
 
             mensaje = enviar.call_args.args[0]
             assert mensaje.recipients == ["cliente-real@example.org"]
@@ -70,7 +75,10 @@ def test_confirmacion_de_pedido_se_dirige_al_cliente():
     )
 
     with app.app_context():
-        with patch.dict(app.config, CONFIGURACION_VALIDA), patch.object(mail, "send") as enviar:
+        with (
+            patch.dict(app.config, CONFIGURACION_VALIDA),
+            patch.object(mail, "send") as enviar,
+        ):
             assert notificar_creacion_pedido(pedido) is True
 
             mensaje = enviar.call_args.args[0]
@@ -89,7 +97,10 @@ def test_cambio_de_estado_utiliza_la_plantilla_correspondiente():
     )
 
     with app.app_context():
-        with patch.dict(app.config, CONFIGURACION_VALIDA), patch.object(mail, "send") as enviar:
+        with (
+            patch.dict(app.config, CONFIGURACION_VALIDA),
+            patch.object(mail, "send") as enviar,
+        ):
             assert notificar_cambio_estado(pedido) is True
             assert "APROBADO" in enviar.call_args.args[0].html
             assert "factura oficial" in enviar.call_args.args[0].html.lower()

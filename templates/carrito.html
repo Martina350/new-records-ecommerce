@@ -64,7 +64,7 @@
                         />
                       </div>
                       <div class="producto-detalles-texto">
-                        <a class="producto-album-enlace" href="{{ url_for('detalle_producto', codigo=item.disco.codigo) }}">
+                        <a class="producto-album-enlace" href="{{ url_for('catalogo.detalle_producto', codigo=item.disco.codigo) }}">
                           {{ item.disco.album }}
                         </a>
                         <div class="producto-submeta">
@@ -96,7 +96,7 @@
 
                   <!-- Columna 4: Control de Cantidad -->
                   <td class="celda-cantidad" data-label="Cantidad">
-                    <form class="form-cantidad-inline" action="{{ url_for('actualizar_carrito', disco_id=item.disco.id) }}" method="post">
+                    <form class="form-cantidad-inline" action="{{ url_for('carrito.actualizar_carrito', disco_id=item.disco.id) }}" method="post">
                       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                       <div class="input-cantidad-grupo">
                         <input 
@@ -121,7 +121,7 @@
 
                   <!-- Columna 6: Acciones -->
                   <td class="celda-acciones" data-label="Acciones">
-                    <form action="{{ url_for('eliminar_del_carrito', disco_id=item.disco.id) }}" method="post">
+                    <form action="{{ url_for('carrito.eliminar_del_carrito', disco_id=item.disco.id) }}" method="post">
                       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                       <button class="boton-eliminar-fila" type="submit" title="Eliminar {{ item.disco.album }} del carrito" aria-label="Eliminar {{ item.disco.album }}">
                         <span class="material-symbols-outlined" aria-hidden="true">delete</span>
@@ -137,12 +137,12 @@
         <!-- Barra Inferior de Acciones Integrada en la Misma Tarjeta -->
         <div class="carrito-barra-inferior-wide">
           <div class="barra-acciones-izq">
-            <a class="boton boton-secundario boton-chico" href="{{ url_for('productos') }}">
+            <a class="boton boton-secundario boton-chico" href="{{ url_for('catalogo.productos') }}">
               <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
               <span>Seguir explorando</span>
             </a>
 
-            <form action="{{ url_for('vaciar_carrito_ruta') }}" method="post" onsubmit="return confirm('¿Seguro que deseas vaciar todo el carrito?');">
+            <form action="{{ url_for('carrito.vaciar_carrito_ruta') }}" method="post" onsubmit="return confirm('¿Seguro que deseas vaciar todo el carrito?');">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <button class="boton boton-peligro-suave boton-chico" type="submit">
                 <span class="material-symbols-outlined" aria-hidden="true">delete_sweep</span>
@@ -157,7 +157,7 @@
               <span class="chip-total-monto">${{ "%.2f"|format(carrito.total_general) }}</span>
             </div>
 
-            <a class="boton boton-destacado resplandor-neon boton-checkout-cta" href="{{ url_for('checkout_resumen') }}">
+            <a class="boton boton-destacado resplandor-neon boton-checkout-cta" href="{{ url_for('pedidos.checkout_resumen') }}">
               <span>Proceder al Checkout</span>
               <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
             </a>
@@ -253,7 +253,7 @@
 
           <!-- Pie del Panel con Botón de Checkout -->
           <div class="panel-resumen-pie">
-            <a class="boton boton-destacado boton-checkout-panel resplandor-neon" href="{{ url_for('checkout_resumen') }}">
+            <a class="boton boton-destacado boton-checkout-panel resplandor-neon" href="{{ url_for('pedidos.checkout_resumen') }}">
               <span>Proceder al Checkout</span>
               <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
             </a>
@@ -276,7 +276,7 @@
             Aún no has agregado discos a tu selección. Explora nuestro catálogo dinámico de CD y Vinilos para comenzar tu colección.
           </p>
           <div class="carrito-vacio-acciones">
-            <a class="boton boton-destacado resplandor-neon boton-explorar-vacio" href="{{ url_for('productos') }}">
+            <a class="boton boton-destacado resplandor-neon boton-explorar-vacio" href="{{ url_for('catalogo.productos') }}">
               <span class="material-symbols-outlined" aria-hidden="true">album</span>
               <span>Explorar Catálogo de Discos</span>
             </a>

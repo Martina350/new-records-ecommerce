@@ -143,17 +143,26 @@ def verificar_pin(token_verificacion, pin_ingresado):
         return False, "Esta verificación ya fue completada anteriormente."
 
     if ahora_utc() > verificacion.fecha_expiracion:
-        return False, "El código de verificación ha expirado. Inicia el proceso nuevamente."
+        return (
+            False,
+            "El código de verificación ha expirado. Inicia el proceso nuevamente.",
+        )
 
     if verificacion.intentos >= MAX_INTENTOS_PIN:
-        return False, "Se alcanzó el número máximo de intentos. Inicia el proceso nuevamente."
+        return (
+            False,
+            "Se alcanzó el número máximo de intentos. Inicia el proceso nuevamente.",
+        )
 
     if not check_password_hash(verificacion.pin_hash, pin_ingresado):
         verificacion.intentos += 1
         db.session.commit()
         restantes = MAX_INTENTOS_PIN - verificacion.intentos
         if restantes <= 0:
-            return False, "Código incorrecto. No quedan intentos disponibles. Inicia el proceso nuevamente."
+            return (
+                False,
+                "Código incorrecto. No quedan intentos disponibles. Inicia el proceso nuevamente.",
+            )
         return False, f"Código incorrecto. Te quedan {restantes} intento(s)."
 
     # PIN correcto: crear el MetodoPago definitivo
@@ -198,15 +207,15 @@ def obtener_metodos_pago_activos(usuario_id):
     """Retorna los métodos de pago verificados y activos del usuario."""
     metodos = (
         MetodoPago.query.filter_by(usuario_id=usuario_id, activo=True)
-        .order_by(MetodoPago.predeterminado.desc(), MetodoPago.fecha_verificacion.desc())
+        .order_by(
+            MetodoPago.predeterminado.desc(), MetodoPago.fecha_verificacion.desc()
+        )
         .all()
     )
     return [
         metodo
         for metodo in metodos
-        if vencimiento_tarjeta_valido(
-            metodo.mes_vencimiento, metodo.anio_vencimiento
-        )
+        if vencimiento_tarjeta_valido(metodo.mes_vencimiento, metodo.anio_vencimiento)
     ]
 
 
@@ -216,7 +225,9 @@ def desactivar_metodo_pago(metodo_id, usuario_id):
     Si el método era el predeterminado, promueve automáticamente el siguiente activo.
     Retorna True si se desactivó, False si no se encontró o no pertenece al usuario.
     """
-    metodo = MetodoPago.query.filter_by(id=metodo_id, usuario_id=usuario_id, activo=True).first()
+    metodo = MetodoPago.query.filter_by(
+        id=metodo_id, usuario_id=usuario_id, activo=True
+    ).first()
     if not metodo:
         return False
 
@@ -240,13 +251,13 @@ def establecer_predeterminado(metodo_id, usuario_id):
 
     Retorna True si se realizó el cambio, False si el método no pertenece al usuario.
     """
-    metodo = MetodoPago.query.filter_by(id=metodo_id, usuario_id=usuario_id, activo=True).first()
+    metodo = MetodoPago.query.filter_by(
+        id=metodo_id, usuario_id=usuario_id, activo=True
+    ).first()
     if not metodo:
         return False
 
-    if not vencimiento_tarjeta_valido(
-        metodo.mes_vencimiento, metodo.anio_vencimiento
-    ):
+    if not vencimiento_tarjeta_valido(metodo.mes_vencimiento, metodo.anio_vencimiento):
         return False
 
     MetodoPago.query.filter_by(usuario_id=usuario_id, activo=True).update(

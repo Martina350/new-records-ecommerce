@@ -1,10 +1,11 @@
 """Pruebas del sistema de carrito de compras y preparación de checkout de la Fase 6."""
 
 import os
+
 from flask import session
 
 from app import app
-from models import Disco, db
+from models import Disco
 
 
 def obtener_cliente_pass():

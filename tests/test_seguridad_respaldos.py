@@ -2,25 +2,22 @@
 
 import os
 import re
-from datetime import datetime, timezone
-from decimal import Decimal
 from pathlib import Path
 
 import pytest
 from sqlalchemy import text
-from sqlalchemy.exc import IntegrityError, ProgrammingError
+from sqlalchemy.exc import IntegrityError
 
 from app import app
 from backup_manager import (
     generar_nombre_backup,
-    listar_backups_locales,
     obtener_carpeta_backups,
     verificar_restauracion_completa,
 )
-from models import CD, Categoria, Disco, Usuario, db
-
+from models import Categoria, Disco, Usuario, db
 
 # ── Tests de Seguridad en Capa Web (Cabeceras HTTP) ───────────────────────────
+
 
 def test_cabeceras_http_seguridad(client):
     """Las respuestas de la aplicación deben incluir cabeceras HTTP de seguridad."""
@@ -30,10 +27,7 @@ def test_cabeceras_http_seguridad(client):
     assert respuesta.headers.get("X-Content-Type-Options") == "nosniff"
     assert respuesta.headers.get("X-Frame-Options") == "SAMEORIGIN"
     assert respuesta.headers.get("X-XSS-Protection") == "1; mode=block"
-    assert (
-        respuesta.headers.get("Referrer-Policy")
-        == "strict-origin-when-cross-origin"
-    )
+    assert respuesta.headers.get("Referrer-Policy") == "strict-origin-when-cross-origin"
 
 
 def test_csrf_protege_formularios_post(client):
@@ -45,7 +39,9 @@ def test_csrf_protege_formularios_post(client):
         token = re.search(rb'name="csrf_token" value="([^"]+)"', pagina.data)
         assert token is not None
 
-        sin_token = client.post("/login", data={"email": "nadie@example.com", "password": "x"})
+        sin_token = client.post(
+            "/login", data={"email": "nadie@example.com", "password": "x"}
+        )
         assert sin_token.status_code == 302
 
         con_token = client.post(
@@ -112,14 +108,13 @@ def test_plantillas_no_exponen_tecnologia_o_logica_interna():
         contenido = plantilla.read_text(encoding="utf-8").lower()
         for termino in terminos_prohibidos:
             if termino in contenido:
-                coincidencias.append(
-                    f"{plantilla.relative_to(raiz)}: {termino}"
-                )
+                coincidencias.append(f"{plantilla.relative_to(raiz)}: {termino}")
 
     assert coincidencias == []
 
 
 # ── Tests de Restricciones Relacionales e Integridad en PostgreSQL ────────────
+
 
 def test_postgresql_rechaza_disco_precio_invalido(client):
     """PostgreSQL debe rechazar discos con precio negativo o cero."""
@@ -202,6 +197,7 @@ def test_postgresql_rechaza_pedido_rechazado_sin_motivo(client):
 
 # ── Tests de Triggers de Consistencia ─────────────────────────────────────────
 
+
 def test_trigger_actualiza_fecha_modificacion_disco(client):
     """El trigger trg_discos_actualizar_fecha debe actualizar fecha_actualizacion al modificar un disco."""
     with app.app_context():
@@ -210,9 +206,7 @@ def test_trigger_actualiza_fecha_modificacion_disco(client):
 
         # Forzar actualización
         db.session.execute(
-            text(
-                "UPDATE discos SET stock = stock + 1 WHERE id = :id"
-            ),
+            text("UPDATE discos SET stock = stock + 1 WHERE id = :id"),
             {"id": disco.id},
         )
         db.session.commit()
@@ -224,6 +218,7 @@ def test_trigger_actualiza_fecha_modificacion_disco(client):
 
 
 # ── Tests del Gestor de Respaldos y Documentación ─────────────────────────────
+
 
 def test_backup_manager_generacion_nombres_y_directorios():
     """El gestor de respaldos genera nombres válidos y asegura el directorio local."""
@@ -242,7 +237,9 @@ def test_backup_manager_generacion_nombres_y_directorios():
 
 def test_script_roles_seguridad_existe_y_declara_roles():
     """El script de roles debe definir new_records_app, new_records_backup y new_records_admin."""
-    ruta_roles = Path(__file__).resolve().parent.parent / "database" / "roles_seguridad.sql"
+    ruta_roles = (
+        Path(__file__).resolve().parent.parent / "database" / "roles_seguridad.sql"
+    )
     assert ruta_roles.exists()
     contenido = ruta_roles.read_text(encoding="utf-8")
 
@@ -272,14 +269,24 @@ def test_roles_postgresql_aplicados_y_con_minimo_privilegio(client):
                 )
             ).mappings()
         }
-        assert set(roles) == {"new_records_app", "new_records_backup", "new_records_admin"}
+        assert set(roles) == {
+            "new_records_app",
+            "new_records_backup",
+            "new_records_admin",
+        }
         assert not roles["new_records_app"].rolsuper
         assert not roles["new_records_app"].rolcreatedb
         assert not roles["new_records_backup"].rolsuper
 
-        propietarios = db.session.execute(
-            text("SELECT DISTINCT tableowner FROM pg_tables WHERE schemaname = 'public'")
-        ).scalars().all()
+        propietarios = (
+            db.session.execute(
+                text(
+                    "SELECT DISTINCT tableowner FROM pg_tables WHERE schemaname = 'public'"
+                )
+            )
+            .scalars()
+            .all()
+        )
         assert set(propietarios) == {"new_records_admin"}
         assert db.session.execute(
             text("SELECT has_table_privilege('new_records_backup', 'discos', 'SELECT')")

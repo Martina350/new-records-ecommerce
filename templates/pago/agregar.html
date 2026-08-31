@@ -36,7 +36,7 @@
       <form
         class="formulario-tarjeta-grid"
         id="form-tarjeta"
-        action="{{ url_for('pago_agregar') }}"
+        action="{{ url_for('pagos.pago_agregar') }}"
         method="post"
         data-anio-actual="{{ anio_actual }}"
         data-mes-actual="{{ mes_actual }}"
@@ -145,7 +145,7 @@
             <span class="material-symbols-outlined" aria-hidden="true">verified</span>
             <span>Continuar y verificar por PIN</span>
           </button>
-          <a class="boton boton-secundario boton-accion-tarjeta" href="{{ url_for('pago_metodos') }}">
+          <a class="boton boton-secundario boton-accion-tarjeta" href="{{ url_for('pagos.pago_metodos') }}">
             <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
             <span>Cancelar</span>
           </a>

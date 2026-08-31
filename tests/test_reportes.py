@@ -2,14 +2,13 @@
 
 import os
 import secrets
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
 
 import pytest
 
 from app import app
 from models import (
-    CD,
     Categoria,
     DetallePedido,
     Disco,
@@ -17,7 +16,6 @@ from models import (
     Pedido,
     TransaccionPago,
     Usuario,
-    Vinilo,
     ahora_utc,
     db,
 )
@@ -168,6 +166,7 @@ def test_reportes_requiere_autenticacion_y_rol_admin(client):
 
 # ── Tests de Exclusión de Estados No Aprobados ───────────────────────────────
 
+
 def test_reportes_excluyen_pedidos_pendientes_y_rechazados(client):
     """Los pedidos PENDIENTE y RECHAZADO no deben alterar los ingresos ni los rankings."""
     with app.app_context():
@@ -188,7 +187,7 @@ def test_reportes_excluyen_pedidos_pendientes_y_rechazados(client):
         # Verificar que las métricas globales permanezcan en 0 (o solo con aprobados previos)
         resumen = obtener_resumen_metricas_ventas()
         ranking_d = obtener_ranking_discos()
-        ranking_c = obtener_ranking_categorias()
+        obtener_ranking_categorias()
         reporte_temp = obtener_reporte_ventas_temporal("diario")
 
         # Ninguno de los 5 discos de estos pedidos no aprobados debe sumarse
@@ -201,6 +200,7 @@ def test_reportes_excluyen_pedidos_pendientes_y_rechazados(client):
 
 
 # ── Tests de Cálculo y Agregaciones de Ventas Aprobadas ───────────────────────
+
 
 def test_reporte_ventas_calculos_y_ticket_promedio(client):
     """Verifica el cálculo exacto de ingresos, unidades y ticket promedio tras aprobación."""
@@ -279,13 +279,13 @@ def test_reporte_anual_consolida_meses_del_mismo_anio(client):
         enero = crear_pedido_auxiliar(
             cliente.id,
             estado="APROBADO",
-            fecha=datetime(2025, 1, 15, tzinfo=timezone.utc),
+            fecha=datetime(2025, 1, 15, tzinfo=UTC),
         )
         agregar_detalle_auxiliar(enero, disco, 1, Decimal("10.00"))
         febrero = crear_pedido_auxiliar(
             cliente.id,
             estado="APROBADO",
-            fecha=datetime(2025, 2, 15, tzinfo=timezone.utc),
+            fecha=datetime(2025, 2, 15, tzinfo=UTC),
         )
         agregar_detalle_auxiliar(febrero, disco, 2, Decimal("10.00"))
         db.session.commit()
@@ -302,6 +302,7 @@ def test_reporte_anual_consolida_meses_del_mismo_anio(client):
 
 
 # ── Tests de Rankings (Discos y Géneros) ──────────────────────────────────────
+
 
 def test_ranking_discos_orden_y_porcentajes(client):
     """El ranking de discos debe ordenar de mayor a menor demanda y calcular porcentaje."""
@@ -334,12 +335,14 @@ def test_ranking_categorias_participacion(client):
     """El ranking de categorías debe agrupar los discos por género musical."""
     with app.app_context():
         cliente = Usuario.query.filter_by(rol="cliente").first()
-        
+
         categorias = Categoria.query.filter_by(activo=True).all()
         cat_rock = next((c for c in categorias if c.slug == "rock"), categorias[0])
         cat_pop = next((c for c in categorias if c.slug == "pop"), categorias[1])
 
-        disco_rock = Disco.query.filter_by(categoria_id=cat_rock.id, activo=True).first()
+        disco_rock = Disco.query.filter_by(
+            categoria_id=cat_rock.id, activo=True
+        ).first()
         disco_pop = Disco.query.filter_by(categoria_id=cat_pop.id, activo=True).first()
 
         ped = crear_pedido_auxiliar(cliente.id, estado="APROBADO")
@@ -351,7 +354,7 @@ def test_ranking_categorias_participacion(client):
 
         ranking_cat = obtener_ranking_categorias()
         assert len(ranking_cat) >= 2
-        
+
         # El primero debe ser Rock ($80 de $100 = 80%)
         top_cat = ranking_cat[0]
         assert top_cat["categoria_id"] == cat_rock.id
@@ -366,6 +369,7 @@ def test_ranking_categorias_participacion(client):
 
 
 # ── Test de Renderizado y Parámetros HTTP ─────────────────────────────────────
+
 
 def test_vistas_reportes_filtros_http(client):
     """El administrador puede filtrar las vistas de reportes por query params."""

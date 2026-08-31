@@ -1,6 +1,6 @@
 {% for disco in discos %}
   <article class="tarjeta-producto">
-    <a class="enlace-tarjeta-producto" href="{{ url_for('detalle_producto', codigo=disco.codigo) }}">
+    <a class="enlace-tarjeta-producto" href="{{ url_for('catalogo.detalle_producto', codigo=disco.codigo) }}">
       <div class="tarjeta-producto-imagen">
         <div 
           class="tarjeta-producto-imagen-fondo" 
@@ -16,7 +16,7 @@
 
     <div class="tarjeta-producto-encabezado">
       <h3 class="tarjeta-producto-titulo">
-        <a href="{{ url_for('detalle_producto', codigo=disco.codigo) }}">
+        <a href="{{ url_for('catalogo.detalle_producto', codigo=disco.codigo) }}">
           {{ disco.artista }} - {{ disco.album }}
         </a>
       </h3>
@@ -33,7 +33,7 @@
     </div>
 
     <div class="tarjeta-producto-acciones">
-      <a class="boton boton-principal boton-tarjeta resplandor-neon" href="{{ url_for('detalle_producto', codigo=disco.codigo) }}">
+      <a class="boton boton-principal boton-tarjeta resplandor-neon" href="{{ url_for('catalogo.detalle_producto', codigo=disco.codigo) }}">
         Ver detalles
         <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
       </a>

@@ -8,6 +8,88 @@ El modelo cubre catálogo, usuarios, verificación de tarjetas, pedidos, cobros 
 
 ```mermaid
 erDiagram
+    CATEGORIAS {
+        int id PK
+        varchar nombre UK
+        varchar slug UK
+        varchar prefijo_codigo UK
+        boolean activo
+    }
+    SECUENCIAS_CODIGO_CATEGORIA {
+        int categoria_id PK,FK
+        int ultimo_numero
+    }
+    DISCOS {
+        int id PK
+        int categoria_id FK
+        varchar codigo UK
+        varchar album
+        varchar artista
+        numeric precio_base
+        int stock
+        varchar formato
+        boolean activo
+    }
+    USUARIOS {
+        int id PK
+        varchar nombre
+        varchar email UK
+        varchar password_hash
+        varchar rol
+        boolean activo
+    }
+    METODOS_PAGO {
+        int id PK
+        int usuario_id FK
+        varchar marca
+        varchar ultimos4
+        varchar titular
+        boolean predeterminado
+        boolean activo
+    }
+    VERIFICACIONES_TARJETA {
+        int id PK
+        int usuario_id FK
+        varchar token_verificacion UK
+        varchar pin_hash
+        int intentos
+        boolean verificada
+    }
+    PEDIDOS {
+        int id PK
+        int cliente_id FK
+        int metodo_pago_id FK
+        int administrador_revisor_id FK
+        varchar numero UK
+        varchar estado
+        numeric total
+    }
+    DETALLES_PEDIDO {
+        int id PK
+        int pedido_id FK
+        int disco_id FK
+        int cantidad
+        numeric precio_unitario
+        varchar album
+        varchar artista
+        varchar formato
+    }
+    TRANSACCIONES_PAGO {
+        int id PK
+        int pedido_id FK,UK
+        int metodo_pago_id FK
+        varchar referencia UK
+        varchar estado
+        numeric monto
+    }
+    FACTURAS {
+        int id PK
+        int pedido_id FK
+        varchar numero UK
+        varchar tipo
+        varchar ruta_pdf
+    }
+
     CATEGORIAS ||--o{ DISCOS : clasifica
     CATEGORIAS ||--o| SECUENCIAS_CODIGO_CATEGORIA : numera
     USUARIOS ||--o{ METODOS_PAGO : registra
@@ -47,6 +129,15 @@ No existen productos digitales, perecibles ni clases provenientes del ejemplo de
 - Un pedido admite una transacción simulada principal.
 - Un pedido puede tener un comprobante pendiente y una factura final.
 - Las FK históricas utilizan eliminación restrictiva; la aplicación deberá desactivar usuarios, categorías y discos en lugar de borrarlos.
+
+## Normalización
+
+- **Primera forma normal (1FN):** cada columna contiene un valor atómico. Los discos de un pedido se almacenan como filas independientes en `detalles_pedido` y no como listas dentro de `pedidos`.
+- **Segunda forma normal (2FN):** los atributos dependen de la clave completa de su entidad. Categorías, usuarios, métodos de pago y discos conservan sus propios datos y se referencian mediante FK.
+- **Tercera forma normal (3FN):** no se repiten datos derivados entre entidades operativas. El género pertenece a `categorias`, la tarjeta simulada a `metodos_pago` y el cobro a `transacciones_pago`.
+- La copia de álbum, artista, formato y precio en `detalles_pedido` es una desnormalización controlada para preservar la evidencia histórica de la venta.
+
+El diseño de clases, métodos, herencia y asociaciones se encuentra en [`DIAGRAMA_CLASES.md`](DIAGRAMA_CLASES.md).
 
 ## Estados controlados
 

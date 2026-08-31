@@ -117,11 +117,7 @@ def obtener_detalle_carrito():
     claves_a_eliminar = []
 
     for clave_id, cantidad in list(carrito.items()):
-        if (
-            isinstance(cantidad, bool)
-            or not isinstance(cantidad, int)
-            or cantidad < 1
-        ):
+        if isinstance(cantidad, bool) or not isinstance(cantidad, int) or cantidad < 1:
             claves_a_eliminar.append(clave_id)
             carrito_modificado = True
             continue

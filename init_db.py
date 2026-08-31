@@ -9,7 +9,8 @@ from decimal import Decimal
 from pathlib import Path
 
 from dotenv import load_dotenv
-from sqlalchemy import text
+from flask_migrate import stamp, upgrade
+from sqlalchemy import inspect, text
 
 # Las modificaciones de esquema usan el rol administrativo, no la cuenta web.
 load_dotenv()
@@ -22,9 +23,10 @@ if not password_admin or password_admin.startswith("change_"):
 os.environ["DB_USER"] = usuario_admin
 os.environ["DB_PASSWORD"] = password_admin
 
-from app import app
-from models import CD, Categoria, Disco, Usuario, Vinilo, db
-
+# La configuración administrativa debe quedar en el entorno antes de importar
+# Config y construir la aplicación.
+from app import app  # noqa: E402
+from models import CD, Categoria, Disco, Usuario, Vinilo, db  # noqa: E402
 
 CATEGORIAS = [
     {
@@ -240,18 +242,14 @@ RESTRICCIONES_USUARIO = {
         "CHECK (char_length(btrim(nombre)) BETWEEN 2 AND 100)"
     ),
     "ck_usuarios_email_normalizado": "CHECK (email = lower(btrim(email)))",
-    "ck_usuarios_email_formato": (
-        "CHECK (email ~ '^[^@ ]+@[^@ ]+\\.[^@ ]+$')"
-    ),
+    "ck_usuarios_email_formato": ("CHECK (email ~ '^[^@ ]+@[^@ ]+\\.[^@ ]+$')"),
 }
 
 
 RUTA_REGLAS_FASES_7_10 = (
     Path(__file__).resolve().parent / "database" / "rules_fases7_10.sql"
 )
-RUTA_REGLAS_FASE_12 = (
-    Path(__file__).resolve().parent / "database" / "rules_fases12.sql"
-)
+RUTA_REGLAS_FASE_12 = Path(__file__).resolve().parent / "database" / "rules_fases12.sql"
 RUTA_REGLAS_CODIGOS_DISCOS = (
     Path(__file__).resolve().parent / "database" / "rules_codigos_discos.sql"
 )
@@ -278,9 +276,7 @@ def actualizar_reglas_schema():
         ).scalar_one()
         if not existe:
             db.session.execute(
-                text(
-                    f"ALTER TABLE usuarios ADD CONSTRAINT {nombre} {expresion}"
-                )
+                text(f"ALTER TABLE usuarios ADD CONSTRAINT {nombre} {expresion}")
             )
 
     reglas_fases_7_10 = RUTA_REGLAS_FASES_7_10.read_text(encoding="utf-8")
@@ -296,6 +292,26 @@ def actualizar_reglas_schema():
     reglas_codigos_discos = RUTA_REGLAS_CODIGOS_DISCOS.read_text(encoding="utf-8")
     with conexion.cursor() as cursor:
         cursor.execute(reglas_codigos_discos)
+
+
+def preparar_esquema_versionado():
+    """Actualiza una base nueva o adopta sin pérdida una instalación anterior."""
+    tablas = set(inspect(db.engine).get_table_names())
+    tablas_dominio = {"usuarios", "categorias", "discos", "pedidos"}
+    base_existente_sin_alembic = bool(tablas & tablas_dominio) and (
+        "alembic_version" not in tablas
+    )
+
+    if base_existente_sin_alembic:
+        db.create_all()
+        actualizar_reglas_schema()
+        db.session.commit()
+        stamp(directory="alembic")
+        return
+
+    upgrade(directory="alembic")
+    actualizar_reglas_schema()
+    db.session.commit()
 
 
 def obtener_password(nombre_variable):
@@ -363,8 +379,7 @@ def cargar_disco(datos, categorias_por_slug):
 def inicializar_base():
     with app.app_context():
         try:
-            db.create_all()
-            actualizar_reglas_schema()
+            preparar_esquema_versionado()
 
             categorias = {
                 datos["slug"]: cargar_categoria(datos) for datos in CATEGORIAS

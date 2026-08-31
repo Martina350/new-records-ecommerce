@@ -35,7 +35,7 @@
     </div>
 
     <!-- Formulario Principal con Grid Horizontal de 3 Bloques -->
-    <form action="{{ url_for('confirmar_checkout') }}" method="post" id="form-confirmar-pedido">
+    <form action="{{ url_for('pedidos.confirmar_checkout') }}" method="post" id="form-confirmar-pedido">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
       <!-- Resumen Ultra-Compacto para Flujo Móvil -->
@@ -92,7 +92,7 @@
             </div>
 
             <div class="tarjeta-pie-accion">
-              <a class="enlace-destacado-btn" href="{{ url_for('perfil') }}">
+              <a class="enlace-destacado-btn" href="{{ url_for('auth.perfil') }}">
                 <span class="material-symbols-outlined" aria-hidden="true">edit</span>
                 <span>Editar datos de envío</span>
               </a>
@@ -170,11 +170,11 @@
 
               <div class="tarjeta-pie-accion">
                 <div class="grupo-enlaces-tarjetas">
-                  <a class="enlace-destacado-btn" href="{{ url_for('pago_agregar') }}">
+                  <a class="enlace-destacado-btn" href="{{ url_for('pagos.pago_agregar') }}">
                     <span class="material-symbols-outlined" aria-hidden="true">add_card</span>
                     <span>Nueva tarjeta</span>
                   </a>
-                  <a class="enlace-destacado-btn enlace-secundario-tarjetas" href="{{ url_for('pago_metodos') }}">
+                  <a class="enlace-destacado-btn enlace-secundario-tarjetas" href="{{ url_for('pagos.pago_metodos') }}">
                     <span class="material-symbols-outlined" aria-hidden="true">settings</span>
                     <span>Gestionar tarjetas</span>
                   </a>
@@ -187,7 +187,7 @@
                   <strong>No tienes tarjetas registradas</strong>
                   <p>Agrega una tarjeta para procesar el pago.</p>
                 </div>
-                <a class="boton boton-principal boton-chico resplandor-neon" href="{{ url_for('pago_agregar') }}">
+                <a class="boton boton-principal boton-chico resplandor-neon" href="{{ url_for('pagos.pago_agregar') }}">
                   <span class="material-symbols-outlined" aria-hidden="true">add_card</span>
                   <span>Agregar tarjeta</span>
                 </a>
@@ -251,7 +251,7 @@
                 </button>
               {% endif %}
 
-              <a class="boton boton-secundario boton-chico boton-volver-carrito" href="{{ url_for('ver_carrito') }}">
+              <a class="boton boton-secundario boton-chico boton-volver-carrito" href="{{ url_for('carrito.ver_carrito') }}">
                 <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
                 <span>Volver al Carrito</span>
               </a>

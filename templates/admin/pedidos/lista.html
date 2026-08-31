@@ -21,7 +21,7 @@
       </div>
 
       <div class="admin-cabecera-acciones">
-        <a class="boton boton-secundario" href="{{ url_for('admin_dashboard') }}">
+        <a class="boton boton-secundario" href="{{ url_for('admin.admin_dashboard') }}">
           <span class="material-symbols-outlined" aria-hidden="true">dashboard</span>
           <span>Dashboard</span>
         </a>
@@ -30,18 +30,18 @@
 
     <!-- Pestañas de Filtro por Estado -->
     <div class="admin-filtros-pedidos">
-      <a class="boton-filtro-tab {% if not estado_filtro %}activo{% endif %}" href="{{ url_for('admin_pedidos_lista') }}">
+      <a class="boton-filtro-tab {% if not estado_filtro %}activo{% endif %}" href="{{ url_for('admin.admin_pedidos_lista') }}">
         <span>Todos</span>
       </a>
-      <a class="boton-filtro-tab {% if estado_filtro == 'PENDIENTE' %}activo{% endif %}" href="{{ url_for('admin_pedidos_lista', estado='PENDIENTE') }}">
+      <a class="boton-filtro-tab {% if estado_filtro == 'PENDIENTE' %}activo{% endif %}" href="{{ url_for('admin.admin_pedidos_lista', estado='PENDIENTE') }}">
         <span class="material-symbols-outlined" aria-hidden="true">schedule</span>
         <span>Pendientes</span>
       </a>
-      <a class="boton-filtro-tab {% if estado_filtro == 'APROBADO' %}activo{% endif %}" href="{{ url_for('admin_pedidos_lista', estado='APROBADO') }}">
+      <a class="boton-filtro-tab {% if estado_filtro == 'APROBADO' %}activo{% endif %}" href="{{ url_for('admin.admin_pedidos_lista', estado='APROBADO') }}">
         <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
         <span>Aprobados</span>
       </a>
-      <a class="boton-filtro-tab {% if estado_filtro == 'RECHAZADO' %}activo{% endif %}" href="{{ url_for('admin_pedidos_lista', estado='RECHAZADO') }}">
+      <a class="boton-filtro-tab {% if estado_filtro == 'RECHAZADO' %}activo{% endif %}" href="{{ url_for('admin.admin_pedidos_lista', estado='RECHAZADO') }}">
         <span class="material-symbols-outlined" aria-hidden="true">cancel</span>
         <span>Rechazados</span>
       </a>
@@ -83,7 +83,7 @@
                   </span>
                 </td>
                 <td data-label="Acción">
-                  <a class="boton boton-secundario boton-chico" href="{{ url_for('admin_pedido_detalle', numero=p.numero) }}">
+                  <a class="boton boton-secundario boton-chico" href="{{ url_for('admin.admin_pedido_detalle', numero=p.numero) }}">
                     <span class="material-symbols-outlined" aria-hidden="true">rate_review</span>
                     <span>Auditar Pedido</span>
                   </a>
@@ -101,7 +101,7 @@
       <!-- Vista Móvil: Cards compactos y clickables -->
       <div class="admin-pedidos-cards-movil-grid vista-movil-admin-pedidos">
         {% for p in pedidos %}
-          <a class="admin-pedido-card-enlace" href="{{ url_for('admin_pedido_detalle', numero=p.numero) }}" aria-label="Auditar pedido {{ p.numero }}">
+          <a class="admin-pedido-card-enlace" href="{{ url_for('admin.admin_pedido_detalle', numero=p.numero) }}" aria-label="Auditar pedido {{ p.numero }}">
             <div class="admin-pedido-card-top">
               <div class="admin-pedido-chip-codigo">
                 <span class="material-symbols-outlined icono-chip-pedido" aria-hidden="true">receipt_long</span>
@@ -161,7 +161,7 @@
             {% if pagina > 1 %}
               <a 
                 class="btn-paginacion" 
-                href="{{ url_for('admin_pedidos_lista', estado=estado_filtro, pagina=pagina - 1) }}"
+                href="{{ url_for('admin.admin_pedidos_lista', estado=estado_filtro, pagina=pagina - 1) }}"
                 title="Página anterior"
               >
                 <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
@@ -182,7 +182,7 @@
                 {% else %}
                   <a 
                     class="btn-num-pag" 
-                    href="{{ url_for('admin_pedidos_lista', estado=estado_filtro, pagina=p) }}"
+                    href="{{ url_for('admin.admin_pedidos_lista', estado=estado_filtro, pagina=p) }}"
                   >{{ p }}</a>
                 {% endif %}
               {% endfor %}
@@ -192,7 +192,7 @@
             {% if pagina < total_paginas %}
               <a 
                 class="btn-paginacion" 
-                href="{{ url_for('admin_pedidos_lista', estado=estado_filtro, pagina=pagina + 1) }}"
+                href="{{ url_for('admin.admin_pedidos_lista', estado=estado_filtro, pagina=pagina + 1) }}"
                 title="Página siguiente"
               >
                 <span>Siguiente</span>

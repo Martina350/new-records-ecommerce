@@ -26,7 +26,7 @@
           </div>
         </div>
 
-        <form class="formulario-contacto" action="{{ url_for('perfil') }}" method="post">
+        <form class="formulario-contacto" action="{{ url_for('auth.perfil') }}" method="post">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <div class="fila-formulario">
             <div class="grupo-formulario">
@@ -108,7 +108,7 @@
             </button>
 
             {% if usuario.es_administrador() %}
-              <a class="boton boton-destacado" href="{{ url_for('admin_dashboard') }}">
+              <a class="boton boton-destacado" href="{{ url_for('admin.admin_dashboard') }}">
                 <span class="material-symbols-outlined" aria-hidden="true">dashboard</span>
                 Panel de Administración
               </a>

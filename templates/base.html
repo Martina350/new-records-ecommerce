@@ -27,7 +27,7 @@
   {% block head_extra %}{% endblock %}
 </head>
 <body
-  class="cuerpo-app{% if request.endpoint in ['inicio', 'login', 'registro'] %} vista-inicio{% endif %}"
+  class="cuerpo-app{% if request.endpoint in ['catalogo.inicio', 'auth.login', 'auth.registro'] %} vista-inicio{% endif %}"
   style="background-color: #121212;"
   hx-boost="true"
   hx-push-url="true"
@@ -38,26 +38,26 @@
     <span class="spinner-transicion" aria-hidden="true"></span>
     <span class="oculto-visual">Cargando contenido</span>
   </div>
-  {% if request.endpoint == 'inicio' %}
+  {% if request.endpoint == 'catalogo.inicio' %}
     <!-- =====================================================================
          HEADER SUPERIOR EXCLUSIVO PARA INICIO (Solo Logo y Opción de Ingresar)
          ===================================================================== -->
     <header class="cabecera-sitio cabecera-inicio">
       <div class="contenedor cabecera-interior cabecera-inicio-interior">
-        <a class="enlace-logo" href="{{ url_for('inicio') }}">
+        <a class="enlace-logo" href="{{ url_for('catalogo.inicio') }}">
           <span class="material-symbols-outlined icono-logo" aria-hidden="true">album</span>
           <span class="texto-logo">New Records</span>
         </a>
 
         <div class="cabecera-derecha">
-          <a class="enlace-nav enlace-login-header btn-abrir-login" id="btnHeaderLogin" href="{{ url_for('login') }}">
+          <a class="enlace-nav enlace-login-header btn-abrir-login" id="btnHeaderLogin" href="{{ url_for('auth.login') }}">
             <span class="material-symbols-outlined" aria-hidden="true">login</span>
             Ingresar
           </a>
         </div>
       </div>
     </header>
-  {% elif request.endpoint not in ['login', 'registro'] %}
+  {% elif request.endpoint not in ['auth.login', 'auth.registro'] %}
     <!-- =====================================================================
          BARRA MÓVIL Y BACKDROP (Para vistas internas con Sidebar)
          ===================================================================== -->
@@ -66,7 +66,7 @@
         <span class="material-symbols-outlined" aria-hidden="true">menu</span>
       </button>
 
-      <a class="enlace-logo-movil" href="{{ url_for('productos') if esta_autenticado else url_for('inicio') }}">
+      <a class="enlace-logo-movil" href="{{ url_for('catalogo.productos') if esta_autenticado else url_for('catalogo.inicio') }}">
         <span class="material-symbols-outlined icono-logo" aria-hidden="true">album</span>
         <span class="texto-logo">New Records</span>
       </a>
@@ -74,7 +74,7 @@
       <div class="acciones-movil-rapidas">
         {% if esta_autenticado %}
           {% if not es_admin %}
-            <a class="btn-icono-movil" href="{{ url_for('ver_carrito') }}" title="Carrito">
+            <a class="btn-icono-movil" href="{{ url_for('carrito.ver_carrito') }}" title="Carrito">
               <span class="material-symbols-outlined" aria-hidden="true">shopping_cart</span>
               {% if total_items_carrito > 0 %}
                 <span class="badge-contador-movil">{{ total_items_carrito }}</span>
@@ -82,7 +82,7 @@
             </a>
           {% endif %}
         {% else %}
-          <a class="btn-icono-movil" href="{{ url_for('login') }}" title="Iniciar Sesión">
+          <a class="btn-icono-movil" href="{{ url_for('auth.login') }}" title="Iniciar Sesión">
             <span class="material-symbols-outlined" aria-hidden="true">login</span>
           </a>
         {% endif %}
@@ -93,13 +93,13 @@
   {% endif %}
 
   <!-- Layout Principal -->
-  <div class="layout-app{% if request.endpoint in ['inicio', 'login', 'registro'] %} layout-landing{% endif %}" id="layoutApp">
-    {% if request.endpoint not in ['inicio', 'login', 'registro'] %}
+  <div class="layout-app{% if request.endpoint in ['catalogo.inicio', 'auth.login', 'auth.registro'] %} layout-landing{% endif %}" id="layoutApp">
+    {% if request.endpoint not in ['catalogo.inicio', 'auth.login', 'auth.registro'] %}
       <!-- Sidebar Lateral (Exclusivo para vistas internas) -->
       <aside class="sidebar" id="sidebar" aria-label="Navegación lateral principal">
         <!-- Encabezado del Sidebar -->
         <div class="sidebar-header">
-          <a class="enlace-logo-sidebar" href="{{ url_for('admin_dashboard') if es_admin else (url_for('productos') if esta_autenticado else url_for('inicio')) }}">
+          <a class="enlace-logo-sidebar" href="{{ url_for('admin.admin_dashboard') if es_admin else (url_for('catalogo.productos') if esta_autenticado else url_for('catalogo.inicio')) }}">
             <span class="material-symbols-outlined icono-logo-sidebar" aria-hidden="true">album</span>
             <span class="texto-logo-sidebar">New Records</span>
           </a>
@@ -116,7 +116,7 @@
               <span class="modulo-titulo">Administración</span>
               <ul class="lista-menu-sidebar">
                 <li class="item-menu-sidebar">
-                  <a class="enlace-sidebar{% if request.endpoint == 'admin_dashboard' %} activo{% endif %}" href="{{ url_for('admin_dashboard') }}" title="Panel Principal">
+                  <a class="enlace-sidebar{% if request.endpoint == 'admin.admin_dashboard' %} activo{% endif %}" href="{{ url_for('admin.admin_dashboard') }}" title="Panel Principal">
                     <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">dashboard</span>
                     <span class="texto-item-sidebar">Dashboard</span>
                   </a>
@@ -127,21 +127,21 @@
             <div class="modulo-sidebar">
               <span class="modulo-titulo">Catálogo</span>
               <ul class="lista-menu-sidebar">
-                <li class="item-menu-sidebar submodulo-sidebar{% if request.endpoint in ['admin_discos_lista', 'admin_discos_nuevo', 'admin_discos_editar'] %} abierto{% endif %}">
-                  <button class="btn-acordeon-sidebar" type="button" aria-expanded="{% if request.endpoint in ['admin_discos_lista', 'admin_discos_nuevo', 'admin_discos_editar'] %}true{% else %}false{% endif %}">
+                <li class="item-menu-sidebar submodulo-sidebar{% if request.endpoint in ['admin.admin_discos_lista', 'admin.admin_discos_nuevo', 'admin.admin_discos_editar'] %} abierto{% endif %}">
+                  <button class="btn-acordeon-sidebar" type="button" aria-expanded="{% if request.endpoint in ['admin.admin_discos_lista', 'admin.admin_discos_nuevo', 'admin.admin_discos_editar'] %}true{% else %}false{% endif %}">
                     <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">album</span>
                     <span class="texto-item-sidebar">Discos</span>
                     <span class="material-symbols-outlined icono-flecha-acordeon" aria-hidden="true">expand_more</span>
                   </button>
                   <ul class="sublista-sidebar">
                     <li>
-                      <a class="enlace-subitem{% if request.endpoint == 'admin_discos_lista' %} activo{% endif %}" href="{{ url_for('admin_discos_lista') }}">
+                      <a class="enlace-subitem{% if request.endpoint == 'admin.admin_discos_lista' %} activo{% endif %}" href="{{ url_for('admin.admin_discos_lista') }}">
                         <span class="indicador-subitem"></span>
                         <span>Listado de Discos</span>
                       </a>
                     </li>
                     <li>
-                      <a class="enlace-subitem{% if request.endpoint == 'admin_discos_nuevo' %} activo{% endif %}" href="{{ url_for('admin_discos_nuevo') }}">
+                      <a class="enlace-subitem{% if request.endpoint == 'admin.admin_discos_nuevo' %} activo{% endif %}" href="{{ url_for('admin.admin_discos_nuevo') }}">
                         <span class="indicador-subitem"></span>
                         <span>Registrar Disco</span>
                       </a>
@@ -149,21 +149,21 @@
                   </ul>
                 </li>
 
-                <li class="item-menu-sidebar submodulo-sidebar{% if request.endpoint in ['admin_categorias_lista', 'admin_categorias_nueva', 'admin_categorias_editar'] %} abierto{% endif %}">
-                  <button class="btn-acordeon-sidebar" type="button" aria-expanded="{% if request.endpoint in ['admin_categorias_lista', 'admin_categorias_nueva', 'admin_categorias_editar'] %}true{% else %}false{% endif %}">
+                <li class="item-menu-sidebar submodulo-sidebar{% if request.endpoint in ['admin.admin_categorias_lista', 'admin.admin_categorias_nueva', 'admin.admin_categorias_editar'] %} abierto{% endif %}">
+                  <button class="btn-acordeon-sidebar" type="button" aria-expanded="{% if request.endpoint in ['admin.admin_categorias_lista', 'admin.admin_categorias_nueva', 'admin.admin_categorias_editar'] %}true{% else %}false{% endif %}">
                     <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">category</span>
                     <span class="texto-item-sidebar">Categorías</span>
                     <span class="material-symbols-outlined icono-flecha-acordeon" aria-hidden="true">expand_more</span>
                   </button>
                   <ul class="sublista-sidebar">
                     <li>
-                      <a class="enlace-subitem{% if request.endpoint == 'admin_categorias_lista' %} activo{% endif %}" href="{{ url_for('admin_categorias_lista') }}">
+                      <a class="enlace-subitem{% if request.endpoint == 'admin.admin_categorias_lista' %} activo{% endif %}" href="{{ url_for('admin.admin_categorias_lista') }}">
                         <span class="indicador-subitem"></span>
                         <span>Listado de Géneros</span>
                       </a>
                     </li>
                     <li>
-                      <a class="enlace-subitem{% if request.endpoint == 'admin_categorias_nueva' %} activo{% endif %}" href="{{ url_for('admin_categorias_nueva') }}">
+                      <a class="enlace-subitem{% if request.endpoint == 'admin.admin_categorias_nueva' %} activo{% endif %}" href="{{ url_for('admin.admin_categorias_nueva') }}">
                         <span class="indicador-subitem"></span>
                         <span>Nueva Categoría</span>
                       </a>
@@ -177,13 +177,13 @@
               <span class="modulo-titulo">Ventas y Gestión</span>
               <ul class="lista-menu-sidebar">
                 <li class="item-menu-sidebar">
-                  <a class="enlace-sidebar{% if request.endpoint in ['admin_pedidos_lista', 'admin_pedido_detalle'] %} activo{% endif %}" href="{{ url_for('admin_pedidos_lista') }}" title="Gestión de Pedidos">
+                  <a class="enlace-sidebar{% if request.endpoint in ['admin.admin_pedidos_lista', 'admin.admin_pedido_detalle'] %} activo{% endif %}" href="{{ url_for('admin.admin_pedidos_lista') }}" title="Gestión de Pedidos">
                     <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">receipt_long</span>
                     <span class="texto-item-sidebar">Pedidos Clientes</span>
                   </a>
                 </li>
                 <li class="item-menu-sidebar">
-                  <a class="enlace-sidebar{% if request.endpoint == 'admin_reportes' %} activo{% endif %}" href="{{ url_for('admin_reportes') }}" title="Estadísticas y Reportes">
+                  <a class="enlace-sidebar{% if request.endpoint == 'admin.admin_reportes' %} activo{% endif %}" href="{{ url_for('admin.admin_reportes') }}" title="Estadísticas y Reportes">
                     <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">analytics</span>
                     <span class="texto-item-sidebar">Reportes y Métricas</span>
                   </a>
@@ -195,7 +195,7 @@
               <span class="modulo-titulo">Vista Pública</span>
               <ul class="lista-menu-sidebar">
                 <li class="item-menu-sidebar">
-                  <a class="enlace-sidebar{% if request.endpoint == 'productos' %} activo{% endif %}" href="{{ url_for('productos') }}" title="Ver Tienda">
+                  <a class="enlace-sidebar{% if request.endpoint == 'catalogo.productos' %} activo{% endif %}" href="{{ url_for('catalogo.productos') }}" title="Ver Tienda">
                     <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">storefront</span>
                     <span class="texto-item-sidebar">Catálogo Público</span>
                   </a>
@@ -209,13 +209,13 @@
               <span class="modulo-titulo">Tienda</span>
               <ul class="lista-menu-sidebar">
                 <li class="item-menu-sidebar">
-                  <a class="enlace-sidebar{% if request.endpoint == 'categorias' %} activo{% endif %}" href="{{ url_for('categorias') }}" title="Explorar Categorías">
+                  <a class="enlace-sidebar{% if request.endpoint == 'catalogo.categorias' %} activo{% endif %}" href="{{ url_for('catalogo.categorias') }}" title="Explorar Categorías">
                     <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">category</span>
                     <span class="texto-item-sidebar">Explorar Categorías</span>
                   </a>
                 </li>
                 <li class="item-menu-sidebar">
-                  <a class="enlace-sidebar{% if request.endpoint in ['productos', 'detalle_producto'] %} activo{% endif %}" href="{{ url_for('productos') }}" title="Catálogo de Productos">
+                  <a class="enlace-sidebar{% if request.endpoint in ['catalogo.productos', 'catalogo.detalle_producto'] %} activo{% endif %}" href="{{ url_for('catalogo.productos') }}" title="Catálogo de Productos">
                     <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">album</span>
                     <span class="texto-item-sidebar">Productos / Discos</span>
                   </a>
@@ -227,7 +227,7 @@
               <span class="modulo-titulo">Mis Compras</span>
               <ul class="lista-menu-sidebar">
                 <li class="item-menu-sidebar">
-                  <a class="enlace-sidebar{% if request.endpoint == 'ver_carrito' %} activo{% endif %}" href="{{ url_for('ver_carrito') }}" title="Mi Carrito de Compras">
+                  <a class="enlace-sidebar{% if request.endpoint == 'carrito.ver_carrito' %} activo{% endif %}" href="{{ url_for('carrito.ver_carrito') }}" title="Mi Carrito de Compras">
                     <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">shopping_cart</span>
                     <span class="texto-item-sidebar">Mi Carrito</span>
                     {% if total_items_carrito > 0 %}
@@ -236,13 +236,13 @@
                   </a>
                 </li>
                 <li class="item-menu-sidebar">
-                  <a class="enlace-sidebar{% if request.endpoint in ['lista_pedidos', 'detalle_pedido'] %} activo{% endif %}" href="{{ url_for('lista_pedidos') }}" title="Mis Pedidos">
+                  <a class="enlace-sidebar{% if request.endpoint in ['pedidos.lista_pedidos', 'detalle_pedido'] %} activo{% endif %}" href="{{ url_for('pedidos.lista_pedidos') }}" title="Mis Pedidos">
                     <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">receipt_long</span>
                     <span class="texto-item-sidebar">Mis Pedidos</span>
                   </a>
                 </li>
                 <li class="item-menu-sidebar">
-                  <a class="enlace-sidebar{% if request.endpoint in ['pago_metodos', 'pago_agregar', 'pago_verificar'] %} activo{% endif %}" href="{{ url_for('pago_metodos') }}" title="Métodos de Pago">
+                  <a class="enlace-sidebar{% if request.endpoint in ['pagos.pago_metodos', 'pagos.pago_agregar', 'pagos.pago_verificar'] %} activo{% endif %}" href="{{ url_for('pagos.pago_metodos') }}" title="Métodos de Pago">
                     <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">credit_card</span>
                     <span class="texto-item-sidebar">Métodos de Pago</span>
                   </a>
@@ -256,19 +256,19 @@
               <span class="modulo-titulo">Navegación</span>
               <ul class="lista-menu-sidebar">
                 <li class="item-menu-sidebar">
-                  <a class="enlace-sidebar{% if request.endpoint == 'inicio' %} activo{% endif %}" href="{{ url_for('inicio') }}" title="Página de Inicio">
+                  <a class="enlace-sidebar{% if request.endpoint == 'catalogo.inicio' %} activo{% endif %}" href="{{ url_for('catalogo.inicio') }}" title="Página de Inicio">
                     <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">home</span>
                     <span class="texto-item-sidebar">Inicio</span>
                   </a>
                 </li>
                 <li class="item-menu-sidebar">
-                  <a class="enlace-sidebar{% if request.endpoint == 'categorias' %} activo{% endif %}" href="{{ url_for('categorias') }}" title="Explorar Categorías">
+                  <a class="enlace-sidebar{% if request.endpoint == 'catalogo.categorias' %} activo{% endif %}" href="{{ url_for('catalogo.categorias') }}" title="Explorar Categorías">
                     <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">category</span>
                     <span class="texto-item-sidebar">Explorar Categorías</span>
                   </a>
                 </li>
                 <li class="item-menu-sidebar">
-                  <a class="enlace-sidebar{% if request.endpoint in ['productos', 'detalle_producto'] %} activo{% endif %}" href="{{ url_for('productos') }}" title="Catálogo de Productos">
+                  <a class="enlace-sidebar{% if request.endpoint in ['catalogo.productos', 'catalogo.detalle_producto'] %} activo{% endif %}" href="{{ url_for('catalogo.productos') }}" title="Catálogo de Productos">
                     <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">album</span>
                     <span class="texto-item-sidebar">Productos</span>
                   </a>
@@ -280,13 +280,13 @@
               <span class="modulo-titulo">Acceso</span>
               <ul class="lista-menu-sidebar">
                 <li class="item-menu-sidebar">
-                  <a class="enlace-sidebar{% if request.endpoint == 'login' %} activo{% endif %}" href="{{ url_for('login') }}" title="Iniciar Sesión">
+                  <a class="enlace-sidebar{% if request.endpoint == 'auth.login' %} activo{% endif %}" href="{{ url_for('auth.login') }}" title="Iniciar Sesión">
                     <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">login</span>
                     <span class="texto-item-sidebar">Iniciar Sesión</span>
                   </a>
                 </li>
                 <li class="item-menu-sidebar">
-                  <a class="enlace-sidebar enlace-destacado-sidebar{% if request.endpoint == 'registro' %} activo{% endif %}" href="{{ url_for('registro') }}" title="Crear Cuenta">
+                  <a class="enlace-sidebar enlace-destacado-sidebar{% if request.endpoint == 'auth.registro' %} activo{% endif %}" href="{{ url_for('auth.registro') }}" title="Crear Cuenta">
                     <span class="material-symbols-outlined icono-sidebar" aria-hidden="true">person_add</span>
                     <span class="texto-item-sidebar">Registrarse</span>
                   </a>
@@ -300,7 +300,7 @@
         <div class="sidebar-footer">
           {% if esta_autenticado %}
             <div class="tarjeta-usuario-sidebar" id="tarjetaUsuarioSidebar">
-              <a class="enlace-perfil-tarjeta" href="{{ url_for('perfil') }}" title="Ver perfil de {{ usuario_actual.nombre }}">
+              <a class="enlace-perfil-tarjeta" href="{{ url_for('auth.perfil') }}" title="Ver perfil de {{ usuario_actual.nombre }}">
                 <div class="avatar-usuario-gradiente" aria-hidden="true">
                   {{ usuario_iniciales }}
                 </div>
@@ -309,7 +309,7 @@
                   <span class="email-usuario-sidebar" title="{{ usuario_actual.email }}">{{ usuario_actual.email }}</span>
                 </div>
               </a>
-              <form class="form-logout-sidebar" action="{{ url_for('logout') }}" method="post">
+              <form class="form-logout-sidebar" action="{{ url_for('auth.logout') }}" method="post">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <button class="btn-logout-sidebar" type="submit" title="Cerrar sesión" aria-label="Cerrar sesión">
                   <span class="material-symbols-outlined" aria-hidden="true">logout</span>
@@ -323,7 +323,7 @@
               </div>
               <div class="detalles-usuario-sidebar">
                 <span class="nombre-usuario-sidebar">Invitado</span>
-                <a class="enlace-login-tarjeta" href="{{ url_for('login') }}">Iniciar Sesión</a>
+                <a class="enlace-login-tarjeta" href="{{ url_for('auth.login') }}">Iniciar Sesión</a>
               </div>
             </div>
           {% endif %}
@@ -332,7 +332,7 @@
     {% endif %}
 
     <!-- Contenedor del Contenido Principal y Toasts -->
-    <div class="layout-contenido{% if request.endpoint in ['inicio', 'login', 'registro'] %} contenido-landing{% endif %}" id="layoutContenido">
+    <div class="layout-contenido{% if request.endpoint in ['catalogo.inicio', 'auth.login', 'auth.registro'] %} contenido-landing{% endif %}" id="layoutContenido">
       <!-- Sistema Flotante de Notificaciones Toast -->
       <div class="contenedor-toasts" id="contenedorToasts" aria-live="polite">
         {% with mensajes = get_flashed_messages(with_categories=true) %}
@@ -363,7 +363,7 @@
       {% block contenido %}{% endblock %}
 
       <!-- Pie de Página -->
-      <footer class="pie-sitio{% if request.endpoint in ['inicio', 'login', 'registro'] %} pie-inicio{% endif %}">
+      <footer class="pie-sitio{% if request.endpoint in ['catalogo.inicio', 'auth.login', 'auth.registro'] %} pie-inicio{% endif %}">
         <div class="contenedor">
           <p class="pie-texto">© 2026 New Records. Todos los derechos reservados.</p>
         </div>

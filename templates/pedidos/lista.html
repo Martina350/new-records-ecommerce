@@ -48,7 +48,7 @@
                 <tr class="fila-pedido-widescreen">
                   <!-- Número de pedido con link y código monospace -->
                   <td class="celda-numero-pedido" data-label="Pedido">
-                    <a class="enlace-codigo-pedido" href="{{ url_for('ver_pedido', numero=pedido.numero) }}" title="Ver detalle del pedido {{ pedido.numero }}">
+                    <a class="enlace-codigo-pedido" href="{{ url_for('pedidos.ver_pedido', numero=pedido.numero) }}" title="Ver detalle del pedido {{ pedido.numero }}">
                       <code class="codigo-pedido-texto">{{ pedido.numero }}</code>
                     </a>
                   </td>
@@ -100,11 +100,11 @@
                   <!-- Acciones: Detalle y PDF -->
                   <td class="celda-acciones-pedido" data-label="Acciones">
                     <div class="grupo-acciones-pedido">
-                      <a class="boton boton-secundario boton-chico boton-ver-pedido" href="{{ url_for('ver_pedido', numero=pedido.numero) }}">
+                      <a class="boton boton-secundario boton-chico boton-ver-pedido" href="{{ url_for('pedidos.ver_pedido', numero=pedido.numero) }}">
                         <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
                         <span>Ver Detalle</span>
                       </a>
-                      <a class="boton boton-secundario boton-chico boton-pdf-pedido" href="{{ url_for('descargar_comprobante', numero=pedido.numero) }}" title="Descargar Comprobante PDF" target="_blank">
+                      <a class="boton boton-secundario boton-chico boton-pdf-pedido" href="{{ url_for('pedidos.descargar_comprobante', numero=pedido.numero) }}" title="Descargar Comprobante PDF" target="_blank">
                         <span class="material-symbols-outlined" aria-hidden="true">picture_as_pdf</span>
                       </a>
                     </div>
@@ -168,7 +168,7 @@
             <span>Mostrando {{ pedidos | length }} pedido{% if pedidos | length != 1 %}s{% endif %} en tu historial de compras</span>
           </div>
 
-          <a class="boton boton-destacado resplandor-neon boton-chico" href="{{ url_for('productos') }}">
+          <a class="boton boton-destacado resplandor-neon boton-chico" href="{{ url_for('catalogo.productos') }}">
             <span>Explorar más álbumes</span>
             <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
           </a>
@@ -212,7 +212,7 @@
                   <span class="modal-hero-total-leyenda">Envío especializado y embalaje incluidos</span>
                 </div>
 
-                <a class="boton boton-principal resplandor-neon boton-pdf-hero" href="{{ url_for('descargar_comprobante', numero=pedido.numero) }}" target="_blank">
+                <a class="boton boton-principal resplandor-neon boton-pdf-hero" href="{{ url_for('pedidos.descargar_comprobante', numero=pedido.numero) }}" target="_blank">
                   <span class="material-symbols-outlined" aria-hidden="true">picture_as_pdf</span>
                   <span>Descargar Comprobante PDF</span>
                 </a>
@@ -314,7 +314,7 @@
             Explora nuestro catálogo dinámico de CD y Vinilos para realizar tu primera compra y empezar tu colección.
           </p>
           <div class="pedidos-vacio-acciones">
-            <a class="boton boton-destacado resplandor-neon boton-explorar-vacio" href="{{ url_for('productos') }}">
+            <a class="boton boton-destacado resplandor-neon boton-explorar-vacio" href="{{ url_for('catalogo.productos') }}">
               <span class="material-symbols-outlined" aria-hidden="true">album</span>
               <span>Ir al Catálogo de Discos</span>
             </a>

@@ -1,0 +1,69 @@
+name: Calidad y pruebas
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: new_records_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d new_records_db"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      SECRET_KEY: clave-exclusiva-para-integracion-continua
+      DB_HOST: localhost
+      DB_PORT: "5432"
+      DB_NAME: new_records_db
+      DB_USER: new_records_app
+      DB_PASSWORD: app_password_ci
+      DB_ADMIN_USER: new_records_admin
+      DB_ADMIN_PASSWORD: admin_password_ci
+      DB_BACKUP_USER: new_records_backup
+      DB_BACKUP_PASSWORD: backup_password_ci
+      DB_BOOTSTRAP_USER: postgres
+      DB_BOOTSTRAP_PASSWORD: postgres
+      ADMIN_PASSWORD: admin_demo_password_ci
+      CLIENTE_DEMO_PASSWORD: cliente_demo_password_ci
+      RUN_DB_SECURITY_TESTS: "1"
+      RUN_DB_RESTORE_TEST: "1"
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Instalar dependencias
+        run: python -m pip install -r requirements.txt
+
+      - name: Configurar PostgreSQL
+        run: |
+          python configure_db_roles.py
+          python init_db.py
+
+      - name: Verificar formato y lint
+        run: |
+          python -m black --check .
+          python -m ruff check .
+
+      - name: Ejecutar pruebas
+        run: python -m pytest -q

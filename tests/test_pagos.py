@@ -6,7 +6,12 @@ from unittest.mock import patch
 
 from app import app
 from models import MetodoPago, VerificacionTarjeta, ahora_utc, db
-from payments import crear_verificacion, verificar_pin, DURACION_PIN_MINUTOS, MAX_INTENTOS_PIN
+from payments import (
+    MAX_INTENTOS_PIN,
+    crear_verificacion,
+    verificar_pin,
+)
+
 
 def pass_cliente():
     return os.environ["CLIENTE_DEMO_PASSWORD"]
@@ -32,6 +37,7 @@ def datos_tarjeta_demo():
 
 # ── Tests de acceso ──────────────────────────────────────────────────────────
 
+
 def test_pagos_requiere_login(client):
     resp_metodos = client.get("/pago/metodos", follow_redirects=False)
     assert resp_metodos.status_code == 302
@@ -53,6 +59,7 @@ def test_formulario_agregar_tarjeta(client):
 
 # ── Tests del flujo de verificación ─────────────────────────────────────────
 
+
 def test_agregar_crea_verificacion_pendiente(client):
     with client:
         autenticar_cliente(client)
@@ -72,9 +79,11 @@ def test_agregar_crea_verificacion_pendiente(client):
         assert "/pago/verificar/" in resp.headers["Location"]
 
         with app.app_context():
-            verificacion = VerificacionTarjeta.query.filter_by(
-                ultimos4="1111", marca="VISA"
-            ).order_by(VerificacionTarjeta.id.desc()).first()
+            verificacion = (
+                VerificacionTarjeta.query.filter_by(ultimos4="1111", marca="VISA")
+                .order_by(VerificacionTarjeta.id.desc())
+                .first()
+            )
             assert verificacion is not None
             assert verificacion.verificada is False
             assert verificacion.intentos == 0
@@ -83,7 +92,7 @@ def test_agregar_crea_verificacion_pendiente(client):
 def test_pin_alternativo_no_expone_configuracion_interna(client):
     with client:
         autenticar_cliente(client)
-        with patch("app.enviar_pin", return_value=False):
+        with patch("routes.pagos.enviar_pin", return_value=False):
             respuesta = client.post(
                 "/pago/agregar",
                 data={
@@ -137,9 +146,9 @@ def test_pin_se_bloquea_exactamente_al_tercer_intento(client):
         with app.app_context():
             from models import Usuario
 
-            usuario_id = Usuario.query.filter_by(
-                email="cliente@newrecords.local"
-            ).first().id
+            usuario_id = (
+                Usuario.query.filter_by(email="cliente@newrecords.local").first().id
+            )
             verificacion, pin_correcto = crear_verificacion(
                 usuario_id, datos_tarjeta_demo()
             )
@@ -161,6 +170,7 @@ def test_pin_incorrecto_incrementa_intentos(client):
 
         with app.app_context():
             from models import Usuario
+
             usuario = Usuario.query.filter_by(email="cliente@newrecords.local").first()
             verificacion, _pin = crear_verificacion(usuario.id, datos_tarjeta_demo())
             token = verificacion.token_verificacion
@@ -184,8 +194,11 @@ def test_pin_correcto_crea_metodo_pago(client):
 
         with app.app_context():
             from models import Usuario
+
             usuario = Usuario.query.filter_by(email="cliente@newrecords.local").first()
-            verificacion, pin_plano = crear_verificacion(usuario.id, datos_tarjeta_demo())
+            verificacion, pin_plano = crear_verificacion(
+                usuario.id, datos_tarjeta_demo()
+            )
             token = verificacion.token_verificacion
 
         resp = client.post(
@@ -210,8 +223,11 @@ def test_pin_expirado_rechaza_verificacion(client):
 
         with app.app_context():
             from models import Usuario
+
             usuario = Usuario.query.filter_by(email="cliente@newrecords.local").first()
-            verificacion, pin_plano = crear_verificacion(usuario.id, datos_tarjeta_demo())
+            verificacion, pin_plano = crear_verificacion(
+                usuario.id, datos_tarjeta_demo()
+            )
             token = verificacion.token_verificacion
             # Forzar expiración retroactiva
             verificacion.fecha_expiracion = ahora_utc() - timedelta(minutes=10)
@@ -230,12 +246,17 @@ def test_metodo_predeterminado(client):
         with app.app_context():
             from models import Usuario
             from payments import establecer_predeterminado
+
             usuario = Usuario.query.filter_by(email="cliente@newrecords.local").first()
 
             # Crear y verificar dos métodos de pago
-            v1, p1 = crear_verificacion(usuario.id, {**datos_tarjeta_demo(), "ultimos4": "1111"})
+            v1, p1 = crear_verificacion(
+                usuario.id, {**datos_tarjeta_demo(), "ultimos4": "1111"}
+            )
             verificar_pin(v1.token_verificacion, p1)
-            v2, p2 = crear_verificacion(usuario.id, {**datos_tarjeta_demo(), "ultimos4": "2222"})
+            v2, p2 = crear_verificacion(
+                usuario.id, {**datos_tarjeta_demo(), "ultimos4": "2222"}
+            )
             verificar_pin(v2.token_verificacion, p2)
 
             metodo2 = MetodoPago.query.filter_by(
@@ -256,6 +277,7 @@ def test_desactivar_metodo_pago(client):
         with app.app_context():
             from models import Usuario
             from payments import desactivar_metodo_pago
+
             usuario = Usuario.query.filter_by(email="cliente@newrecords.local").first()
             verificacion, pin_plano = crear_verificacion(
                 usuario.id, {**datos_tarjeta_demo(), "ultimos4": "9999"}

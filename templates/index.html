@@ -14,7 +14,7 @@
         Nuestra tienda online es el destino definitivo para los amantes de la música. Encuentra los mejores discos de tus géneros favoritos.
       </p>
       <div class="inicio-botones">
-        <a class="boton boton-destacado resplandor-neon btn-abrir-registro" id="btnHeroRegistro" href="{{ url_for('registro') }}">
+        <a class="boton boton-destacado resplandor-neon btn-abrir-registro" id="btnHeroRegistro" href="{{ url_for('auth.registro') }}">
           <span class="material-symbols-outlined" aria-hidden="true">person_add</span>
           Registrarse
         </a>
@@ -37,7 +37,7 @@
         <p class="auth-subtitulo">Accede a tu cuenta de New Records para gestionar tus compras y pedidos.</p>
       </div>
 
-      <form class="formulario-auth" id="formLoginLanding" action="{{ url_for('login') }}" method="post" novalidate>
+      <form class="formulario-auth" id="formLoginLanding" action="{{ url_for('auth.login') }}" method="post" novalidate>
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         
         <div class="grupo-formulario">
@@ -98,7 +98,7 @@
         <p class="auth-subtitulo">Únete a la comunidad de New Records para adquirir tus discos y vinilos favoritos.</p>
       </div>
 
-      <form class="formulario-auth" id="formRegistroLanding" action="{{ url_for('registro') }}" method="post" novalidate>
+      <form class="formulario-auth" id="formRegistroLanding" action="{{ url_for('auth.registro') }}" method="post" novalidate>
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         
         <div class="grupo-formulario">
