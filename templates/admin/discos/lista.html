@@ -34,32 +34,87 @@
 
     <!-- Barra de Filtros Avanzados -->
     <div class="admin-barra-filtros-avanzados">
-      <form method="get" action="{{ url_for('admin_discos_lista') }}" class="form-filtros-grid">
+      <form method="get" action="{{ url_for('admin_discos_lista') }}" class="form-filtros-grid" id="formFiltrosDiscos">
+        <!-- Selector Personalizado de Género -->
         <div class="campo-filtro-item">
-          <label for="filtroCategoria" class="etiqueta-filtro-mini">
+          <label class="etiqueta-filtro-mini">
             <span class="material-symbols-outlined" aria-hidden="true">category</span>
             Género Musical:
           </label>
-          <select id="filtroCategoria" name="categoria_id" class="input-filtro-select" onchange="this.form.submit()">
-            <option value="">Todos los géneros</option>
-            {% for cat in categorias %}
-              <option value="{{ cat.id }}" {% if categoria_filtro == cat.id|string %}selected{% endif %}>
-                {{ cat.nombre }}
-              </option>
-            {% endfor %}
-          </select>
+          <div class="custom-select-contenedor" data-target-input="filtroCategoria">
+            <input type="hidden" id="filtroCategoria" name="categoria_id" value="{{ categoria_filtro }}">
+            <button type="button" class="custom-select-boton" aria-haspopup="listbox" aria-expanded="false">
+              <span class="custom-select-label">
+                {% if categoria_filtro %}
+                  {% for cat in categorias %}
+                    {% if categoria_filtro == cat.id|string %}{{ cat.nombre }}{% endif %}
+                  {% endfor %}
+                {% else %}
+                  Todos los géneros
+                {% endif %}
+              </span>
+              <span class="material-symbols-outlined icono-select-chevron" aria-hidden="true">expand_more</span>
+            </button>
+            <div class="custom-select-opciones" role="listbox">
+              <div class="custom-select-opcion {% if not categoria_filtro %}seleccionada{% endif %}" data-value="">
+                <span>Todos los géneros</span>
+                {% if not categoria_filtro %}
+                  <span class="material-symbols-outlined check-activo" aria-hidden="true">check</span>
+                {% endif %}
+              </div>
+              {% for cat in categorias %}
+                <div class="custom-select-opcion {% if categoria_filtro == cat.id|string %}seleccionada{% endif %}" data-value="{{ cat.id }}">
+                  <span>{{ cat.nombre }}</span>
+                  {% if categoria_filtro == cat.id|string %}
+                    <span class="material-symbols-outlined check-activo" aria-hidden="true">check</span>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            </div>
+          </div>
         </div>
 
+        <!-- Selector Personalizado de Formato -->
         <div class="campo-filtro-item">
-          <label for="filtroFormato" class="etiqueta-filtro-mini">
+          <label class="etiqueta-filtro-mini">
             <span class="material-symbols-outlined" aria-hidden="true">album</span>
             Formato Físico:
           </label>
-          <select id="filtroFormato" name="formato" class="input-filtro-select" onchange="this.form.submit()">
-            <option value="">Todos los formatos</option>
-            <option value="CD" {% if formato_filtro == 'CD' %}selected{% endif %}>CD</option>
-            <option value="VINILO" {% if formato_filtro == 'VINILO' %}selected{% endif %}>Vinilo</option>
-          </select>
+          <div class="custom-select-contenedor" data-target-input="filtroFormato">
+            <input type="hidden" id="filtroFormato" name="formato" value="{{ formato_filtro }}">
+            <button type="button" class="custom-select-boton" aria-haspopup="listbox" aria-expanded="false">
+              <span class="custom-select-label">
+                {% if formato_filtro == 'CD' %}
+                  CD
+                {% elif formato_filtro == 'VINILO' %}
+                  Vinilo
+                {% else %}
+                  Todos los formatos
+                {% endif %}
+              </span>
+              <span class="material-symbols-outlined icono-select-chevron" aria-hidden="true">expand_more</span>
+            </button>
+            <div class="custom-select-opciones" role="listbox">
+              <div class="custom-select-opcion {% if not formato_filtro %}seleccionada{% endif %}" data-value="">
+                <span>Todos los formatos</span>
+                {% if not formato_filtro %}
+                  <span class="material-symbols-outlined check-activo" aria-hidden="true">check</span>
+                {% endif %}
+              </div>
+              <div class="custom-select-opcion {% if formato_filtro == 'CD' %}seleccionada{% endif %}" data-value="CD">
+                <span>CD</span>
+                {% if formato_filtro == 'CD' %}
+                  <span class="material-symbols-outlined check-activo" aria-hidden="true">check</span>
+                {% endif %}
+              </div>
+              <div class="custom-select-opcion {% if formato_filtro == 'VINILO' %}seleccionada{% endif %}" data-value="VINILO">
+                <span>Vinilo</span>
+                {% if formato_filtro == 'VINILO' %}
+                  <span class="material-symbols-outlined check-activo" aria-hidden="true">check</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
         </div>
 
         {% if categoria_filtro or formato_filtro %}

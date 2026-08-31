@@ -9777,62 +9777,181 @@ select option {
 
 /* --- Barra de Filtros Avanzados --- */
 .admin-barra-filtros-avanzados {
+  position: relative;
+  z-index: 60;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 0.85rem;
-  padding: 1rem 1.25rem;
+  padding: 0.95rem 1.25rem;
   margin-bottom: 1.5rem;
   backdrop-filter: blur(10px);
 }
 
 .form-filtros-grid {
   display: flex;
-  align-items: flex-end;
-  gap: 1.25rem;
+  align-items: center;
+  gap: 1.75rem;
   flex-wrap: wrap;
 }
 
 .campo-filtro-item {
   display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  min-width: 190px;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .etiqueta-filtro-mini {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  font-size: 0.8rem;
-  color: var(--text-muted-page, #94a3b8);
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--text-light, #f8fafc);
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .etiqueta-filtro-mini .material-symbols-outlined {
-  font-size: 1.05rem;
+  font-size: 1.15rem;
   color: var(--accent, #00FF41);
 }
 
-.input-filtro-select {
-  background: #18181b;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #ffffff;
-  padding: 0.55rem 0.85rem;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  outline: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
+/* --- Custom Select Component Dark Cyberpunk --- */
+.custom-select-contenedor {
+  position: relative;
+  min-width: 195px;
+  z-index: 10;
 }
 
-.input-filtro-select:focus {
-  border-color: var(--primary, #8a2ce2);
-  box-shadow: 0 0 10px rgba(138, 44, 226, 0.3);
+.custom-select-contenedor.abierto {
+  z-index: 1000;
+}
+
+.custom-select-boton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+  width: 100%;
+  background: rgba(20, 20, 24, 0.95);
+  border: 1px solid rgba(138, 44, 226, 0.35);
+  color: #ffffff;
+  padding: 0.52rem 0.95rem;
+  border-radius: 0.625rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  user-select: none;
+}
+
+.custom-select-boton:hover,
+.custom-select-contenedor.abierto .custom-select-boton {
+  border-color: var(--accent, #00FF41);
+  box-shadow: 0 0 14px rgba(0, 255, 65, 0.25);
+}
+
+.custom-select-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.icono-select-chevron {
+  font-size: 1.25rem;
+  color: var(--accent, #00FF41);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+}
+
+.custom-select-contenedor.abierto .icono-select-chevron {
+  transform: rotate(180deg);
+}
+
+.custom-select-opciones {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: #141418;
+  border: 1px solid rgba(138, 44, 226, 0.55);
+  border-radius: 0.65rem;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.9), 0 0 25px rgba(138, 44, 226, 0.3);
+  backdrop-filter: blur(16px);
+  z-index: 10000;
+  max-height: 230px;
+  overflow-y: auto;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 0.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.custom-select-contenedor.abierto .custom-select-opciones {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.custom-select-opcion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 0.85rem;
+  border-radius: 0.45rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-light, #f8fafc);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.custom-select-opcion:hover {
+  background: rgba(138, 44, 226, 0.25);
+  color: #ffffff;
+  padding-left: 1rem;
+}
+
+.custom-select-opcion.seleccionada {
+  background: rgba(138, 44, 226, 0.35);
+  color: #ffffff;
+  border: 1px solid rgba(0, 255, 65, 0.3);
+  font-weight: 600;
+}
+
+.custom-select-opcion .check-activo {
+  font-size: 1.05rem;
+  color: var(--accent, #00FF41);
 }
 
 .campo-filtro-acciones {
   display: flex;
   align-items: center;
+  margin-left: auto;
+}
+
+@media (max-width: 768px) {
+  .campo-filtro-acciones {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .campo-filtro-item {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .input-filtro-select {
+    width: 100%;
+  }
 }
 
 /* --- Contenedor de Paginación Inteligente --- */

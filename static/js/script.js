@@ -1129,3 +1129,72 @@ function inicializarGraficosReportes() {
   }
 }
 
+/**
+ * Control Dinámico de Selectores Personalizados (Custom Dropdowns)
+ */
+function inicializarCustomSelects() {
+  if (window._customSelectsInicializados) return;
+  window._customSelectsInicializados = true;
+
+  document.addEventListener('click', (e) => {
+    // Si se presiona el botón trigger del selector
+    const trigger = e.target.closest('.custom-select-boton');
+    if (trigger) {
+      e.preventDefault();
+      const contenedor = trigger.closest('.custom-select-contenedor');
+      const estabaAbierto = contenedor.classList.contains('abierto');
+
+      // Cerrar todos los selectores abiertos
+      document.querySelectorAll('.custom-select-contenedor.abierto').forEach((c) => {
+        c.classList.remove('abierto');
+        c.querySelector('.custom-select-boton')?.setAttribute('aria-expanded', 'false');
+      });
+
+      if (!estabaAbierto) {
+        contenedor.classList.add('abierto');
+        trigger.setAttribute('aria-expanded', 'true');
+      }
+      return;
+    }
+
+    // Si se selecciona una opción
+    const opcion = e.target.closest('.custom-select-opcion');
+    if (opcion) {
+      e.preventDefault();
+      const contenedor = opcion.closest('.custom-select-contenedor');
+      const targetInputId = contenedor?.dataset.targetInput;
+      const input = targetInputId ? document.getElementById(targetInputId) : null;
+      const valor = opcion.dataset.value;
+
+      if (input) {
+        input.value = valor;
+        const form = input.closest('form');
+        if (form) {
+          form.submit();
+        }
+      }
+      contenedor?.classList.remove('abierto');
+      return;
+    }
+
+    // Cerrar cualquier selector si se hace clic fuera
+    if (!e.target.closest('.custom-select-contenedor')) {
+      document.querySelectorAll('.custom-select-contenedor.abierto').forEach((c) => {
+        c.classList.remove('abierto');
+        c.querySelector('.custom-select-boton')?.setAttribute('aria-expanded', 'false');
+      });
+    }
+  });
+
+  // Accesibilidad por teclado: tecla Escape cierra el selector
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.custom-select-contenedor.abierto').forEach((c) => {
+        c.classList.remove('abierto');
+        c.querySelector('.custom-select-boton')?.setAttribute('aria-expanded', 'false');
+      });
+    }
+  });
+}
+
+
