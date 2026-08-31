@@ -2646,16 +2646,17 @@ select option {
   align-items: center;
   justify-content: center;
   font-size: 0.75rem;
-  font-weight: 700;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
+  font-weight: 800;
+  padding: 0.35rem 0.7rem;
+  border-radius: 0.4rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  z-index: 2;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  letter-spacing: 0.08em;
+  z-index: 3;
+  opacity: 1 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
 }
 
-/* El badge solo flota cuando está superpuesto sobre la portada de una tarjeta. */
+/* El badge flota superpuesto sobre la portada de una tarjeta */
 .tarjeta-producto-imagen > .badge-formato-tarjeta {
   position: absolute;
   top: 0.75rem;
@@ -2663,14 +2664,19 @@ select option {
 }
 
 .badge-formato-cd {
-  background: #2563eb;
-  color: #eff6ff;
+  background: #0284c7 !important;
+  color: #ffffff !important;
+  border: 1.5px solid #7dd3fc;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.7), 0 0 12px rgba(2, 132, 199, 0.45);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
 
 .badge-formato-vinilo {
-  background: #7c3aed;
-  color: #faf5ff;
-  border: 1px solid var(--accent);
+  background: #8b22e2 !important;
+  color: #ffffff !important;
+  border: 1.5px solid #d8b4fe;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.7), 0 0 12px rgba(139, 34, 226, 0.45);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
 
 .tarjeta-producto-acciones {
@@ -2787,11 +2793,24 @@ select option {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.4rem 0.875rem;
+  padding: 0.45rem 1rem;
   border-radius: 9999px;
-  font-weight: 700;
+  font-weight: 800;
   font-size: 0.875rem;
-  backdrop-filter: blur(8px);
+  opacity: 1 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.7);
+}
+
+.badge-formato-flotante.badge-formato-cd {
+  background: #0284c7 !important;
+  color: #ffffff !important;
+  border: 1.5px solid #7dd3fc;
+}
+
+.badge-formato-flotante.badge-formato-vinilo {
+  background: #8b22e2 !important;
+  color: #ffffff !important;
+  border: 1.5px solid #d8b4fe;
 }
 
 .icono-formato {
