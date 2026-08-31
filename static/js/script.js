@@ -6,6 +6,7 @@ function inicializarAplicacion() {
   inicializarValidacionesAuth();
   inicializarCustomSelects();
   configurarFormularioTarjeta();
+  inicializarResumenCarrito();
 }
 
 function sincronizarClaseBody(evento) {
@@ -821,4 +822,57 @@ document.addEventListener('keydown', (e) => {
     });
   }
 });
+
+/**
+ * Control del Panel Desplegable (Slide-Over / Modal) de Resumen de Pedido
+ */
+function inicializarResumenCarrito() {
+  const btnToggle = document.getElementById('btnToggleResumenPedido');
+  const btnAbrirBottom = document.getElementById('btnAbrirResumenBottom');
+  const btnCerrar = document.getElementById('btnCerrarResumenPedido');
+  const btnContinuar = document.getElementById('btnContinuarComprandoPanel');
+  const panel = document.getElementById('panelResumenPedido');
+  const overlay = document.getElementById('overlayResumenPedido');
+
+  if (!panel || !overlay) return;
+
+  const abrirResumen = () => {
+    panel.classList.add('abierto');
+    overlay.classList.add('abierto');
+    panel.setAttribute('aria-hidden', 'false');
+    overlay.setAttribute('aria-hidden', 'false');
+    if (btnToggle) btnToggle.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+  };
+
+  const cerrarResumen = () => {
+    panel.classList.remove('abierto');
+    overlay.classList.remove('abierto');
+    panel.setAttribute('aria-hidden', 'true');
+    overlay.setAttribute('aria-hidden', 'true');
+    if (btnToggle) btnToggle.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  };
+
+  const toggleResumen = () => {
+    if (panel.classList.contains('abierto')) {
+      cerrarResumen();
+    } else {
+      abrirResumen();
+    }
+  };
+
+  if (btnToggle) btnToggle.addEventListener('click', toggleResumen);
+  if (btnAbrirBottom) btnAbrirBottom.addEventListener('click', abrirResumen);
+  if (btnCerrar) btnCerrar.addEventListener('click', cerrarResumen);
+  if (btnContinuar) btnContinuar.addEventListener('click', cerrarResumen);
+  overlay.addEventListener('click', cerrarResumen);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && panel.classList.contains('abierto')) {
+      cerrarResumen();
+    }
+  });
+}
+
 
