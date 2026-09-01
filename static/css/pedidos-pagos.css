@@ -333,6 +333,26 @@
   color: var(--primary);
 }
 
+.alerta-rechazo-card-movil {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 0.45rem;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.75rem;
+  color: #f87171;
+  font-weight: 500;
+  box-sizing: border-box;
+}
+
+.alerta-rechazo-card-movil .icono-rechazo-mini {
+  font-size: 0.95rem;
+  flex-shrink: 0;
+  color: #ef4444;
+}
+
 .fila-movil-pedido-pie {
   display: flex;
   justify-content: space-between;
@@ -552,6 +572,30 @@ body.modal-pedido-abierto {
 .modal-hero-fecha .material-symbols-outlined {
   font-size: 0.95rem;
   color: var(--primary);
+}
+
+.modal-hero-pedido-card .aviso-estado-detalle {
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.65rem;
+  gap: 0.65rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.modal-hero-pedido-card .aviso-estado-detalle .icono-aviso-detalle {
+  font-size: 1.35rem;
+  flex-shrink: 0;
+}
+
+.modal-hero-pedido-card .aviso-estado-detalle .aviso-detalle-titulo {
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 0.15rem;
+}
+
+.modal-hero-pedido-card .aviso-estado-detalle .aviso-detalle-texto {
+  font-size: 0.78rem;
+  line-height: 1.35;
 }
 
 .modal-hero-total-box {
