@@ -1,0 +1,31 @@
+{% extends "emails/base.html" %}
+
+{% block titulo %}Pedido recibido - New Records{% endblock %}
+{% block preheader %}Recibimos tu pedido {{ numero }} y está pendiente de revisión.{% endblock %}
+
+{% block contenido %}
+  <p class="eyebrow">Compra registrada</p>
+  <h1>¡Recibimos tu pedido!</h1>
+  <p>Hola {{ nombre }}, tu compra fue registrada correctamente y ya está disponible para revisión.</p>
+
+  <div class="panel">
+    <table role="presentation" width="100%">
+      <tr>
+        <td style="padding-right:12px;">
+          <p class="dato-etiqueta">Pedido</p>
+          <p class="dato-valor">{{ numero }}</p>
+        </td>
+        <td align="right">
+          <p class="dato-etiqueta">Total</p>
+          <p class="dato-valor">${{ total }}</p>
+        </td>
+      </tr>
+    </table>
+    <div style="margin-top:20px;"><span class="estado estado-pendiente">PENDIENTE DE REVISIÓN</span></div>
+  </div>
+
+  <p>Te enviaremos otro correo cuando el pedido sea aprobado o rechazado.</p>
+  {% if url_pedidos %}
+    <p><a class="boton" href="{{ url_pedidos }}">Consultar mis pedidos</a></p>
+  {% endif %}
+{% endblock %}

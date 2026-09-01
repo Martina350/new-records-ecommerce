@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+
+{% block titulo %}Administración de Discos{% endblock %}
+
+{% block contenido %}
+<main class="seccion-admin">
+  <div class="contenedor">
+    <div class="admin-cabecera-principal">
+      <div class="admin-cabecera-info">
+        <div class="admin-icono-grande">
+          <span class="material-symbols-outlined" aria-hidden="true">album</span>
+        </div>
+        <div>
+          <h1 id="titulo-discos" class="titulo-admin">
+            Gestión de <span class="degradado">Discos</span>
+          </h1>
+          <p class="subtitulo-admin">
+            Catálogo completo de música en formato CD y Vinilo con control de stock y precios.
+          </p>
+        </div>
+      </div>
+
+      <div class="admin-cabecera-acciones">
+        <a class="boton boton-principal resplandor-neon" href="{{ url_for('admin.admin_discos_nuevo') }}">
+          <span class="material-symbols-outlined" aria-hidden="true">add</span>
+          <span>Nuevo Disco</span>
+        </a>
+        <a class="boton boton-secundario" href="{{ url_for('admin.admin_dashboard') }}">
+          <span class="material-symbols-outlined" aria-hidden="true">dashboard</span>
+          <span>Dashboard</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Barra de Filtros Avanzados -->
+    <div class="admin-barra-filtros-avanzados">
+      <form method="get" action="{{ url_for('admin.admin_discos_lista') }}" class="form-filtros-grid" id="formFiltrosDiscos">
+        <!-- Selector Personalizado de Género -->
+        <div class="campo-filtro-item">
+          <label class="etiqueta-filtro-mini">
+            <span class="material-symbols-outlined" aria-hidden="true">category</span>
+            Género Musical:
+          </label>
+          <div class="custom-select-contenedor" data-target-input="filtroCategoria">
+            <input type="hidden" id="filtroCategoria" name="categoria_id" value="{{ categoria_filtro }}">
+            <button type="button" class="custom-select-boton" aria-haspopup="listbox" aria-expanded="false">
+              <span class="custom-select-label">
+                {% if categoria_filtro %}
+                  {% for cat in categorias %}
+                    {% if categoria_filtro == cat.id|string %}{{ cat.nombre }}{% endif %}
+                  {% endfor %}
+                {% else %}
+                  Todos los géneros
+                {% endif %}
+              </span>
+              <span class="material-symbols-outlined icono-select-chevron" aria-hidden="true">expand_more</span>
+            </button>
+            <div class="custom-select-opciones" role="listbox">
+              <div class="custom-select-opcion {% if not categoria_filtro %}seleccionada{% endif %}" data-value="">
+                <span>Todos los géneros</span>
+                {% if not categoria_filtro %}
+                  <span class="material-symbols-outlined check-activo" aria-hidden="true">check</span>
+                {% endif %}
+              </div>
+              {% for cat in categorias %}
+                <div class="custom-select-opcion {% if categoria_filtro == cat.id|string %}seleccionada{% endif %}" data-value="{{ cat.id }}">
+                  <span>{{ cat.nombre }}</span>
+                  {% if categoria_filtro == cat.id|string %}
+                    <span class="material-symbols-outlined check-activo" aria-hidden="true">check</span>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Selector Personalizado de Formato -->
+        <div class="campo-filtro-item">
+          <label class="etiqueta-filtro-mini">
+            <span class="material-symbols-outlined" aria-hidden="true">album</span>
+            Formato Físico:
+          </label>
+          <div class="custom-select-contenedor" data-target-input="filtroFormato">
+            <input type="hidden" id="filtroFormato" name="formato" value="{{ formato_filtro }}">
+            <button type="button" class="custom-select-boton" aria-haspopup="listbox" aria-expanded="false">
+              <span class="custom-select-label">
+                {% if formato_filtro == 'CD' %}
+                  CD
+                {% elif formato_filtro == 'VINILO' %}
+                  Vinilo
+                {% else %}
+                  Todos los formatos
+                {% endif %}
+              </span>
+              <span class="material-symbols-outlined icono-select-chevron" aria-hidden="true">expand_more</span>
+            </button>
+            <div class="custom-select-opciones" role="listbox">
+              <div class="custom-select-opcion {% if not formato_filtro %}seleccionada{% endif %}" data-value="">
+                <span>Todos los formatos</span>
+                {% if not formato_filtro %}
+                  <span class="material-symbols-outlined check-activo" aria-hidden="true">check</span>
+                {% endif %}
+              </div>
+              <div class="custom-select-opcion {% if formato_filtro == 'CD' %}seleccionada{% endif %}" data-value="CD">
+                <span>CD</span>
+                {% if formato_filtro == 'CD' %}
+                  <span class="material-symbols-outlined check-activo" aria-hidden="true">check</span>
+                {% endif %}
+              </div>
+              <div class="custom-select-opcion {% if formato_filtro == 'VINILO' %}seleccionada{% endif %}" data-value="VINILO">
+                <span>Vinilo</span>
+                {% if formato_filtro == 'VINILO' %}
+                  <span class="material-symbols-outlined check-activo" aria-hidden="true">check</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {% if categoria_filtro or formato_filtro %}
+          <div class="campo-filtro-acciones">
+            <a href="{{ url_for('admin.admin_discos_lista') }}" class="boton boton-secundario boton-chico">
+              <span class="material-symbols-outlined" aria-hidden="true">clear_all</span>
+              <span>Limpiar Filtros</span>
+            </a>
+          </div>
+        {% endif %}
+      </form>
+    </div>
+
+    <div class="admin-seccion-bloque admin-seccion-bloque-discos">
+      <!-- Vista Desktop: Tabla Panorámica de 9 Columnas -->
+      <div class="tabla-carrito-contenedor vista-desktop-admin-discos">
+        <table class="tabla-carrito">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Álbum / Artista</th>
+              <th>Género</th>
+              <th>Formato</th>
+              <th>Precio Base</th>
+              <th>Precio Final</th>
+              <th>Stock</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for d in discos %}
+              <tr class="{% if not d.activo %}fila-inactiva{% endif %}">
+                <td data-label="Código"><code>{{ d.codigo }}</code></td>
+                <td data-label="Álbum / Artista">
+                  <strong>{{ d.album }}</strong><br/>
+                  <small class="artista-disco-carrito">{{ d.artista }}</small>
+                </td>
+                <td data-label="Género">{{ d.categoria.nombre if d.categoria else 'Sin género' }}</td>
+                <td data-label="Formato">
+                  <span class="badge-formato-tarjeta badge-formato-{{ d.formato | lower }}">
+                    {{ d.formato }}
+                  </span>
+                </td>
+                <td data-label="Precio Base">${{ "%.2f"|format(d.precio_base) }}</td>
+                <td data-label="Precio Final"><strong>${{ "%.2f"|format(d.precio_final()) }}</strong></td>
+                <td data-label="Stock">
+                  {% if d.stock == 0 %}
+                    <span class="badge-stock-agotado">Agotado (0)</span>
+                  {% elif d.stock <= 3 %}
+                    <span class="badge-stock-bajo">{{ d.stock }} unid.</span>
+                  {% else %}
+                    <span>{{ d.stock }} unid.</span>
+                  {% endif %}
+                </td>
+                <td data-label="Estado">
+                  {% if d.activo %}
+                    <span class="badge-estado badge-estado-aprobado">Activo</span>
+                  {% else %}
+                    <span class="badge-estado badge-estado-rechazado">Inactivo</span>
+                  {% endif %}
+                </td>
+                <td data-label="Acciones">
+                  <div class="acciones-pedido-lista">
+                    <a class="boton boton-secundario boton-chico" href="{{ url_for('admin.admin_discos_editar', id=d.id) }}">
+                      <span class="material-symbols-outlined" aria-hidden="true">edit</span>
+                      <span>Editar</span>
+                    </a>
+                    {% if d.activo %}
+                      <form action="{{ url_for('admin.admin_discos_desactivar', id=d.id) }}" method="post" onsubmit="return confirm('¿Desactivar este disco del catálogo público?');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="boton boton-chico boton-peligro" type="submit" title="Desactivar del catálogo">
+                          <span class="material-symbols-outlined" aria-hidden="true">visibility_off</span>
+                        </button>
+                      </form>
+                    {% else %}
+                      <form action="{{ url_for('admin.admin_discos_reactivar', id=d.id) }}" method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="boton boton-chico boton-exito" type="submit" title="Reactivar en el catálogo">
+                          <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
+                        </button>
+                      </form>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="9" class="texto-centrado">No hay discos registrados que coincidan con los filtros.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Vista Móvil: Cards de Discos con Jerarquía Visual de Primer Nivel -->
+      <div class="admin-discos-cards-movil-grid vista-movil-admin-discos" id="contenedorCardsDiscosMovil">
+        {% if discos %}
+          {% include "admin/discos/_cards_movil.html" %}
+        {% else %}
+          <div class="sin-resultados-admin-card">
+            <span class="material-symbols-outlined" aria-hidden="true">search_off</span>
+            <p>No hay discos registrados que coincidan con los filtros.</p>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Botón Cargar Más Álbumes (Exclusivo para Vista Móvil) -->
+      {% if total_paginas > 1 %}
+        <div class="contenedor-cargar-mas-movil vista-movil-admin-discos" id="bloqueCargarMasDiscos">
+          <button
+            type="button"
+            class="boton boton-principal resplandor-neon btn-cargar-mas-discos"
+            id="btnCargarMasDiscos"
+            data-pagina-siguiente="{{ pagina + 1 }}"
+            data-total-paginas="{{ total_paginas }}"
+            data-categoria="{{ categoria_filtro }}"
+            data-formato="{{ formato_filtro }}"
+            data-url="{{ url_for('admin.admin_discos_lista') }}"
+          >
+            <span class="material-symbols-outlined icono-cargar-mas" aria-hidden="true">autorenew</span>
+            <span class="texto-btn-cargar">Cargar más álbumes</span>
+          </button>
+          <span class="contador-progreso-movil" id="contadorProgresoDiscos">
+            Mostrando {{ [pagina * por_pagina, total]|min }} de {{ total }} discos
+          </span>
+        </div>
+      {% endif %}
+
+      <!-- Paginación Desktop Panorámica (Se oculta automáticamente en móvil) -->
+      {% if total_paginas > 1 %}
+        <div class="paginacion-admin-contenedor vista-desktop-admin-discos">
+          <div class="paginacion-admin-info">
+            Mostrando <strong>{{ ((pagina - 1) * por_pagina) + 1 }}</strong> a <strong>{{ [pagina * por_pagina, total]|min }}</strong> de <strong>{{ total }}</strong> discos
+          </div>
+
+          <nav class="paginacion-admin-controles" aria-label="Navegación de páginas">
+            <!-- Botón Anterior -->
+            {% if pagina > 1 %}
+              <a 
+                class="btn-paginacion" 
+                href="{{ url_for('admin.admin_discos_lista', categoria_id=categoria_filtro, formato=formato_filtro, pagina=pagina - 1) }}"
+                title="Página anterior"
+              >
+                <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+                <span>Anterior</span>
+              </a>
+            {% else %}
+              <span class="btn-paginacion deshabilitado" aria-disabled="true">
+                <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+                <span>Anterior</span>
+              </span>
+            {% endif %}
+
+            <!-- Números de Página -->
+            <div class="paginacion-numeros">
+              {% for p in range(1, total_paginas + 1) %}
+                {% if p == pagina %}
+                  <span class="btn-num-pag activo" aria-current="page">{{ p }}</span>
+                {% else %}
+                  <a 
+                    class="btn-num-pag" 
+                    href="{{ url_for('admin.admin_discos_lista', categoria_id=categoria_filtro, formato=formato_filtro, pagina=p) }}"
+                  >{{ p }}</a>
+                {% endif %}
+              {% endfor %}
+            </div>
+
+            <!-- Botón Siguiente -->
+            {% if pagina < total_paginas %}
+              <a 
+                class="btn-paginacion" 
+                href="{{ url_for('admin.admin_discos_lista', categoria_id=categoria_filtro, formato=formato_filtro, pagina=pagina + 1) }}"
+                title="Página siguiente"
+              >
+                <span>Siguiente</span>
+                <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+              </a>
+            {% else %}
+              <span class="btn-paginacion deshabilitado" aria-disabled="true">
+                <span>Siguiente</span>
+                <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+              </span>
+            {% endif %}
+          </nav>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</main>
+{% endblock %}

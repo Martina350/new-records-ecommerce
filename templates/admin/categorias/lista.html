@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block titulo %}Administración de Categorías{% endblock %}
+
+{% block contenido %}
+<main class="seccion-admin">
+  <div class="contenedor">
+    <div class="admin-cabecera-principal">
+      <div class="admin-cabecera-info">
+        <div class="admin-icono-grande">
+          <span class="material-symbols-outlined" aria-hidden="true">category</span>
+        </div>
+        <div>
+          <h1 id="titulo-categorias" class="titulo-admin">
+            Gestión de <span class="degradado">Categorías</span>
+          </h1>
+          <p class="subtitulo-admin">
+            Clasificación por géneros musicales y control de visibilidad en el catálogo.
+          </p>
+        </div>
+      </div>
+
+      <div class="admin-cabecera-acciones">
+        <a class="boton boton-principal resplandor-neon" href="{{ url_for('admin.admin_categorias_nueva') }}">
+          <span class="material-symbols-outlined" aria-hidden="true">add</span>
+          <span>Nueva Categoría</span>
+        </a>
+        <a class="boton boton-secundario" href="{{ url_for('admin.admin_dashboard') }}">
+          <span class="material-symbols-outlined" aria-hidden="true">dashboard</span>
+          <span>Dashboard</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="admin-seccion-bloque">
+      <div class="tabla-carrito-contenedor">
+        <table class="tabla-carrito">
+          <thead>
+            <tr>
+              <th>Nombre del Género</th>
+              <th>Prefijo</th>
+              <th>Discos Vinculados</th>
+              <th>Descripción</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for cat in categorias %}
+              <tr class="{% if not cat.activo %}fila-inactiva{% endif %}">
+                <td data-label="Género"><strong>{{ cat.nombre }}</strong></td>
+                <td data-label="Prefijo"><code>NR-{{ cat.prefijo_codigo }}-###</code></td>
+                <td data-label="Discos">
+                  <span class="badge-activo-admin" style="margin-top: 0;">
+                    {{ cat.discos | length }} disco(s)
+                  </span>
+                </td>
+                <td data-label="Descripción">{{ cat.descripcion or 'Sin descripción' }}</td>
+                <td data-label="Estado">
+                  {% if cat.activo %}
+                    <span class="badge-estado badge-estado-aprobado">Activa</span>
+                  {% else %}
+                    <span class="badge-estado badge-estado-rechazado">Inactiva</span>
+                  {% endif %}
+                </td>
+                <td data-label="Acciones">
+                  <div class="acciones-pedido-lista">
+                    <a class="boton boton-secundario boton-chico" href="{{ url_for('admin.admin_categorias_editar', id=cat.id) }}">
+                      <span class="material-symbols-outlined" aria-hidden="true">edit</span>
+                      <span>Editar</span>
+                    </a>
+                    {% if cat.activo %}
+                      {% set discos_activos = cat.discos | selectattr('activo') | list | length %}
+                      <form
+                        action="{{ url_for('admin.admin_categorias_desactivar', id=cat.id) }}"
+                        method="post"
+                        onsubmit="return confirm('{% if discos_activos %}Esta categoría tiene {{ discos_activos }} disco(s) activo(s). También serán desactivados. {% endif %}¿Confirmas esta operación?');"
+                      >
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        {% if discos_activos %}
+                          <input type="hidden" name="confirmar_con_discos" value="si" />
+                        {% endif %}
+                        <button class="boton boton-chico boton-peligro" type="submit" title="Desactivar categoría">
+                          <span class="material-symbols-outlined" aria-hidden="true">visibility_off</span>
+                        </button>
+                      </form>
+                    {% else %}
+                      <form action="{{ url_for('admin.admin_categorias_reactivar', id=cat.id) }}" method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="boton boton-chico boton-exito" type="submit" title="Reactivar categoría">
+                          <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
+                        </button>
+                      </form>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="6" class="texto-centrado">No hay categorías registradas.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginación Condicional (Se oculta automáticamente si total_paginas <= 1) -->
+      {% if total_paginas > 1 %}
+        <div class="paginacion-admin-contenedor">
+          <div class="paginacion-admin-info">
+            Mostrando <strong>{{ ((pagina - 1) * por_pagina) + 1 }}</strong> a <strong>{{ [pagina * por_pagina, total]|min }}</strong> de <strong>{{ total }}</strong> categorías
+          </div>
+
+          <nav class="paginacion-admin-controles" aria-label="Navegación de páginas">
+            <!-- Botón Anterior -->
+            {% if pagina > 1 %}
+              <a 
+                class="btn-paginacion" 
+                href="{{ url_for('admin.admin_categorias_lista', pagina=pagina - 1) }}"
+                title="Página anterior"
+              >
+                <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+                <span>Anterior</span>
+              </a>
+            {% else %}
+              <span class="btn-paginacion deshabilitado" aria-disabled="true">
+                <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+                <span>Anterior</span>
+              </span>
+            {% endif %}
+
+            <!-- Números de Página -->
+            <div class="paginacion-numeros">
+              {% for p in range(1, total_paginas + 1) %}
+                {% if p == pagina %}
+                  <span class="btn-num-pag activo" aria-current="page">{{ p }}</span>
+                {% else %}
+                  <a 
+                    class="btn-num-pag" 
+                    href="{{ url_for('admin.admin_categorias_lista', pagina=p) }}"
+                  >{{ p }}</a>
+                {% endif %}
+              {% endfor %}
+            </div>
+
+            <!-- Botón Siguiente -->
+            {% if pagina < total_paginas %}
+              <a 
+                class="btn-paginacion" 
+                href="{{ url_for('admin.admin_categorias_lista', pagina=pagina + 1) }}"
+                title="Página siguiente"
+              >
+                <span>Siguiente</span>
+                <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+              </a>
+            {% else %}
+              <span class="btn-paginacion deshabilitado" aria-disabled="true">
+                <span>Siguiente</span>
+                <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+              </span>
+            {% endif %}
+          </nav>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</main>
+{% endblock %}

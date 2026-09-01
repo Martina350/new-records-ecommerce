@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block titulo %}Registro de Usuario{% endblock %}
+
+{% block contenido %}
+  <!-- Fondo de Inicio con Desenfoque (Blur) -->
+  <section class="inicio inicio-desenfocado" aria-hidden="true">
+    <div class="inicio-fondo" role="img" aria-label="Vinilo iluminado en una tornamesa"></div>
+    <div class="inicio-superposicion"></div>
+    <div class="inicio-contenido">
+      <h1 class="inicio-titulo">
+        NEW <span class="degradado">RECORDS</span>
+      </h1>
+      <p class="inicio-descripcion">
+        Nuestra tienda online es el destino definitivo para los amantes de la música. Encuentra los mejores discos de tus géneros favoritos.
+      </p>
+    </div>
+  </section>
+
+  <!-- Modal Flotante de Registro -->
+  <div class="modal-auth-overlay activo" id="modalRegistroOverlay">
+    <div class="modal-auth-tarjeta" role="dialog" aria-modal="true" aria-labelledby="titulo-registro">
+      <!-- Botón de Cerrar Modal (X) -->
+      <a class="btn-cerrar-modal" href="{{ url_for('catalogo.inicio') }}" aria-label="Cerrar ventana y volver al inicio" title="Cerrar">
+        <span class="material-symbols-outlined" aria-hidden="true">close</span>
+      </a>
+
+      <div class="auth-cabecera">
+        <span class="material-symbols-outlined auth-icono" aria-hidden="true">person_add</span>
+        <h1 id="titulo-registro" class="auth-titulo">
+          Crear <span class="degradado">Cuenta</span>
+        </h1>
+        <p class="auth-subtitulo">Únete a la comunidad de New Records para adquirir tus discos y vinilos favoritos.</p>
+      </div>
+
+      <form class="formulario-auth" id="formRegistro" action="{{ url_for('auth.registro') }}" method="post" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        
+        <div class="grupo-formulario">
+          <label class="etiqueta-formulario" for="nombre">Nombre completo *</label>
+          <input 
+            class="entrada-formulario{% if errores and errores.get('nombre') %} no-valido{% endif %}" 
+            id="nombre" 
+            name="nombre" 
+            type="text" 
+            value="{{ nombre or '' }}" 
+            placeholder="Ej. Martina Gómez" 
+            minlength="2"
+            maxlength="100"
+            required 
+            autocomplete="name"
+            autofocus
+          />
+          <span class="mensaje-error{% if errores and errores.get('nombre') %} visible{% endif %}" id="nombreError" role="alert">{{ errores.get('nombre', '') if errores else '' }}</span>
+        </div>
+
+        <div class="grupo-formulario">
+          <label class="etiqueta-formulario" for="email">Correo electrónico *</label>
+          <input 
+            class="entrada-formulario{% if errores and errores.get('email') %} no-valido{% endif %}" 
+            id="email" 
+            name="email" 
+            type="email" 
+            value="{{ email or '' }}" 
+            placeholder="tu@correo.com" 
+            maxlength="120"
+            required 
+            autocomplete="email"
+          />
+          <span class="mensaje-error{% if errores and errores.get('email') %} visible{% endif %}" id="emailError" role="alert">{{ errores.get('email', '') if errores else '' }}</span>
+        </div>
+
+        <div class="grupo-formulario">
+          <label class="etiqueta-formulario" for="password">Contraseña *</label>
+          <input 
+            class="entrada-formulario{% if errores and errores.get('password') %} no-valido{% endif %}" 
+            id="password" 
+            name="password" 
+            type="password" 
+            placeholder="Mínimo 8 caracteres" 
+            minlength="8" 
+            required 
+            autocomplete="new-password"
+          />
+          <span class="mensaje-error{% if errores and errores.get('password') %} visible{% endif %}" id="passwordError" role="alert">{{ errores.get('password', '') if errores else '' }}</span>
+        </div>
+
+        <div class="grupo-formulario">
+          <label class="etiqueta-formulario" for="confirmar_password">Confirmar contraseña *</label>
+          <input 
+            class="entrada-formulario{% if errores and errores.get('confirmar_password') %} no-valido{% endif %}" 
+            id="confirmar_password" 
+            name="confirmar_password" 
+            type="password" 
+            placeholder="Repite tu contraseña" 
+            minlength="8" 
+            required 
+            autocomplete="new-password"
+          />
+          <span class="mensaje-error{% if errores and errores.get('confirmar_password') %} visible{% endif %}" id="confirmarPasswordError" role="alert">{{ errores.get('confirmar_password', '') if errores else '' }}</span>
+        </div>
+
+        {% if errores and errores.get('general') %}
+          <div class="mensaje-error visible" style="text-align: center; margin-bottom: 0.3rem;" role="alert">
+            {{ errores.get('general') }}
+          </div>
+        {% endif %}
+
+        <button class="boton boton-principal boton-enviar resplandor-neon" type="submit">
+          Registrarme
+          <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+        </button>
+
+        <div class="auth-pie-enlaces">
+          <p class="auth-texto-enlace">
+            ¿Ya tienes una cuenta? 
+            <a class="enlace-destacado" href="{{ url_for('auth.login') }}">Inicia sesión aquí</a>
+          </p>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

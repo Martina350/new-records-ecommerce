@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block titulo %}Verificar Tarjeta — PIN{% endblock %}
+
+{% block contenido %}
+<main class="contacto-principal auth-seccion">
+  <div class="contenedor">
+    <div class="caja-formulario auth-caja pin-caja">
+      <section class="contenedor-formulario-contacto" aria-labelledby="titulo-pin">
+
+        <div class="auth-cabecera">
+          <span class="material-symbols-outlined auth-icono" aria-hidden="true">pin</span>
+          <h1 id="titulo-pin" class="titulo-formulario-contacto">
+            Verificación <span class="degradado">PIN</span>
+          </h1>
+          <p class="auth-subtitulo">
+            Ingresa el código de 6 dígitos enviado a tu correo electrónico para confirmar la tarjeta
+            <strong>**** **** **** {{ verificacion.ultimos4 }}</strong>.
+          </p>
+        </div>
+
+        <!-- Indicador de intentos restantes -->
+        <div class="intentos-indicator">
+          <div class="intentos-bar">
+            {% for i in range(3) %}
+              <div class="intento-dot {% if i < (3 - intentos_restantes) %}usado{% else %}disponible{% endif %}"></div>
+            {% endfor %}
+          </div>
+          <span class="intentos-texto">
+            {% if intentos_restantes > 0 %}
+              {{ intentos_restantes }} intento(s) restante(s)
+            {% else %}
+              Sin intentos disponibles — inicia el proceso nuevamente
+            {% endif %}
+          </span>
+        </div>
+
+        <!-- Aviso de caducidad -->
+        <div class="aviso-caduca">
+          <span class="material-symbols-outlined" aria-hidden="true">timer</span>
+          <span>Este código es válido por <strong>5 minutos</strong> desde el momento del envío.</span>
+        </div>
+
+        {% if intentos_restantes > 0 and not verificacion.verificada %}
+          <form class="formulario-contacto form-verificar-pin" action="{{ url_for('pagos.pago_verificar', token=token) }}" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="campo-formulario campo-pin">
+              <label class="etiqueta-formulario" for="pin">Código PIN <span class="requerido">*</span></label>
+              <input
+                class="entrada-formulario input-pin"
+                type="text"
+                id="pin"
+                name="pin"
+                placeholder="• • • • • •"
+                required
+                minlength="6"
+                maxlength="6"
+                pattern="[0-9]{6}"
+                inputmode="numeric"
+                autocomplete="one-time-code"
+                autofocus
+              />
+              <span class="nota-campo nota-campo-pin">Solo números, exactamente 6 dígitos.</span>
+            </div>
+
+            <div class="grupo-botones-verificar-pin">
+              <button class="boton boton-principal resplandor-neon btn-accion-verificar-pin" type="submit" id="btn-verificar-pin">
+                <span class="material-symbols-outlined" aria-hidden="true">verified</span>
+                <span>Verificar y activar tarjeta</span>
+              </button>
+            </div>
+          </form>
+        {% else %}
+          <div class="estado-bloqueado">
+            <span class="material-symbols-outlined icono-bloqueado" aria-hidden="true">lock</span>
+            <p>La verificación expiró o fue bloqueada por intentos fallidos.</p>
+          </div>
+        {% endif %}
+
+        <div class="pin-acciones-extra">
+          <a class="boton boton-secundario btn-reintentar-pin" href="{{ url_for('pagos.pago_agregar') }}">
+            <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
+            <span>Reintentar con nueva tarjeta</span>
+          </a>
+          <a class="enlace-destacado enlace-volver-metodos" href="{{ url_for('pagos.pago_metodos') }}">
+            Volver a mis métodos de pago
+          </a>
+        </div>
+
+      </section>
+    </div>
+  </div>
+</main>
+{% endblock %}

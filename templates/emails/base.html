@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="supported-color-schemes" content="dark">
+  <title>{% block titulo %}New Records{% endblock %}</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #0b0b0d;
+      color: #f8fafc;
+      font-family: Arial, Helvetica, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    table { border-collapse: collapse; }
+    .contenedor { width: 100%; background: #0b0b0d; }
+    .tarjeta {
+      width: 100%;
+      max-width: 600px;
+      background: #141217;
+      border: 1px solid #30213d;
+      border-radius: 18px;
+      overflow: hidden;
+    }
+    .cabecera {
+      padding: 26px 34px;
+      background: #1d1029;
+      border-bottom: 1px solid #43205f;
+    }
+    .marca { color: #ffffff; font-size: 21px; font-weight: 700; }
+    .monograma {
+      width: 36px;
+      height: 36px;
+      border: 3px solid #8a2ce2;
+      border-radius: 50%;
+      color: #00ff41;
+      font-size: 11px;
+      font-weight: 700;
+      text-align: center;
+      line-height: 30px;
+    }
+    .contenido { padding: 38px 42px 34px; }
+    .eyebrow {
+      margin: 0 0 12px;
+      color: #b76cff;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 0 0 18px;
+      color: #ffffff;
+      font-size: 28px;
+      line-height: 1.25;
+    }
+    p { margin: 0 0 18px; color: #cbd5e1; font-size: 16px; line-height: 1.65; }
+    .panel {
+      margin: 24px 0;
+      padding: 22px;
+      background: #0f0e12;
+      border: 1px solid #3b2850;
+      border-radius: 12px;
+    }
+    .dato-etiqueta {
+      margin: 0 0 7px;
+      color: #94a3b8;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .dato-valor { margin: 0; color: #ffffff; font-size: 22px; font-weight: 700; }
+    .boton {
+      display: inline-block;
+      padding: 14px 24px;
+      background: #8a2ce2;
+      border-radius: 9px;
+      color: #ffffff !important;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .estado {
+      display: inline-block;
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .5px;
+    }
+    .estado-pendiente { background: #38260b; color: #fbbf24; }
+    .estado-aprobado { background: #063c1a; color: #36f56b; }
+    .estado-rechazado { background: #45171b; color: #fb7185; }
+    .aviso {
+      margin: 24px 0 0;
+      padding: 16px 18px;
+      background: #17131d;
+      border-left: 3px solid #8a2ce2;
+      color: #b9c1cd;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+    .pie { padding: 24px 34px 30px; text-align: center; }
+    .pie p { margin: 0 0 6px; color: #778195; font-size: 12px; line-height: 1.5; }
+    @media only screen and (max-width: 620px) {
+      .exterior { padding: 18px 12px !important; }
+      .cabecera { padding: 22px 24px !important; }
+      .contenido { padding: 30px 24px 26px !important; }
+      .pie { padding: 22px 24px 26px !important; }
+      h1 { font-size: 24px !important; }
+      .boton { display: block !important; text-align: center !important; }
+    }
+  </style>
+</head>
+<body>
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">
+    {% block preheader %}Tienes una actualización de New Records.{% endblock %}
+  </div>
+  <table role="presentation" class="contenedor" width="100%">
+    <tr>
+      <td class="exterior" align="center" style="padding:36px 16px;">
+        <table role="presentation" class="tarjeta" width="600">
+          <tr>
+            <td class="cabecera">
+              <table role="presentation">
+                <tr>
+                  <td><div class="monograma">NR</div></td>
+                  <td style="padding-left:13px;"><span class="marca">New Records</span></td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr><td class="contenido">{% block contenido %}{% endblock %}</td></tr>
+          <tr>
+            <td class="pie">
+              <p>New Records · Música en formato físico</p>
+              <p>Este es un mensaje automático. No es necesario responder.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

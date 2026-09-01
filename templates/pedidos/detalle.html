@@ -1,0 +1,261 @@
+ {% extends "base.html" %}
+
+{% block titulo %}Pedido {{ pedido.numero }}{% endblock %}
+
+{% block contenido %}
+<main class="pedido-detalle-seccion-desktop">
+  <div class="contenedor-pedido-detalle-wide">
+    <div class="pedido-detalle-card-principal">
+      <section class="pedido-detalle-contenedor-interno" aria-labelledby="titulo-pedido">
+
+        <!-- Cabecera Panorámica del Pedido -->
+        <div class="pedido-detalle-cabecera-wide">
+          <!-- Fila 1: Código de Pedido + Badge de Estado alineados en los extremos sin desborde -->
+          <div class="pedido-detalle-top-meta-fila">
+            <div class="pedido-codigo-chip-wrap">
+              <span class="material-symbols-outlined icono-chip-pedido" aria-hidden="true">receipt_long</span>
+              <code class="codigo-pedido-detalle-neon">{{ pedido.numero }}</code>
+            </div>
+
+            <span class="badge-estado badge-estado-{{ pedido.estado | lower }} badge-estado-detalle-header" title="Estado: {{ pedido.estado }}" aria-label="Estado: {{ pedido.estado }}">
+              {% if pedido.estado == "PENDIENTE" %}
+                <span class="material-symbols-outlined icono-estado-chico" aria-hidden="true">schedule</span>
+              {% elif pedido.estado == "APROBADO" %}
+                <span class="material-symbols-outlined icono-estado-chico" aria-hidden="true">check_circle</span>
+              {% else %}
+                <span class="material-symbols-outlined icono-estado-chico" aria-hidden="true">cancel</span>
+              {% endif %}
+              <span class="texto-estado-desktop">{{ pedido.estado }}</span>
+            </span>
+          </div>
+
+          <!-- Fila 2: Título Principal y Fecha de Realización -->
+          <div class="pedido-detalle-titulos-wrap">
+            <h1 id="titulo-pedido" class="pedido-detalle-titulo-principal">
+              Resumen del Pedido
+            </h1>
+            <div class="pedido-fecha-meta">
+              <span class="material-symbols-outlined icono-meta-chico" aria-hidden="true">calendar_today</span>
+              <span>Realizado el {{ pedido.fecha_creacion.strftime('%d/%m/%Y a las %H:%M') }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mensaje Informativo según Estado -->
+        {% if pedido.estado == "PENDIENTE" %}
+          <div class="aviso-estado-detalle aviso-estado-detalle-pendiente">
+            <span class="material-symbols-outlined icono-aviso-detalle" aria-hidden="true">info</span>
+            <div>
+              <strong class="aviso-detalle-titulo">Tu pedido se encuentra en revisión administrativa</strong>
+              <p class="aviso-detalle-texto">Nuestro equipo verificará las existencias y confirmará el cobro antes de emitir tu factura final.</p>
+            </div>
+          </div>
+        {% elif pedido.estado == "APROBADO" %}
+          <div class="aviso-estado-detalle aviso-estado-detalle-aprobado">
+            <span class="material-symbols-outlined icono-aviso-detalle" aria-hidden="true">verified</span>
+            <div>
+              <strong class="aviso-detalle-titulo">¡Pedido Aprobado y Procesado con Éxito!</strong>
+              <p class="aviso-detalle-texto">El stock ha sido descontado satisfactoriamente y tu comprobante oficial está listo para descarga.</p>
+            </div>
+          </div>
+        {% elif pedido.estado == "RECHAZADO" %}
+          <div class="aviso-estado-detalle aviso-estado-detalle-rechazado">
+            <span class="material-symbols-outlined icono-aviso-detalle" aria-hidden="true">error</span>
+            <div>
+              <strong class="aviso-detalle-titulo">Pedido No Aprobado</strong>
+              <p class="aviso-detalle-texto">Motivo: {{ pedido.motivo_rechazo or 'Sin motivo especificado por el administrador.' }}</p>
+            </div>
+          </div>
+        {% endif %}
+
+        <!-- Grid de 2 Columnas: Datos de Envío y Pago -->
+        <div class="pedido-grid-info-2cols">
+          <!-- Columna 1: Datos de Envío -->
+          <div class="pedido-card-info-bloque">
+            <div class="info-bloque-cabecera">
+              <span class="material-symbols-outlined icono-info-bloque" aria-hidden="true">local_shipping</span>
+              <h2 class="info-bloque-titulo">Datos de Envío</h2>
+            </div>
+            <div class="info-bloque-cuerpo">
+              <div class="fila-info-item">
+                <span class="etiqueta-info-item">Destinatario:</span>
+                <strong class="valor-info-item">{{ pedido.cliente.nombre }}</strong>
+              </div>
+              <div class="fila-info-item">
+                <span class="etiqueta-info-item">Correo Electrónico:</span>
+                <span class="valor-info-item">{{ pedido.cliente.email }}</span>
+              </div>
+              <div class="fila-info-item">
+                <span class="etiqueta-info-item">Teléfono de Contacto:</span>
+                <span class="valor-info-item">{{ pedido.cliente.telefono or 'No especificado' }}</span>
+              </div>
+              <div class="fila-info-item">
+                <span class="etiqueta-info-item">Ciudad de Destino:</span>
+                <span class="valor-info-item">{{ pedido.cliente.ciudad or 'No especificada' }}</span>
+              </div>
+              <div class="fila-info-item">
+                <span class="etiqueta-info-item">Dirección de Entrega:</span>
+                <span class="valor-info-item valor-direccion-item">{{ pedido.cliente.direccion or 'No especificada' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Columna 2: Método de Pago -->
+          <div class="pedido-card-info-bloque">
+            <div class="info-bloque-cabecera">
+              <span class="material-symbols-outlined icono-info-bloque" aria-hidden="true">credit_card</span>
+              <h2 class="info-bloque-titulo">Método de Pago Utilizado</h2>
+            </div>
+            <div class="info-bloque-cuerpo">
+              <div class="fila-info-item">
+                <span class="etiqueta-info-item">Tarjeta:</span>
+                <div class="metodo-tarjeta-chip">
+                  <span class="material-symbols-outlined icono-tarjeta-chip" aria-hidden="true">credit_card</span>
+                  <span class="marca-tarjeta-texto">{{ pedido.metodo_pago.marca }}</span>
+                  <span class="ultimos4-tarjeta-texto">•••• {{ pedido.metodo_pago.ultimos4 }}</span>
+                </div>
+              </div>
+              <div class="fila-info-item">
+                <span class="etiqueta-info-item">Titular de la Tarjeta:</span>
+                <span class="valor-info-item">{{ pedido.metodo_pago.titular }}</span>
+              </div>
+              <div class="fila-info-item">
+                <span class="etiqueta-info-item">Vencimiento:</span>
+                <span class="valor-info-item vence-codigo">{{ "%02d"|format(pedido.metodo_pago.mes_vencimiento) }}/{{ pedido.metodo_pago.anio_vencimiento }}</span>
+              </div>
+              {% if pedido.transaccion_pago %}
+                <div class="fila-info-item">
+                  <span class="etiqueta-info-item">Referencia Bancaria:</span>
+                  <code class="codigo-referencia-bancaria">{{ pedido.transaccion_pago.referencia }}</code>
+                </div>
+                <div class="fila-info-item">
+                  <span class="etiqueta-info-item">Estado de Cobro:</span>
+                  <span class="badge-estado badge-estado-{{ pedido.transaccion_pago.estado | lower }}">
+                    {{ pedido.transaccion_pago.estado }}
+                  </span>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Sección de Artículos Comprados (Inmutables) -->
+        <div class="pedido-articulos-seccion-card">
+          <div class="articulos-seccion-cabecera">
+            <span class="material-symbols-outlined icono-articulos-seccion" aria-hidden="true">album</span>
+            <div>
+              <h2 class="articulos-seccion-titulo">Discos Comprados (Detalle Histórico)</h2>
+              <span class="articulos-seccion-subtitulo">{{ pedido.detalles | length }} álbum{% if pedido.detalles | length != 1 %}es{% endif %} adquirido{% if pedido.detalles | length != 1 %}s{% endif %} en este pedido</span>
+            </div>
+          </div>
+
+          <div class="tabla-detalle-items-wrapper">
+            <table class="tabla-detalle-items-widescreen">
+              <thead>
+                <tr>
+                  <th class="col-th-det-disco">DISCO / ÁLBUM</th>
+                  <th class="col-th-det-artista">ARTISTA</th>
+                  <th class="col-th-det-formato">FORMATO</th>
+                  <th class="col-th-det-precio">PRECIO UNITARIO</th>
+                  <th class="col-th-det-cantidad">CANTIDAD</th>
+                  <th class="col-th-det-subtotal">SUBTOTAL</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for detalle in pedido.detalles %}
+                  <tr class="fila-detalle-item">
+                    <!-- Disco / Álbum -->
+                    <td class="celda-det-disco" data-label="Disco / Álbum">
+                      <strong class="album-titulo-detalle">{{ detalle.album }}</strong>
+                    </td>
+
+                    <!-- Artista -->
+                    <td class="celda-det-artista" data-label="Artista">
+                      <span class="artista-texto-detalle">{{ detalle.artista }}</span>
+                    </td>
+
+                    <!-- Formato -->
+                    <td class="celda-det-formato" data-label="Formato">
+                      <span class="badge-formato-tarjeta badge-formato-{{ detalle.formato | lower }}">
+                        {{ detalle.formato }}
+                      </span>
+                    </td>
+
+                    <!-- Precio Unitario -->
+                    <td class="celda-det-precio" data-label="Precio Unitario">
+                      <span class="precio-unitario-numero">${{ "%.2f"|format(detalle.precio_unitario) }}</span>
+                    </td>
+
+                    <!-- Cantidad -->
+                    <td class="celda-det-cantidad" data-label="Cantidad">
+                      <span class="badge-cantidad-estatica">{{ detalle.cantidad }}</span>
+                    </td>
+
+                    <!-- Subtotal -->
+                    <td class="celda-det-subtotal" data-label="Subtotal">
+                      <span class="subtotal-numero-neon">${{ "%.2f"|format(detalle.subtotal) }}</span>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Total del Pedido -->
+          <div class="pedido-total-resumen-banner">
+            <div class="pedido-total-etiqueta-bloque">
+              <span class="material-symbols-outlined icono-total-banner" aria-hidden="true">payments</span>
+              <span class="pedido-total-etiqueta-texto">Total del Pedido (con envío y embalaje):</span>
+            </div>
+            <span class="pedido-total-monto-neon">${{ "%.2f"|format(pedido.total) }}</span>
+          </div>
+        </div>
+
+        <!-- Acciones de Descarga de Documentos PDF -->
+        <div class="pedido-documentos-seccion-card">
+          <div class="documentos-cabecera">
+            <span class="material-symbols-outlined icono-documentos-cabecera" aria-hidden="true">picture_as_pdf</span>
+            <div>
+              <h2 class="documentos-titulo">Documentos Oficiales Disponibles</h2>
+              <span class="documentos-subtitulo">Comprobantes digitales y facturación</span>
+            </div>
+          </div>
+
+          <div class="pedido-documentos-grid-botones">
+            <a class="boton boton-secundario resplandor-neon boton-descarga-doc" href="{{ url_for('pedidos.descargar_comprobante', numero=pedido.numero) }}" target="_blank">
+              <span class="material-symbols-outlined icono-doc-btn" aria-hidden="true">download</span>
+              <span>Descargar Comprobante (PDF)</span>
+            </a>
+
+            {% if pedido.estado == "APROBADO" %}
+              <a class="boton boton-destacado resplandor-neon boton-descarga-doc" href="{{ url_for('pedidos.descargar_factura', numero=pedido.numero) }}" target="_blank">
+                <span class="material-symbols-outlined icono-doc-btn" aria-hidden="true">receipt_long</span>
+                <span>Descargar Factura Oficial (PDF)</span>
+              </a>
+            {% else %}
+              <div class="nota-factura-bloqueada-box">
+                <span class="material-symbols-outlined icono-bloqueado" aria-hidden="true">lock</span>
+                <span>Factura Oficial disponible tras aprobación del pedido</span>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Barra de Navegación Inferior -->
+        <div class="pedido-acciones-pie-wide">
+          <a class="boton boton-secundario" href="{{ url_for('pedidos.lista_pedidos') }}">
+            <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+            <span>Volver a Mis Pedidos</span>
+          </a>
+          <a class="boton boton-principal" href="{{ url_for('catalogo.productos') }}">
+            <span class="material-symbols-outlined" aria-hidden="true">album</span>
+            <span>Seguir Explorando el Catálogo</span>
+          </a>
+        </div>
+
+      </section>
+    </div>
+  </div>
+</main>
+{% endblock %}
+

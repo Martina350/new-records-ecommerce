@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block titulo %}
+  {% if categoria_actual %}
+    Discos de {{ categoria_actual.nombre }}
+  {% else %}
+    Catálogo de Discos
+  {% endif %}
+{% endblock %}
+
+{% block contenido %}
+<main>
+  <section class="seccion-productos" aria-labelledby="titulo-productos">
+    <div class="contenedor">
+      <div class="encabezado-productos">
+        <div class="encabezado-productos-info">
+          <h1 id="titulo-productos" class="titulo-productos">
+            Colección <span class="degradado">Musical</span>
+          </h1>
+          <p class="descripcion-productos">
+            {% if categoria_actual %}
+              Explorando los mejores lanzamientos de <strong>{{ categoria_actual.nombre }}</strong> en formato físico.
+            {% else %}
+              Encuentra tus álbumes favoritos en CD y Vinilo de colección al mejor precio.
+            {% endif %}
+          </p>
+        </div>
+      </div>
+
+      <div class="barra-filtros-catalogo">
+        <form class="formulario-catalogo-filtros" action="{{ url_for('catalogo.productos') }}" method="get" id="formFiltroProductos">
+          <div class="grupo-filtro-categoria">
+            <label for="filtroCategoria" class="etiqueta-filtro-select">
+              <span class="material-symbols-outlined icono-filtro-select" aria-hidden="true">category</span>
+              Género:
+            </label>
+            <div class="contenedor-select-estilizado">
+              <select 
+                class="select-filtro-categoria select-custom" 
+                name="categoria" 
+                id="filtroCategoria"
+                onchange="document.getElementById('formFiltroProductos').requestSubmit()"
+                aria-label="Filtrar por género musical"
+              >
+                <option value="todos"{% if categoria_slug == 'todos' or not categoria_slug %} selected{% endif %}>
+                  Todos los géneros
+                </option>
+                {% for cat in categorias %}
+                  <option value="{{ cat.slug }}"{% if categoria_slug == cat.slug %} selected{% endif %}>
+                    {{ cat.nombre }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="contenedor-input-busqueda">
+            <span class="material-symbols-outlined icono-busqueda-input" aria-hidden="true">search</span>
+            <input 
+              class="entrada-busqueda-catalogo" 
+              type="text" 
+              name="q" 
+              placeholder="Buscar por álbum o artista..." 
+              value="{{ busqueda or '' }}"
+              aria-label="Buscar discos por álbum o artista"
+            />
+            {% if busqueda or (categoria_slug and categoria_slug != 'todos') %}
+              <a class="limpiar-busqueda" href="{{ url_for('catalogo.productos') }}" title="Limpiar todos los filtros">
+                <span class="material-symbols-outlined" aria-hidden="true">close</span>
+              </a>
+            {% endif %}
+          </div>
+        </form>
+      </div>
+
+      {% if discos %}
+        <div class="grid-productos" id="gridProductosCatalogo">
+          {% include "productos/_tarjetas_productos.html" %}
+        </div>
+
+        <!-- Botón Cargar Más Álbumes (Exclusivo para Vista Móvil) -->
+        {% if total_paginas > 1 %}
+          <div class="contenedor-cargar-mas-movil vista-movil-catalogo" id="bloqueCargarMasCatalogo">
+            <button
+              type="button"
+              class="boton boton-principal resplandor-neon btn-cargar-mas-discos"
+              id="btnCargarMasCatalogo"
+              data-pagina-siguiente="{{ pagina + 1 }}"
+              data-total-paginas="{{ total_paginas }}"
+              data-categoria="{{ categoria_slug }}"
+              data-q="{{ busqueda or '' }}"
+              data-url="{{ url_for('catalogo.productos') }}"
+            >
+              <span class="material-symbols-outlined icono-cargar-mas" aria-hidden="true">autorenew</span>
+              <span class="texto-btn-cargar">Cargar más álbumes</span>
+            </button>
+            <span class="contador-progreso-movil" id="contadorProgresoCatalogo">
+              Mostrando {{ [pagina * por_pagina, total]|min }} de {{ total }} álbumes
+            </span>
+          </div>
+        {% endif %}
+
+        <!-- Paginación Desktop Panorámica (Se oculta automáticamente en móvil) -->
+        {% if total_paginas > 1 %}
+          <div class="paginacion-admin-contenedor vista-desktop-catalogo">
+            <div class="paginacion-admin-info">
+              Mostrando <strong>{{ ((pagina - 1) * por_pagina) + 1 }}</strong> a <strong>{{ [pagina * por_pagina, total]|min }}</strong> de <strong>{{ total }}</strong> álbumes
+            </div>
+
+            <nav class="paginacion-admin-controles" aria-label="Navegación de páginas">
+              <!-- Botón Anterior -->
+              {% if pagina > 1 %}
+                <a 
+                  class="btn-paginacion" 
+                  href="{{ url_for('catalogo.productos', categoria=categoria_slug, q=busqueda, pagina=pagina - 1) }}"
+                  title="Página anterior"
+                >
+                  <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+                  <span>Anterior</span>
+                </a>
+              {% else %}
+                <span class="btn-paginacion deshabilitado" aria-disabled="true">
+                  <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+                  <span>Anterior</span>
+                </span>
+              {% endif %}
+
+              <!-- Números de Página -->
+              <div class="paginacion-numeros">
+                {% for p in range(1, total_paginas + 1) %}
+                  {% if p == pagina %}
+                    <span class="btn-num-pag activo" aria-current="page">{{ p }}</span>
+                  {% else %}
+                    <a 
+                      class="btn-num-pag" 
+                      href="{{ url_for('catalogo.productos', categoria=categoria_slug, q=busqueda, pagina=p) }}"
+                    >{{ p }}</a>
+                  {% endif %}
+                {% endfor %}
+              </div>
+
+              <!-- Botón Siguiente -->
+              {% if pagina < total_paginas %}
+                <a 
+                  class="btn-paginacion" 
+                  href="{{ url_for('catalogo.productos', categoria=categoria_slug, q=busqueda, pagina=pagina + 1) }}"
+                  title="Página siguiente"
+                >
+                  <span>Siguiente</span>
+                  <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+                </a>
+              {% else %}
+                <span class="btn-paginacion deshabilitado" aria-disabled="true">
+                  <span>Siguiente</span>
+                  <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+                </span>
+              {% endif %}
+            </nav>
+          </div>
+        {% endif %}
+      {% else %}
+        <div class="estado-vacio">
+          <span class="material-symbols-outlined icono-vacio" aria-hidden="true">album</span>
+          <h3 class="titulo-vacio">No se encontraron discos</h3>
+          <p class="texto-vacio">
+            {% if busqueda %}
+              No hay resultados para "{{ busqueda }}". Intenta con otro término o limpia los filtros.
+            {% else %}
+              No hay productos disponibles en esta categoría actualmente.
+            {% endif %}
+          </p>
+          <a class="boton boton-secundario" href="{{ url_for('catalogo.productos') }}">Ver todos los discos</a>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+</main>
+{% endblock %}

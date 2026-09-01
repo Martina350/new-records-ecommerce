@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block titulo %}Inicio{% endblock %}
+
+{% block contenido %}
+  <section class="inicio" id="seccionInicio" aria-labelledby="titulo-inicio">
+    <div class="inicio-fondo" role="img" aria-label="Vinilo iluminado en una tornamesa"></div>
+    <div class="inicio-superposicion"></div>
+    <div class="inicio-contenido">
+      <h1 id="titulo-inicio" class="inicio-titulo">
+        NEW <span class="degradado">RECORDS</span>
+      </h1>
+      <p class="inicio-descripcion">
+        Nuestra tienda online es el destino definitivo para los amantes de la música. Encuentra los mejores discos de tus géneros favoritos.
+      </p>
+      <div class="inicio-botones">
+        <a class="boton boton-destacado resplandor-neon btn-abrir-registro" id="btnHeroRegistro" href="{{ url_for('auth.registro') }}">
+          <span class="material-symbols-outlined" aria-hidden="true">person_add</span>
+          Registrarse
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal Interactivo de Iniciar Sesión -->
+  <div class="modal-auth-overlay" id="modalLoginOverlay">
+    <div class="modal-auth-tarjeta" role="dialog" aria-modal="true" aria-labelledby="titulo-login-modal">
+      <button class="btn-cerrar-modal" type="button" id="btnCerrarLoginModal" aria-label="Cerrar ventana">
+        <span class="material-symbols-outlined" aria-hidden="true">close</span>
+      </button>
+
+      <div class="auth-cabecera">
+        <span class="material-symbols-outlined auth-icono" aria-hidden="true">lock_open</span>
+        <h2 id="titulo-login-modal" class="auth-titulo">
+          Iniciar <span class="degradado">Sesión</span>
+        </h2>
+        <p class="auth-subtitulo">Accede a tu cuenta de New Records para gestionar tus compras y pedidos.</p>
+      </div>
+
+      <form class="formulario-auth" id="formLoginLanding" action="{{ url_for('auth.login') }}" method="post" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        
+        <div class="grupo-formulario">
+          <label class="etiqueta-formulario" for="login_email">Correo electrónico</label>
+          <input 
+            class="entrada-formulario" 
+            id="login_email" 
+            name="email" 
+            type="email" 
+            placeholder="tu@correo.com" 
+            required 
+            autocomplete="email"
+          />
+          <span class="mensaje-error" id="loginEmailError" role="alert"></span>
+        </div>
+
+        <div class="grupo-formulario">
+          <label class="etiqueta-formulario" for="login_password">Contraseña</label>
+          <input 
+            class="entrada-formulario" 
+            id="login_password" 
+            name="password" 
+            type="password" 
+            placeholder="••••••••" 
+            required 
+            autocomplete="current-password"
+          />
+          <span class="mensaje-error" id="loginPasswordError" role="alert"></span>
+        </div>
+
+        <button class="boton boton-principal boton-enviar resplandor-neon" type="submit">
+          Ingresar
+          <span class="material-symbols-outlined" aria-hidden="true">login</span>
+        </button>
+
+        <div class="auth-pie-enlaces">
+          <p class="auth-texto-enlace">
+            ¿Aún no tienes cuenta? 
+            <button class="enlace-destacado btn-cambiar-a-registro" type="button">Crear una cuenta nueva</button>
+          </p>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Interactivo de Registro -->
+  <div class="modal-auth-overlay" id="modalRegistroOverlay">
+    <div class="modal-auth-tarjeta" role="dialog" aria-modal="true" aria-labelledby="titulo-registro-modal">
+      <button class="btn-cerrar-modal" type="button" id="btnCerrarRegistroModal" aria-label="Cerrar ventana">
+        <span class="material-symbols-outlined" aria-hidden="true">close</span>
+      </button>
+
+      <div class="auth-cabecera">
+        <span class="material-symbols-outlined auth-icono" aria-hidden="true">person_add</span>
+        <h2 id="titulo-registro-modal" class="auth-titulo">
+          Crear <span class="degradado">Cuenta</span>
+        </h2>
+        <p class="auth-subtitulo">Únete a la comunidad de New Records para adquirir tus discos y vinilos favoritos.</p>
+      </div>
+
+      <form class="formulario-auth" id="formRegistroLanding" action="{{ url_for('auth.registro') }}" method="post" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        
+        <div class="grupo-formulario">
+          <label class="etiqueta-formulario" for="reg_nombre">Nombre completo *</label>
+          <input 
+            class="entrada-formulario" 
+            id="reg_nombre" 
+            name="nombre" 
+            type="text" 
+            placeholder="Ej. Martina Gómez" 
+            minlength="2"
+            maxlength="100"
+            required 
+            autocomplete="name"
+          />
+          <span class="mensaje-error" id="regNombreError" role="alert"></span>
+        </div>
+
+        <div class="grupo-formulario">
+          <label class="etiqueta-formulario" for="reg_email">Correo electrónico *</label>
+          <input 
+            class="entrada-formulario" 
+            id="reg_email" 
+            name="email" 
+            type="email" 
+            placeholder="tu@correo.com" 
+            maxlength="120"
+            required 
+            autocomplete="email"
+          />
+          <span class="mensaje-error" id="regEmailError" role="alert"></span>
+        </div>
+
+        <div class="grupo-formulario">
+          <label class="etiqueta-formulario" for="reg_password">Contraseña *</label>
+          <input 
+            class="entrada-formulario" 
+            id="reg_password" 
+            name="password" 
+            type="password" 
+            placeholder="Mínimo 8 caracteres" 
+            minlength="8" 
+            required 
+            autocomplete="new-password"
+          />
+          <span class="mensaje-error" id="regPasswordError" role="alert"></span>
+        </div>
+
+        <div class="grupo-formulario">
+          <label class="etiqueta-formulario" for="reg_confirmar_password">Confirmar contraseña *</label>
+          <input 
+            class="entrada-formulario" 
+            id="reg_confirmar_password" 
+            name="confirmar_password" 
+            type="password" 
+            placeholder="Repite tu contraseña" 
+            minlength="8" 
+            required 
+            autocomplete="new-password"
+          />
+          <span class="mensaje-error" id="regConfirmarPasswordError" role="alert"></span>
+        </div>
+
+        <button class="boton boton-principal boton-enviar resplandor-neon" type="submit">
+          Registrarme
+          <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+        </button>
+
+        <div class="auth-pie-enlaces">
+          <p class="auth-texto-enlace">
+            ¿Ya tienes una cuenta? 
+            <button class="enlace-destacado btn-cambiar-a-login" type="button">Inicia sesión aquí</button>
+          </p>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

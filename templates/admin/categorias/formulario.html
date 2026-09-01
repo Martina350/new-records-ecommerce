@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block titulo %}{% if categoria %}Editar Categoría: {{ categoria.nombre }}{% else %}Nueva Categoría{% endif %}{% endblock %}
+
+{% block contenido %}
+<main class="seccion-admin">
+  <div class="contenedor-admin-fluido">
+    <!-- Cabecera Superior Fuera del Formulario -->
+    <div class="admin-cabecera-principal">
+      <div class="admin-cabecera-info">
+        <div class="admin-icono-grande">
+          <span class="material-symbols-outlined" aria-hidden="true">category</span>
+        </div>
+        <div>
+          <h1 id="titulo-form-cat" class="titulo-admin">
+            {% if categoria %}
+              Editar <span class="degradado">Categoría</span>
+            {% else %}
+              Nueva <span class="degradado">Categoría</span>
+            {% endif %}
+          </h1>
+          <p class="subtitulo-admin">
+            {% if categoria %}
+              Modifica la información y presentación del género musical.
+            {% else %}
+              Registra un nuevo género musical para organizar el catálogo de álbumes.
+            {% endif %}
+          </p>
+        </div>
+      </div>
+
+      <div class="admin-cabecera-acciones">
+        <a class="boton boton-secundario" href="{{ url_for('admin.admin_categorias_lista') }}">
+          <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+          <span>Volver a Categorías</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Caja del Formulario Panorámica -->
+    <div class="caja-formulario-admin-amplia">
+      <form class="formulario-admin-split" method="post" id="formAdminCategoria">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" id="inputImagenValor" value="{{ categoria.imagen if categoria else imagen | default('') }}">
+
+        <div class="layout-formulario-split">
+          <!-- Columna Izquierda: Datos de la Categoría -->
+          <div class="columna-datos-formulario">
+            <div class="form-bloque-seccion">
+              <div class="form-bloque-cabecera">
+                <span class="material-symbols-outlined icono-bloque" aria-hidden="true">tune</span>
+                <h2 class="form-bloque-titulo">Configuración del Género Musical</h2>
+              </div>
+
+              <div class="grid-form-admin-2col">
+                <div class="campo-admin col-span-2">
+                  <label class="etiqueta-tarjeta" for="nombre">Nombre de la Categoría <span class="requerido">*</span></label>
+                  <input
+                    class="entrada-formulario entrada-tarjeta"
+                    type="text"
+                    id="nombre"
+                    name="nombre"
+                    value="{{ categoria.nombre if categoria else nombre | default('') }}"
+                    placeholder="Ej. Heavy Metal, Jazz Fusión, Synthpop..."
+                    required
+                  />
+                </div>
+
+                {% set prefijo_bloqueado = categoria and categoria.discos %}
+                <div class="campo-admin col-span-2">
+                  <label class="etiqueta-tarjeta" for="prefijo_codigo">Prefijo para Códigos de Discos <span class="requerido">*</span></label>
+                  <input
+                    class="entrada-formulario entrada-tarjeta{% if prefijo_bloqueado %} entrada-bloqueada{% endif %}"
+                    type="text"
+                    id="prefijo_codigo"
+                    name="prefijo_codigo"
+                    value="{{ prefijo_codigo | default(categoria.prefijo_codigo if categoria else '') }}"
+                    placeholder="Ej. ROC, POP, REG, JAZ"
+                    minlength="3"
+                    maxlength="5"
+                    pattern="[A-Za-z0-9]{3,5}"
+                    autocomplete="off"
+                    required
+                    {% if prefijo_bloqueado %}disabled{% endif %}
+                  />
+                  <span class="nota-campo">
+                    {% if prefijo_bloqueado %}
+                      No puede modificarse porque esta categoría ya tiene discos registrados.
+                    {% else %}
+                      Usa entre 3 y 5 letras o números. Se normalizará a mayúsculas; por ejemplo: NR-JAZ-001.
+                    {% endif %}
+                  </span>
+                </div>
+
+                <div class="campo-admin col-span-2">
+                  <label class="etiqueta-tarjeta" for="descripcion">Descripción del Género</label>
+                  <textarea
+                    class="entrada-formulario entrada-tarjeta"
+                    id="descripcion"
+                    name="descripcion"
+                    rows="4"
+                    placeholder="Breve reseña e historia del género musical..."
+                  >{{ categoria.descripcion if categoria else descripcion | default('') }}</textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Columna Derecha: Vista Previa y Carga de Arte de Categoría -->
+          <div class="columna-preview-imagen">
+            <div class="panel-carga-imagen" id="panelCargaImagen">
+              <div class="form-bloque-cabecera">
+                <span class="material-symbols-outlined icono-bloque" aria-hidden="true">image</span>
+                <h2 class="form-bloque-titulo">Portada / Arte del Género</h2>
+              </div>
+
+              <!-- Marco de Previsualización (Aspect Ratio 1:1) -->
+              <div class="marco-preview-arte" id="marcoPreviewArte">
+                <img 
+                  id="imagenPrevisualizada" 
+                  class="imagen-preview-elemento {% if not (categoria and categoria.imagen) and not imagen %}oculto{% endif %}" 
+                  src="{{ (categoria.imagen if categoria else imagen) or '' }}" 
+                  alt="Vista previa del género" 
+                />
+
+                <div id="placeholderPreviewArte" class="placeholder-preview-arte {% if (categoria and categoria.imagen) or imagen %}oculto{% endif %}">
+                  <div class="icono-placeholder-disco">
+                    <span class="material-symbols-outlined">category</span>
+                  </div>
+                  <p class="texto-placeholder-principal">Sin imagen de portada</p>
+                  <p class="texto-placeholder-secundario">Arrastra tu archivo aquí</p>
+                </div>
+
+                <button 
+                  type="button" 
+                  id="btnEliminarImagen" 
+                  class="btn-eliminar-preview {% if not (categoria and categoria.imagen) and not imagen %}oculto{% endif %}"
+                  title="Eliminar imagen actual"
+                  aria-label="Eliminar imagen cargada"
+                >
+                  <span class="material-symbols-outlined">delete</span>
+                  <span>Remover</span>
+                </button>
+              </div>
+
+              <div class="zona-drop-archivos" id="zonaDropArchivos">
+                <input 
+                  type="file" 
+                  id="inputArchivoImagen" 
+                  class="input-archivo-oculto" 
+                  accept="image/png, image/jpeg, image/webp, image/gif"
+                />
+                <span class="material-symbols-outlined icono-drop">cloud_upload</span>
+                <p class="texto-drop-instruccion">
+                  <strong>Haz clic para examinar</strong> o arrastra una imagen
+                </p>
+                <span class="info-drop-formatos">PNG, JPG, WEBP (Relación 1:1 recomendada)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-admin-acciones-pie">
+          <button class="boton boton-principal resplandor-neon boton-guardar-admin" type="submit">
+            <span class="material-symbols-outlined" aria-hidden="true">save</span>
+            <span>{% if categoria %}Guardar Cambios{% else %}Crear Categoría{% endif %}</span>
+          </button>
+          <a class="boton boton-secundario boton-cancelar-admin" href="{{ url_for('admin.admin_categorias_lista') }}">
+            <span class="material-symbols-outlined" aria-hidden="true">cancel</span>
+            <span>Cancelar</span>
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</main>
+{% endblock %}

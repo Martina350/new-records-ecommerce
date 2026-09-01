@@ -1,0 +1,42 @@
+{% for disco in discos %}
+  <article class="tarjeta-producto">
+    <a class="enlace-tarjeta-producto" href="{{ url_for('catalogo.detalle_producto', codigo=disco.codigo) }}">
+      <div class="tarjeta-producto-imagen">
+        <div 
+          class="tarjeta-producto-imagen-fondo" 
+          style="background-image: url('{{ url_for('static', filename=disco.imagen if disco.imagen else 'img/placeholder.jpg') }}');" 
+          role="img" 
+          aria-label="Portada {{ disco.album }}"
+        ></div>
+        <span class="badge-formato-tarjeta badge-formato-{{ disco.formato | lower }}">
+          {{ disco.formato }}
+        </span>
+      </div>
+    </a>
+
+    <div class="tarjeta-producto-encabezado">
+      <h3 class="tarjeta-producto-titulo">
+        <a href="{{ url_for('catalogo.detalle_producto', codigo=disco.codigo) }}">
+          {{ disco.artista }} - {{ disco.album }}
+        </a>
+      </h3>
+      <span class="tarjeta-producto-precio">${{ "%.2f"|format(disco.precio_base) }}</span>
+    </div>
+
+    <p class="tarjeta-producto-descripcion">{{ disco.descripcion }}</p>
+
+    <div class="tarjeta-producto-etiquetas">
+      <span class="etiqueta-producto">{{ disco.categoria.nombre }}</span>
+      <span class="etiqueta-producto etiqueta-stock{% if disco.stock == 0 %} etiqueta-agotado{% endif %}">
+        {% if disco.stock > 0 %}Stock: {{ disco.stock }}{% else %}Agotado{% endif %}
+      </span>
+    </div>
+
+    <div class="tarjeta-producto-acciones">
+      <a class="boton boton-principal boton-tarjeta resplandor-neon" href="{{ url_for('catalogo.detalle_producto', codigo=disco.codigo) }}">
+        Ver detalles
+        <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
+      </a>
+    </div>
+  </article>
+{% endfor %}

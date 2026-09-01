@@ -1,0 +1,82 @@
+{% for d in discos %}
+  <div class="admin-disco-card-item {% if not d.activo %}disco-card-inactivo{% endif %}" data-disco-id="{{ d.id }}">
+    <!-- Cabecera de la Tarjeta: Código + Badges (Formato y Estado) -->
+    <div class="admin-disco-card-top">
+      <div class="admin-disco-chip-codigo">
+        <span class="material-symbols-outlined icono-chip-disco" aria-hidden="true">tag</span>
+        <code>{{ d.codigo }}</code>
+      </div>
+      <div class="admin-disco-badges-grupo">
+        <span class="badge-formato-tarjeta badge-formato-{{ d.formato | lower }}">
+          {{ d.formato }}
+        </span>
+        {% if d.activo %}
+          <span class="badge-estado badge-estado-aprobado badge-estado-chip-mini">Activo</span>
+        {% else %}
+          <span class="badge-estado badge-estado-rechazado badge-estado-chip-mini">Inactivo</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Jerarquía Principal: Título del Álbum, Artista y Género -->
+    <div class="admin-disco-card-principal">
+      <div class="admin-disco-card-info">
+        <h3 class="admin-disco-titulo-album">{{ d.album }}</h3>
+        <p class="admin-disco-artista">{{ d.artista }}</p>
+        <div class="admin-disco-genero-tag">
+          <span class="material-symbols-outlined icono-genero-mini" aria-hidden="true">category</span>
+          <span>{{ d.categoria.nombre if d.categoria else 'Sin género' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grilla de Datos Clave: Precios y Stock -->
+    <div class="admin-disco-card-metricas-grid">
+      <div class="admin-disco-metrica-caja">
+        <span class="etiqueta-metrica-disco">PRECIO BASE</span>
+        <span class="valor-metrica-disco">${{ "%.2f"|format(d.precio_base) }}</span>
+      </div>
+      <div class="admin-disco-metrica-caja">
+        <span class="etiqueta-metrica-disco">PRECIO FINAL</span>
+        <span class="valor-metrica-neon">${{ "%.2f"|format(d.precio_final()) }}</span>
+      </div>
+      <div class="admin-disco-metrica-caja caja-stock-span">
+        <span class="etiqueta-metrica-disco">STOCK DISPONIBLE</span>
+        <div class="valor-stock-badge-wrap">
+          {% if d.stock == 0 %}
+            <span class="badge-stock-agotado">Agotado (0 unid.)</span>
+          {% elif d.stock <= 3 %}
+            <span class="badge-stock-bajo">{{ d.stock }} unid. (Bajo)</span>
+          {% else %}
+            <span class="badge-stock-normal">{{ d.stock }} unid.</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Acciones de Gestión -->
+    <div class="admin-disco-card-acciones">
+      <a class="boton boton-secundario boton-chico btn-editar-disco" href="{{ url_for('admin.admin_discos_editar', id=d.id) }}">
+        <span class="material-symbols-outlined" aria-hidden="true">edit</span>
+        <span>Editar</span>
+      </a>
+      {% if d.activo %}
+        <form action="{{ url_for('admin.admin_discos_desactivar', id=d.id) }}" method="post" onsubmit="return confirm('¿Desactivar este disco del catálogo público?');" class="form-accion-inline">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="boton boton-chico boton-peligro btn-toggle-disco" type="submit" title="Desactivar del catálogo">
+            <span class="material-symbols-outlined" aria-hidden="true">visibility_off</span>
+            <span class="texto-btn-accion-movil">Desactivar</span>
+          </button>
+        </form>
+      {% else %}
+        <form action="{{ url_for('admin.admin_discos_reactivar', id=d.id) }}" method="post" class="form-accion-inline">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="boton boton-chico boton-exito btn-toggle-disco" type="submit" title="Reactivar en el catálogo">
+            <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
+            <span class="texto-btn-accion-movil">Reactivar</span>
+          </button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+{% endfor %}

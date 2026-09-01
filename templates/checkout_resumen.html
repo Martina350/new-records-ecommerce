@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% block titulo %}Resumen de Checkout{% endblock %}
+
+{% block contenido %}
+<main class="checkout-seccion-desktop">
+  <div class="contenedor-checkout-wide">
+    <!-- Cabecera de Checkout -->
+    <div class="checkout-cabecera-wide">
+      <div class="checkout-cabecera-titulos">
+        <h1 class="checkout-titulo-principal">
+          Resumen de <span class="degradado">Checkout</span>
+        </h1>
+        <p class="checkout-subtitulo-principal">
+          Verifica tu dirección de entrega, selecciona tu método de pago y confirma tu compra.
+        </p>
+      </div>
+
+      <div class="checkout-cabecera-pasos">
+        <div class="paso-checkout completado">
+          <span class="numero-paso">1</span>
+          <span>Carrito</span>
+        </div>
+        <span class="separador-pasos" aria-hidden="true">→</span>
+        <div class="paso-checkout activo">
+          <span class="numero-paso">2</span>
+          <span>Pago y Envío</span>
+        </div>
+        <span class="separador-pasos" aria-hidden="true">→</span>
+        <div class="paso-checkout">
+          <span class="numero-paso">3</span>
+          <span>Confirmación</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulario Principal con Grid Horizontal de 3 Bloques -->
+    <form action="{{ url_for('pedidos.confirmar_checkout') }}" method="post" id="form-confirmar-pedido">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <!-- Resumen Ultra-Compacto para Flujo Móvil -->
+      <div class="resumen-ultracompacto-movil">
+        <div class="resumen-movil-info">
+          <div class="icono-resumen-movil-wrap">
+            <span class="material-symbols-outlined icono-resumen-movil" aria-hidden="true">shopping_bag</span>
+          </div>
+          <div>
+            <span class="resumen-movil-etiqueta">Total de tu pedido</span>
+            <span class="resumen-movil-sub">{{ carrito.total_unidades }} disco{% if carrito.total_unidades != 1 %}s{% endif %} seleccionado{% if carrito.total_unidades != 1 %}s{% endif %}</span>
+          </div>
+        </div>
+        <span class="resumen-movil-monto-neon">${{ "%.2f"|format(carrito.total_general) }}</span>
+      </div>
+
+      <div class="checkout-grid-horizontal">
+        <!-- BLOQUE 1: Datos de Envío y Facturación -->
+        <section class="checkout-card-columna" aria-labelledby="titulo-bloque-envio">
+          <div class="card-columna-cabecera">
+            <span class="material-symbols-outlined icono-card-columna" aria-hidden="true">local_shipping</span>
+            <div>
+              <h2 id="titulo-bloque-envio" class="card-columna-titulo">1. Datos de Envío</h2>
+              <span class="card-columna-subtitulo">Destino del pedido</span>
+            </div>
+          </div>
+
+          <div class="card-columna-cuerpo">
+            <div class="datos-envio-lista">
+              <div class="dato-envio-item">
+                <span class="dato-envio-etiqueta">Cliente</span>
+                <strong class="dato-envio-valor">{{ usuario.nombre }}</strong>
+              </div>
+
+              <div class="dato-envio-item">
+                <span class="dato-envio-etiqueta">Correo</span>
+                <span class="dato-envio-valor">{{ usuario.email }}</span>
+              </div>
+
+              <div class="dato-envio-item">
+                <span class="dato-envio-etiqueta">Teléfono</span>
+                <span class="dato-envio-valor">{{ usuario.telefono or 'No registrado' }}</span>
+              </div>
+
+              <div class="dato-envio-item">
+                <span class="dato-envio-etiqueta">Ciudad</span>
+                <span class="dato-envio-valor">{{ usuario.ciudad or 'No registrada' }}</span>
+              </div>
+
+              <div class="dato-envio-item">
+                <span class="dato-envio-etiqueta">Dirección</span>
+                <span class="dato-envio-valor dato-direccion">{{ usuario.direccion or 'No registrada' }}</span>
+              </div>
+            </div>
+
+            <div class="tarjeta-pie-accion">
+              <a class="enlace-destacado-btn" href="{{ url_for('auth.perfil') }}">
+                <span class="material-symbols-outlined" aria-hidden="true">edit</span>
+                <span>Editar datos de envío</span>
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <!-- BLOQUE 2: Método de Pago -->
+        <section class="checkout-card-columna" aria-labelledby="titulo-bloque-pago">
+          <div class="card-columna-cabecera">
+            <span class="material-symbols-outlined icono-card-columna" aria-hidden="true">credit_card</span>
+            <div>
+              <h2 id="titulo-bloque-pago" class="card-columna-titulo">2. Método de Pago</h2>
+              <span class="card-columna-subtitulo">Selecciona tarjeta activa</span>
+            </div>
+          </div>
+
+          <div class="card-columna-cuerpo">
+            {% if metodos_pago %}
+              <div class="metodos-pago-selector" role="radiogroup" aria-label="Métodos de pago guardados">
+                {% for metodo in metodos_pago %}
+                  <label class="metodo-pago-tarjeta-label">
+                    <input 
+                      type="radio" 
+                      name="metodo_pago_id" 
+                      value="{{ metodo.id }}" 
+                      {% if metodo.predeterminado or loop.first %}checked{% endif %} 
+                      class="radio-metodo-real"
+                    />
+                    <div class="metodo-pago-tarjeta-box {% if metodo.predeterminado %}seleccionado{% endif %}">
+                      <!-- Fila Superior: Selector + Marca + Badge -->
+                      <div class="tarjeta-box-cabecera">
+                        <div class="tarjeta-box-marca-grupo">
+                          <div class="radio-indicador-visual" aria-hidden="true">
+                            <span class="punto-radio"></span>
+                          </div>
+                          <span class="material-symbols-outlined icono-marca-tarjeta" aria-hidden="true">credit_card</span>
+                          <strong class="marca-nombre">{{ metodo.marca }}</strong>
+                        </div>
+                        {% if metodo.predeterminado %}
+                          <span class="badge-predeterminada-pill" title="Tarjeta predeterminada">
+                            <span class="material-symbols-outlined" aria-hidden="true">star</span>
+                            Predeterminada
+                          </span>
+                        {% endif %}
+                      </div>
+
+                      <!-- Fila Central: Número de Tarjeta con formato bancario -->
+                      <div class="tarjeta-box-numero">
+                        <span class="numero-mascara">•••• •••• ••••</span>
+                        <code class="numero-ultimos4">{{ metodo.ultimos4 }}</code>
+                      </div>
+
+                      <!-- Fila Inferior: Titular y Vencimiento con consistencia visual a Bloque 1 -->
+                      <div class="tarjeta-box-detalles">
+                        <div class="tarjeta-detalle-col">
+                          <span class="tarjeta-detalle-etiqueta">Titular</span>
+                          <span class="tarjeta-detalle-valor titular-completo">{{ metodo.titular }}</span>
+                        </div>
+                        <div class="tarjeta-detalle-col col-vence">
+                          <span class="tarjeta-detalle-etiqueta">Vence</span>
+                          <span class="tarjeta-detalle-valor vence-codigo">{{ "%02d"|format(metodo.mes_vencimiento) }}/{{ metodo.anio_vencimiento }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </label>
+                {% endfor %}
+              </div>
+
+              <!-- Aviso de seguridad para balance visual -->
+              <div class="tarjeta-seguridad-aviso">
+                <span class="material-symbols-outlined icono-seguridad-tarjeta" aria-hidden="true">verified_user</span>
+                <p>El cobro se procesará de forma automática y segura utilizando la tarjeta seleccionada.</p>
+              </div>
+
+              <div class="tarjeta-pie-accion">
+                <div class="grupo-enlaces-tarjetas">
+                  <a class="enlace-destacado-btn" href="{{ url_for('pagos.pago_agregar') }}">
+                    <span class="material-symbols-outlined" aria-hidden="true">add_card</span>
+                    <span>Nueva tarjeta</span>
+                  </a>
+                  <a class="enlace-destacado-btn enlace-secundario-tarjetas" href="{{ url_for('pagos.pago_metodos') }}">
+                    <span class="material-symbols-outlined" aria-hidden="true">settings</span>
+                    <span>Gestionar tarjetas</span>
+                  </a>
+                </div>
+              </div>
+            {% else %}
+              <div class="aviso-sin-tarjeta-compacto">
+                <span class="material-symbols-outlined icono-sin-tarjeta" aria-hidden="true">credit_card_off</span>
+                <div class="texto-sin-tarjeta">
+                  <strong>No tienes tarjetas registradas</strong>
+                  <p>Agrega una tarjeta para procesar el pago.</p>
+                </div>
+                <a class="boton boton-principal boton-chico resplandor-neon" href="{{ url_for('pagos.pago_agregar') }}">
+                  <span class="material-symbols-outlined" aria-hidden="true">add_card</span>
+                  <span>Agregar tarjeta</span>
+                </a>
+              </div>
+            {% endif %}
+          </div>
+        </section>
+
+        <!-- BLOQUE 3: Resumen del Pedido & Confirmación -->
+        <section class="checkout-card-columna checkout-card-resumen" aria-labelledby="titulo-bloque-resumen">
+          <div class="card-columna-cabecera">
+            <span class="material-symbols-outlined icono-card-columna icono-verde" aria-hidden="true">receipt_long</span>
+            <div>
+              <h2 id="titulo-bloque-resumen" class="card-columna-titulo">3. Resumen y Total</h2>
+              <span class="card-columna-subtitulo">{{ carrito.total_unidades }} disco{% if carrito.total_unidades != 1 %}s{% endif %} en pedido</span>
+            </div>
+          </div>
+
+          <div class="card-columna-cuerpo">
+            <!-- Lista compacta de items -->
+            <div class="checkout-articulos-lista-compacta">
+              {% for item in carrito.elementos %}
+                <div class="articulo-checkout-item">
+                  <div class="articulo-checkout-info">
+                    <span class="articulo-nombre">{{ item.disco.artista }} - {{ item.disco.album }}</span>
+                    <span class="articulo-formato-meta">{{ item.disco.formato }} × {{ item.cantidad }}</span>
+                  </div>
+                  <span class="articulo-subtotal">${{ "%.2f"|format(item.subtotal) }}</span>
+                </div>
+              {% endfor %}
+            </div>
+
+            <!-- Desglose de totales -->
+            <div class="checkout-desglose-totales">
+              <div class="desglose-fila-mini">
+                <span>Envío y Embalaje:</span>
+                <span class="valor-verde">Incluido</span>
+              </div>
+              <div class="desglose-fila-mini">
+                <span>Impuestos:</span>
+                <span class="valor-verde">Incluidos</span>
+              </div>
+
+              <div class="desglose-total-principal">
+                <span class="etiqueta-total-checkout">Total a Pagar:</span>
+                <span class="monto-total-checkout">${{ "%.2f"|format(carrito.total_general) }}</span>
+              </div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="checkout-acciones-finales">
+              {% if metodos_pago %}
+                <button class="boton boton-destacado boton-confirmar-checkout resplandor-neon" type="submit" id="btn-confirmar-pedido">
+                  <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+                  <span>Confirmar y Realizar Pedido</span>
+                </button>
+              {% else %}
+                <button class="boton boton-destacado boton-confirmar-checkout" type="button" disabled title="Debes registrar una tarjeta primero">
+                  <span class="material-symbols-outlined" aria-hidden="true">lock</span>
+                  <span>Registra una tarjeta para pagar</span>
+                </button>
+              {% endif %}
+
+              <a class="boton boton-secundario boton-chico boton-volver-carrito" href="{{ url_for('carrito.ver_carrito') }}">
+                <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+                <span>Volver al Carrito</span>
+              </a>
+            </div>
+
+            <div class="garantia-seguridad-mini">
+              <span class="material-symbols-outlined icono-seguridad-mini" aria-hidden="true">lock</span>
+              <span>Pago cifrado y seguro con protección SSL de 256 bits</span>
+            </div>
+          </div>
+        </section>
+      </div>
+    </form>
+  </div>
+</main>
+{% endblock %}

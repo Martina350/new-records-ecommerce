@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block titulo %}Mis Métodos de Pago{% endblock %}
+
+{% block contenido %}
+<main class="pago-seccion-desktop">
+  <div class="contenedor-pago-wide">
+    <!-- Cabecera de Métodos de Pago -->
+    <div class="pago-cabecera-wide">
+      <div class="pago-cabecera-titulos">
+        <div class="pago-titulo-fila-movil">
+          <h1 class="pago-titulo-principal">
+            Mis <span class="degradado">Métodos de Pago</span>
+          </h1>
+          <button type="button" class="btn-toggle-info-seguridad" id="btnToggleInfoSeguridad" aria-expanded="false" aria-controls="panelInfoSeguridad" title="Información de Seguridad" aria-label="Mostrar u ocultar información de seguridad">
+            <span class="material-symbols-outlined icono-info-toggle" aria-hidden="true">info</span>
+          </button>
+        </div>
+        <p class="pago-subtitulo-principal">
+          Administra tus tarjetas guardadas y opciones de facturación con seguridad bancaria de última generación.
+        </p>
+      </div>
+
+      <div class="pago-cabecera-controles">
+        {% if metodos %}
+          <div class="chip-total-tarjetas-contador">
+            <span class="material-symbols-outlined" aria-hidden="true">credit_card</span>
+            <span>{{ metodos | length }} tarjeta{% if metodos | length != 1 %}s{% endif %} registrada{% if metodos | length != 1 %}s{% endif %}</span>
+          </div>
+        {% endif %}
+
+        <a class="boton boton-principal resplandor-neon boton-chico" href="{{ url_for('pagos.pago_agregar') }}">
+          <span class="material-symbols-outlined" aria-hidden="true">add_card</span>
+          <span>Agregar Nueva Tarjeta</span>
+        </a>
+
+        <a class="boton boton-secundario boton-chico" href="{{ url_for('pedidos.checkout_resumen') }}">
+          <span class="material-symbols-outlined" aria-hidden="true">shopping_cart_checkout</span>
+          <span>Ir al Checkout</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Sección Superior: Tarjetas Registradas -->
+    <section class="pago-seccion-tarjetas-widescreen" aria-label="Tarjetas guardadas">
+      {% if metodos %}
+        <div class="grid-tarjetas-bancarias-wide">
+          {% for metodo in metodos %}
+            <div class="tarjeta-bancaria-item{% if metodo.predeterminado %} tarjeta-predeterminada{% endif %}">
+              <!-- Fila Superior: Marca + Badge -->
+              <div class="tarjeta-bancaria-cabecera">
+                <div class="marca-tarjeta-grupo">
+                  <div class="icono-marca-bancaria icono-{{ metodo.marca | lower }}">
+                    <span class="material-symbols-outlined" aria-hidden="true">credit_card</span>
+                    <span class="marca-bancaria-texto">{{ metodo.marca }}</span>
+                  </div>
+                  <span class="tipo-tarjeta-tag">Crédito / Débito</span>
+                </div>
+
+                <div class="tarjeta-estado-badge-grupo">
+                  {% if metodo.predeterminado %}
+                    <span class="badge-predeterminado-chip">
+                      <span class="material-symbols-outlined" aria-hidden="true">star</span>
+                      Predeterminada
+                    </span>
+                  {% else %}
+                    <form action="{{ url_for('pagos.pago_predeterminado', metodo_id=metodo.id) }}" method="post">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <button class="boton-establecer-predeterminada" type="submit" title="Establecer como predeterminada">
+                        <span class="material-symbols-outlined" aria-hidden="true">star_border</span>
+                        <span>Predeterminar</span>
+                      </button>
+                    </form>
+                  {% endif %}
+                </div>
+              </div>
+
+              <!-- Fila Central: Número Enmascarado -->
+              <div class="tarjeta-bancaria-numero">
+                <span class="mascara-puntos">•••• •••• ••••</span>
+                <code class="ultimos4-codigo">{{ metodo.ultimos4 }}</code>
+              </div>
+
+              <!-- Fila Inferior: Titular, Vencimiento y Botón Eliminar -->
+              <div class="tarjeta-bancaria-pie">
+                <div class="tarjeta-campo-info">
+                  <span class="campo-etiqueta-mini">Titular</span>
+                  <strong class="campo-valor-titular">{{ metodo.titular }}</strong>
+                </div>
+
+                <div class="tarjeta-campo-info">
+                  <span class="campo-etiqueta-mini">Vencimiento</span>
+                  <span class="campo-valor-vence">{{ "%02d"|format(metodo.mes_vencimiento) }}/{{ metodo.anio_vencimiento }}</span>
+                </div>
+
+                <div class="tarjeta-accion-eliminar">
+                  <form action="{{ url_for('pagos.pago_eliminar', metodo_id=metodo.id) }}" method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="boton boton-peligro boton-chico boton-eliminar-tarjeta" type="submit" title="Eliminar tarjeta guardada"
+                      onclick="return confirm('¿Deseas eliminar permanentemente esta tarjeta?')">
+                      <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+                      <span>Eliminar</span>
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <!-- Estado Vacío -->
+        <div class="pago-card-vacio-widescreen">
+          <div class="pago-vacio-contenido">
+            <div class="icono-vacio-wrapper-neon">
+              <span class="material-symbols-outlined icono-vacio-neon" aria-hidden="true">credit_card_off</span>
+            </div>
+            <h2 class="titulo-vacio-widescreen">No tienes métodos de pago registrados</h2>
+            <p class="texto-vacio-widescreen">Agrega una tarjeta verificada mediante PIN seguro para agilizar tus compras en New Records.</p>
+            <a class="boton boton-principal resplandor-neon boton-explorar-vacio" href="{{ url_for('pagos.pago_agregar') }}">
+              <span class="material-symbols-outlined" aria-hidden="true">add_card</span>
+              <span>Agregar Mi Primera Tarjeta</span>
+            </a>
+          </div>
+        </div>
+      {% endif %}
+    </section>
+
+    <!-- Sección Inferior: Panel Informativo de Seguridad Horizontal (4 Columnas / Colapsable en Móvil) -->
+    <section class="seguridad-banner-horizontal-wide panel-info-seguridad-colapsable" id="panelInfoSeguridad" aria-labelledby="titulo-seguridad-banner">
+      <div class="seguridad-banner-cabecera">
+        <div class="seguridad-banner-titulo-grupo">
+          <div class="seguridad-icono-glow-mini">
+            <span class="material-symbols-outlined" aria-hidden="true">verified_user</span>
+          </div>
+          <div>
+            <h2 id="titulo-seguridad-banner" class="seguridad-banner-titulo">Tus Datos Están 100% Protegidos</h2>
+            <span class="seguridad-banner-subtitulo">Estándares de seguridad bancaria activa y encriptación de grado militar</span>
+          </div>
+        </div>
+
+        <div class="insignia-certificacion-badge">
+          <span class="material-symbols-outlined" aria-hidden="true">gpp_good</span>
+          <span>Certificado de Transacción Segura · New Records</span>
+        </div>
+      </div>
+
+      <div class="seguridad-grid-horizontal-4cols">
+        <div class="seguridad-tarjeta-horizontal">
+          <div class="seguridad-item-icono-circulo">
+            <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+          </div>
+          <div class="seguridad-item-contenido">
+            <h3 class="seguridad-item-titulo">Privacidad Total</h3>
+            <p class="seguridad-item-desc">Solo guardamos los últimos 4 dígitos. Tu número completo y código CVV jamás se almacenan.</p>
+          </div>
+        </div>
+
+        <div class="seguridad-tarjeta-horizontal">
+          <div class="seguridad-item-icono-circulo">
+            <span class="material-symbols-outlined" aria-hidden="true">lock</span>
+          </div>
+          <div class="seguridad-item-contenido">
+            <h3 class="seguridad-item-titulo">Doble Verificación</h3>
+            <p class="seguridad-item-desc">Cada tarjeta se valida mediante un PIN temporal de 6 dígitos enviado directamente a tu correo.</p>
+          </div>
+        </div>
+
+        <div class="seguridad-tarjeta-horizontal">
+          <div class="seguridad-item-icono-circulo">
+            <span class="material-symbols-outlined" aria-hidden="true">timer</span>
+          </div>
+          <div class="seguridad-item-contenido">
+            <h3 class="seguridad-item-titulo">Control Antifraude</h3>
+            <p class="seguridad-item-desc">El código PIN caduca en 5 minutos y se bloquea tras 3 intentos fallidos consecutivos.</p>
+          </div>
+        </div>
+
+        <div class="seguridad-tarjeta-horizontal">
+          <div class="seguridad-item-icono-circulo">
+            <span class="material-symbols-outlined" aria-hidden="true">security</span>
+          </div>
+          <div class="seguridad-item-contenido">
+            <h3 class="seguridad-item-titulo">Cifrado SSL 256-bit</h3>
+            <p class="seguridad-item-desc">Todas las transacciones y tokens viajan bajo protección criptográfica de grado bancario.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+{% endblock %}

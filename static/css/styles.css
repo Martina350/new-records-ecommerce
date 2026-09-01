@@ -1,0 +1,7 @@
+/* Punto de entrada de estilos. El orden mantiene la cascada histórica. */
+@import url("base.css");
+@import url("catalogo.css");
+@import url("carrito-checkout.css");
+@import url("pedidos-pagos.css");
+@import url("admin.css");
+@import url("admin-formularios.css");

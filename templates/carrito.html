@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+
+{% block titulo %}Carrito de Compras{% endblock %}
+
+{% block contenido %}
+<main class="carrito-seccion-desktop">
+  <div class="contenedor-carrito-wide">
+    <!-- Cabecera del Carrito -->
+    <div class="carrito-cabecera-wide">
+      <div class="carrito-cabecera-titulos">
+        <h1 class="carrito-titulo-principal">
+          Mi <span class="degradado">Carrito</span> de Compras
+        </h1>
+        <p class="carrito-subtitulo-principal">
+          Revisa los discos de tu selección antes de iniciar el proceso de checkout.
+        </p>
+      </div>
+
+      {% if carrito.elementos %}
+        <div class="carrito-cabecera-controles">
+          <button 
+            type="button" 
+            class="boton boton-secundario boton-toggle-resumen-top" 
+            id="btnToggleResumenPedido"
+            aria-expanded="false" 
+            aria-controls="panelResumenPedido"
+            title="Ver desglose detallado del pedido"
+          >
+            <span class="material-symbols-outlined" aria-hidden="true">receipt_long</span>
+            <span>Ver Resumen de Pedido</span>
+            <span class="badge-contador-resumen">{{ carrito.total_unidades }}</span>
+          </button>
+        </div>
+      {% endif %}
+    </div>
+
+    {% if carrito.elementos %}
+      <!-- Tarjeta Principal de Tabla a Pantalla Completa (Estilo Screenshot 2) -->
+      <div class="carrito-card-pantalla-completa">
+        <div class="tabla-carrito-wrapper-fluid">
+          <table class="tabla-carrito-widescreen">
+            <thead>
+              <tr>
+                <th class="col-th-producto">PRODUCTO</th>
+                <th class="col-th-formato">FORMATO</th>
+                <th class="col-th-precio">PRECIO UNITARIO</th>
+                <th class="col-th-cantidad">CANTIDAD</th>
+                <th class="col-th-subtotal">SUBTOTAL</th>
+                <th class="col-th-acciones">ACCIONES</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in carrito.elementos %}
+                <tr class="fila-producto-carrito">
+                  <!-- Columna 1: Producto con Portada, Título, Artista y Género -->
+                  <td class="celda-producto" data-label="Producto">
+                    <div class="producto-bloque-info">
+                      <div class="portada-miniatura-wrapper">
+                        <img 
+                          class="portada-miniatura-img" 
+                          src="{{ url_for('static', filename=item.disco.imagen if item.disco.imagen else 'img/placeholder.jpg') }}" 
+                          alt="Portada de {{ item.disco.album }}"
+                          loading="lazy"
+                        />
+                      </div>
+                      <div class="producto-detalles-texto">
+                        <a class="producto-album-enlace" href="{{ url_for('catalogo.detalle_producto', codigo=item.disco.codigo) }}">
+                          {{ item.disco.album }}
+                        </a>
+                        <div class="producto-submeta">
+                          <span class="producto-artista-nombre">{{ item.disco.artista }}</span>
+                          <span class="producto-meta-punto" aria-hidden="true">•</span>
+                          <span class="badge-genero-mini">{{ item.disco.categoria.nombre }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+
+                  <!-- Columna 2: Formato Badge (CD / Vinilo) -->
+                  <td class="celda-formato" data-label="Formato">
+                    <span class="badge-formato-tarjeta badge-formato-{{ item.disco.formato | lower }}">
+                      <span class="material-symbols-outlined icono-badge-formato" aria-hidden="true">
+                        {{ 'album' if item.disco.formato == 'VINILO' else 'disc_full' }}
+                      </span>
+                      {{ item.disco.formato }}
+                    </span>
+                  </td>
+
+                  <!-- Columna 3: Precio Unitario -->
+                  <td class="celda-precio" data-label="Precio">
+                    <div class="precio-col-info">
+                      <span class="precio-unitario-numero">${{ "%.2f"|format(item.precio_unitario) }}</span>
+                      <span class="precio-unitario-leyenda">IVA y envío incl.</span>
+                    </div>
+                  </td>
+
+                  <!-- Columna 4: Control de Cantidad -->
+                  <td class="celda-cantidad" data-label="Cantidad">
+                    <form class="form-cantidad-inline" action="{{ url_for('carrito.actualizar_carrito', disco_id=item.disco.id) }}" method="post">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <div class="input-cantidad-grupo">
+                        <input 
+                          class="input-cantidad-field" 
+                          type="number" 
+                          name="cantidad" 
+                          value="{{ item.cantidad }}" 
+                          min="1" 
+                          max="{{ item.disco.stock }}"
+                          onchange="this.form.submit()"
+                          aria-label="Cantidad para {{ item.disco.album }}"
+                        />
+                        <span class="input-cantidad-stock">máx. {{ item.disco.stock }}</span>
+                      </div>
+                    </form>
+                  </td>
+
+                  <!-- Columna 5: Subtotal -->
+                  <td class="celda-subtotal" data-label="Subtotal">
+                    <span class="subtotal-numero-neon">${{ "%.2f"|format(item.subtotal) }}</span>
+                  </td>
+
+                  <!-- Columna 6: Acciones -->
+                  <td class="celda-acciones" data-label="Acciones">
+                    <form action="{{ url_for('carrito.eliminar_del_carrito', disco_id=item.disco.id) }}" method="post">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <button class="boton-eliminar-fila" type="submit" title="Eliminar {{ item.disco.album }} del carrito" aria-label="Eliminar {{ item.disco.album }}">
+                        <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Barra Inferior de Acciones Integrada en la Misma Tarjeta -->
+        <div class="carrito-barra-inferior-wide">
+          <div class="barra-acciones-izq">
+            <a class="boton boton-secundario boton-chico" href="{{ url_for('catalogo.productos') }}">
+              <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+              <span>Seguir explorando</span>
+            </a>
+
+            <form action="{{ url_for('carrito.vaciar_carrito_ruta') }}" method="post" onsubmit="return confirm('¿Seguro que deseas vaciar todo el carrito?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="boton boton-peligro-suave boton-chico" type="submit">
+                <span class="material-symbols-outlined" aria-hidden="true">delete_sweep</span>
+                <span>Vaciar carrito</span>
+              </button>
+            </form>
+          </div>
+
+          <div class="barra-acciones-der">
+            <div class="chip-total-acumulado">
+              <span class="chip-total-etiqueta">Total estimado ({{ carrito.total_unidades }} disco{% if carrito.total_unidades != 1 %}s{% endif %}):</span>
+              <span class="chip-total-monto">${{ "%.2f"|format(carrito.total_general) }}</span>
+            </div>
+
+            <a class="boton boton-destacado resplandor-neon boton-checkout-cta" href="{{ url_for('pedidos.checkout_resumen') }}">
+              <span>Proceder al Checkout</span>
+              <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- =====================================================================
+           PANEL DESPLEGABLE / SLIDE-OVER MODAL: RESUMEN DE PEDIDO
+           ===================================================================== -->
+      <div 
+        class="resumen-overlay" 
+        id="overlayResumenPedido" 
+        aria-hidden="true"
+        tabindex="-1"
+      ></div>
+
+      <aside 
+        class="panel-resumen-desplegable" 
+        id="panelResumenPedido" 
+        role="dialog" 
+        aria-modal="true" 
+        aria-labelledby="tituloPanelResumen"
+        aria-hidden="true"
+      >
+        <div class="panel-resumen-contenido">
+          <!-- Cabecera del Panel -->
+          <div class="panel-resumen-cabecera">
+            <div class="panel-resumen-titulo-grupo">
+              <span class="material-symbols-outlined icono-panel-resumen" aria-hidden="true">receipt_long</span>
+              <div>
+                <h2 id="tituloPanelResumen" class="panel-resumen-titulo">Resumen del Pedido</h2>
+                <span class="panel-resumen-subtitulo">{{ carrito.total_unidades }} producto{% if carrito.total_unidades != 1 %}s{% endif %} en tu selección</span>
+              </div>
+            </div>
+            <button 
+              type="button" 
+              class="boton-cerrar-panel-resumen" 
+              id="btnCerrarResumenPedido" 
+              aria-label="Cerrar resumen de pedido"
+            >
+              <span class="material-symbols-outlined" aria-hidden="true">close</span>
+            </button>
+          </div>
+
+          <!-- Cuerpo con Desglose -->
+          <div class="panel-resumen-cuerpo">
+            <div class="desglose-lineas">
+              <div class="desglose-linea">
+                <span class="desglose-concepto">Unidades físicas totales</span>
+                <span class="desglose-valor">{{ carrito.total_unidades }} unidades</span>
+              </div>
+
+              <div class="desglose-linea">
+                <span class="desglose-concepto">Discos incluidos</span>
+                <span class="desglose-valor">{{ carrito.elementos | length }} álbumes</span>
+              </div>
+
+              <div class="desglose-linea">
+                <span class="desglose-concepto">Costos de embalaje protector</span>
+                <span class="desglose-valor-destacado">Incluido</span>
+              </div>
+
+              <div class="desglose-linea">
+                <span class="desglose-concepto">Costos de envío especializado</span>
+                <span class="desglose-valor-destacado">Calculado por peso</span>
+              </div>
+
+              <div class="desglose-linea">
+                <span class="desglose-concepto">Impuestos aplicables</span>
+                <span class="desglose-valor-destacado">Incluidos</span>
+              </div>
+            </div>
+
+            <div class="separador-desglose"></div>
+
+            <div class="desglose-total-caja">
+              <div class="desglose-total-fila">
+                <span class="desglose-total-etiqueta">Total Estimado</span>
+                <span class="desglose-total-monto">${{ "%.2f"|format(carrito.total_general) }}</span>
+              </div>
+              <span class="desglose-total-aclaracion">Moneda: USD ($) · Precio final garantizado</span>
+            </div>
+
+            <div class="panel-resumen-garantia">
+              <span class="material-symbols-outlined icono-garantia" aria-hidden="true">verified_user</span>
+              <div class="texto-garantia">
+                <strong>Compra 100% segura y garantizada</strong>
+                <p>Embalaje rígido anti-impacto para CD y vinilos con envío certificado y seguimiento en línea.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pie del Panel con Botón de Checkout -->
+          <div class="panel-resumen-pie">
+            <a class="boton boton-destacado boton-checkout-panel resplandor-neon" href="{{ url_for('pedidos.checkout_resumen') }}">
+              <span>Proceder al Checkout</span>
+              <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+            </a>
+            <button type="button" class="boton boton-secundario boton-chico boton-seguir-panel" id="btnContinuarComprandoPanel">
+              Continuar revisando carrito
+            </button>
+          </div>
+        </div>
+      </aside>
+
+    {% else %}
+      <!-- Estado Vacío a Pantalla Completa Widescreen -->
+      <div class="carrito-card-pantalla-completa carrito-card-vacio-widescreen">
+        <div class="carrito-vacio-contenido-centrado">
+          <div class="icono-vacio-wrapper-neon">
+            <span class="material-symbols-outlined icono-vacio-neon" aria-hidden="true">shopping_cart</span>
+          </div>
+          <h2 class="titulo-vacio-widescreen">Tu carrito de compras está vacío</h2>
+          <p class="texto-vacio-widescreen">
+            Aún no has agregado discos a tu selección. Explora nuestro catálogo dinámico de CD y Vinilos para comenzar tu colección.
+          </p>
+          <div class="carrito-vacio-acciones">
+            <a class="boton boton-destacado resplandor-neon boton-explorar-vacio" href="{{ url_for('catalogo.productos') }}">
+              <span class="material-symbols-outlined" aria-hidden="true">album</span>
+              <span>Explorar Catálogo de Discos</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</main>
+{% endblock %}

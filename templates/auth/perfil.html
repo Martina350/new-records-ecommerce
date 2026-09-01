@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block titulo %}Mi Perfil{% endblock %}
+
+{% block contenido %}
+<main class="contacto-principal auth-seccion">
+  <div class="contenedor">
+    <div class="caja-formulario auth-caja perfil-caja">
+      <section class="contenedor-formulario-contacto" aria-labelledby="titulo-perfil">
+        <div class="perfil-cabecera">
+          <div class="perfil-avatar">
+            <span class="material-symbols-outlined perfil-avatar-icono" aria-hidden="true">account_circle</span>
+          </div>
+          <div class="perfil-info-principal">
+            <h1 id="titulo-perfil" class="titulo-formulario-contacto">
+              Mi <span class="degradado">Perfil</span>
+            </h1>
+            <p class="perfil-rol-badge">
+              <span class="badge badge-{{ usuario.rol }}">
+                <span class="material-symbols-outlined icono-badge" aria-hidden="true">
+                  {% if usuario.es_administrador() %}admin_panel_settings{% else %}person{% endif %}
+                </span>
+                Rol: {{ usuario.rol | capitalize }}
+              </span>
+            </p>
+          </div>
+        </div>
+
+        <form class="formulario-contacto" action="{{ url_for('auth.perfil') }}" method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="fila-formulario">
+            <div class="grupo-formulario">
+              <label class="etiqueta-formulario" for="nombre">Nombre completo *</label>
+              <input 
+                class="entrada-formulario" 
+                id="nombre" 
+                name="nombre" 
+                type="text"
+                value="{{ usuario.nombre }}"
+                minlength="2"
+                maxlength="100"
+                required
+                autocomplete="name"
+              />
+            </div>
+
+            <div class="grupo-formulario">
+              <label class="etiqueta-formulario" for="email">Correo electrónico (no editable)</label>
+              <input 
+                class="entrada-formulario entrada-bloqueada" 
+                id="email" 
+                type="email" 
+                value="{{ usuario.email }}" 
+                disabled 
+                readonly
+              />
+            </div>
+          </div>
+
+          <div class="fila-formulario">
+            <div class="grupo-formulario">
+              <label class="etiqueta-formulario" for="telefono">Teléfono de contacto</label>
+              <input 
+                class="entrada-formulario" 
+                id="telefono" 
+                name="telefono" 
+                type="tel" 
+                value="{{ usuario.telefono or '' }}"
+                placeholder="Ej. +593 99 123 4567"
+                maxlength="20"
+                autocomplete="tel"
+              />
+            </div>
+
+            <div class="grupo-formulario">
+              <label class="etiqueta-formulario" for="ciudad">Ciudad</label>
+              <input 
+                class="entrada-formulario" 
+                id="ciudad" 
+                name="ciudad" 
+                type="text" 
+                value="{{ usuario.ciudad or '' }}"
+                placeholder="Ej. Quito"
+                maxlength="100"
+                autocomplete="address-level2"
+              />
+            </div>
+          </div>
+
+          <div class="grupo-formulario">
+            <label class="etiqueta-formulario" for="direccion">Dirección de entrega</label>
+            <input 
+              class="entrada-formulario" 
+              id="direccion" 
+              name="direccion" 
+              type="text" 
+              value="{{ usuario.direccion or '' }}" 
+              placeholder="Ej. Av. Amazonas y República" 
+              maxlength="200"
+              autocomplete="street-address"
+            />
+          </div>
+
+          <div class="perfil-acciones">
+            <button class="boton boton-principal resplandor-neon" type="submit">
+              Guardar cambios
+              <span class="material-symbols-outlined" aria-hidden="true">save</span>
+            </button>
+
+            {% if usuario.es_administrador() %}
+              <a class="boton boton-destacado" href="{{ url_for('admin.admin_dashboard') }}">
+                <span class="material-symbols-outlined" aria-hidden="true">dashboard</span>
+                Panel de Administración
+              </a>
+            {% endif %}
+          </div>
+        </form>
+      </section>
+    </div>
+  </div>
+</main>
+{% endblock %}

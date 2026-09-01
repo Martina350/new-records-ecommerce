@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block titulo %}Categorías{% endblock %}
+
+{% block contenido %}
+<main>
+  <section class="encabezado-pagina" aria-labelledby="titulo-categorias">
+    <div class="contenedor">
+      <h1 id="titulo-categorias" class="encabezado-pagina-titulo">
+        Explora los géneros <span class="degradado">musicales</span> del momento
+      </h1>
+      <p class="encabezado-pagina-descripcion">
+        Sumérgete en nuestras dimensiones auditivas más sonadas y disfruta de las mejores producciones musicales en formato físico.
+      </p>
+    </div>
+  </section>
+
+  <section class="seccion-categorias" aria-labelledby="grid-categorias-titulo">
+    <div class="contenedor">
+      <h2 id="grid-categorias-titulo" class="oculto-visual">Categorías disponibles</h2>
+      
+      {% if categorias %}
+        <div class="grid-categorias">
+          {% for categoria in categorias %}
+            <article class="tarjeta-categoria">
+              <div 
+                class="tarjeta-categoria-fondo" 
+                style="background-image: url('{{ url_for('static', filename=categoria.imagen if categoria.imagen else 'img/placeholder.jpg') }}');" 
+                role="img" 
+                aria-label="{{ categoria.nombre }}"
+              ></div>
+              <div class="tarjeta-categoria-superposicion"></div>
+              <div class="tarjeta-categoria-contenido">
+                <div class="tarjeta-categoria-etiqueta">
+                  <span class="tarjeta-categoria-etiqueta-linea"></span>
+                  <span class="tarjeta-categoria-etiqueta-texto">Género</span>
+                </div>
+                <h3 class="tarjeta-categoria-titulo">{{ categoria.nombre }}</h3>
+                <p class="tarjeta-categoria-descripcion">
+                  {{ categoria.descripcion }}
+                </p>
+                <a class="boton boton-principal resplandor-neon" href="{{ url_for('catalogo.productos', categoria=categoria.slug) }}">
+                  Ver discos
+                  <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+                </a>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="estado-vacio">
+          <span class="material-symbols-outlined icono-vacio" aria-hidden="true">category</span>
+          <p class="texto-vacio">No hay categorías musicales disponibles en este momento.</p>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+</main>
+{% endblock %}

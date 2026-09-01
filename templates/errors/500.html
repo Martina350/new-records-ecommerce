@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block titulo %}Error interno{% endblock %}
+
+{% block contenido %}
+<main class="pagina-error contenedor">
+  <span class="pagina-error-codigo">500</span>
+  <h1>La reproducción se interrumpió</h1>
+  <p>Ocurrió un problema inesperado. Inténtalo nuevamente en unos minutos.</p>
+  <a class="boton boton-principal" href="{{ url_for('catalogo.inicio') }}">Volver al inicio</a>
+</main>
+{% endblock %}

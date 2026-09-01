@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block titulo %}Bandeja de Pedidos — Administración{% endblock %}
+
+{% block contenido %}
+<main class="seccion-admin">
+  <div class="contenedor">
+    <div class="admin-cabecera-principal">
+      <div class="admin-cabecera-info">
+        <div class="admin-icono-grande">
+          <span class="material-symbols-outlined" aria-hidden="true">shopping_cart_checkout</span>
+        </div>
+        <div>
+          <h1 id="titulo-admin-pedidos" class="titulo-admin">
+            Bandeja de <span class="degradado">Pedidos</span>
+          </h1>
+          <p class="subtitulo-admin">
+            Revisión de existencias, aprobación de pedidos y emisión de facturas.
+          </p>
+        </div>
+      </div>
+
+      <div class="admin-cabecera-acciones">
+        <a class="boton boton-secundario" href="{{ url_for('admin.admin_dashboard') }}">
+          <span class="material-symbols-outlined" aria-hidden="true">dashboard</span>
+          <span>Dashboard</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Pestañas de Filtro por Estado -->
+    <div class="admin-filtros-pedidos">
+      <a class="boton-filtro-tab {% if not estado_filtro %}activo{% endif %}" href="{{ url_for('admin.admin_pedidos_lista') }}">
+        <span>Todos</span>
+      </a>
+      <a class="boton-filtro-tab {% if estado_filtro == 'PENDIENTE' %}activo{% endif %}" href="{{ url_for('admin.admin_pedidos_lista', estado='PENDIENTE') }}">
+        <span class="material-symbols-outlined" aria-hidden="true">schedule</span>
+        <span>Pendientes</span>
+      </a>
+      <a class="boton-filtro-tab {% if estado_filtro == 'APROBADO' %}activo{% endif %}" href="{{ url_for('admin.admin_pedidos_lista', estado='APROBADO') }}">
+        <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+        <span>Aprobados</span>
+      </a>
+      <a class="boton-filtro-tab {% if estado_filtro == 'RECHAZADO' %}activo{% endif %}" href="{{ url_for('admin.admin_pedidos_lista', estado='RECHAZADO') }}">
+        <span class="material-symbols-outlined" aria-hidden="true">cancel</span>
+        <span>Rechazados</span>
+      </a>
+    </div>
+
+    <div class="admin-seccion-bloque">
+      <!-- Vista Desktop: Tabla -->
+      <div class="tabla-carrito-contenedor vista-desktop-admin-pedidos">
+        <table class="tabla-carrito">
+          <thead>
+            <tr>
+              <th>Número de Pedido</th>
+              <th>Cliente</th>
+              <th>Fecha de Compra</th>
+              <th>Método de Pago</th>
+              <th>Total</th>
+              <th>Estado</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in pedidos %}
+              <tr>
+                <td data-label="N° Pedido"><code>{{ p.numero }}</code></td>
+                <td data-label="Cliente">
+                  <strong>{{ p.cliente.nombre }}</strong><br/>
+                  <small class="artista-disco-carrito">{{ p.cliente.email }}</small>
+                </td>
+                <td data-label="Fecha">{{ p.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}</td>
+                <td data-label="Método de Pago">
+                  <span class="metodo-tarjeta-resumen">
+                    {{ p.metodo_pago.marca }} **** {{ p.metodo_pago.ultimos4 }}
+                  </span>
+                </td>
+                <td data-label="Total"><span class="precio-subtotal">${{ "%.2f"|format(p.total) }}</span></td>
+                <td data-label="Estado">
+                  <span class="badge-estado badge-estado-{{ p.estado | lower }}">
+                    {{ p.estado }}
+                  </span>
+                </td>
+                <td data-label="Acción">
+                  <a class="boton boton-secundario boton-chico" href="{{ url_for('admin.admin_pedido_detalle', numero=p.numero) }}">
+                    <span class="material-symbols-outlined" aria-hidden="true">rate_review</span>
+                    <span>Auditar Pedido</span>
+                  </a>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="7" class="texto-centrado">No hay pedidos registrados con el filtro seleccionado.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Vista Móvil: Cards compactos y clickables -->
+      <div class="admin-pedidos-cards-movil-grid vista-movil-admin-pedidos">
+        {% for p in pedidos %}
+          <a class="admin-pedido-card-enlace" href="{{ url_for('admin.admin_pedido_detalle', numero=p.numero) }}" aria-label="Auditar pedido {{ p.numero }}">
+            <div class="admin-pedido-card-top">
+              <div class="admin-pedido-chip-codigo">
+                <span class="material-symbols-outlined icono-chip-pedido" aria-hidden="true">receipt_long</span>
+                <code>{{ p.numero }}</code>
+              </div>
+              <span class="badge-estado badge-estado-{{ p.estado | lower }} badge-estado-admin-card" title="Estado: {{ p.estado }}">
+                {% if p.estado == "PENDIENTE" %}
+                  <span class="material-symbols-outlined icono-estado-chico" aria-hidden="true">schedule</span>
+                {% elif p.estado == "APROBADO" %}
+                  <span class="material-symbols-outlined icono-estado-chico" aria-hidden="true">check_circle</span>
+                {% else %}
+                  <span class="material-symbols-outlined icono-estado-chico" aria-hidden="true">cancel</span>
+                {% endif %}
+                <span class="texto-estado-desktop">{{ p.estado }}</span>
+              </span>
+            </div>
+
+            <div class="admin-pedido-card-cuerpo">
+              <div class="admin-pedido-cliente-linea">
+                <span class="material-symbols-outlined icono-mini-meta" aria-hidden="true">person</span>
+                <span class="nombre-cliente-card">{{ p.cliente.nombre }}</span>
+              </div>
+              <div class="admin-pedido-fecha-linea">
+                <span class="material-symbols-outlined icono-mini-meta" aria-hidden="true">calendar_today</span>
+                <span>{{ p.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}</span>
+              </div>
+            </div>
+
+            <div class="admin-pedido-card-pie">
+              <div class="admin-pedido-total-monto">
+                <span class="etiqueta-total-mini">TOTAL</span>
+                <span class="monto-total-neon">${{ "%.2f"|format(p.total) }}</span>
+              </div>
+              <div class="admin-pedido-btn-link">
+                <span>Auditar</span>
+                <span class="material-symbols-outlined icono-flecha-card" aria-hidden="true">chevron_right</span>
+              </div>
+            </div>
+          </a>
+        {% else %}
+          <div class="sin-resultados-admin-card">
+            <span class="material-symbols-outlined" aria-hidden="true">search_off</span>
+            <p>No hay pedidos registrados con el filtro seleccionado.</p>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Paginación Condicional (Se oculta automáticamente si total_paginas <= 1) -->
+      {% if total_paginas > 1 %}
+        <div class="paginacion-admin-contenedor">
+          <div class="paginacion-admin-info">
+            Mostrando <strong>{{ ((pagina - 1) * por_pagina) + 1 }}</strong> a <strong>{{ [pagina * por_pagina, total]|min }}</strong> de <strong>{{ total }}</strong> pedidos
+          </div>
+
+          <nav class="paginacion-admin-controles" aria-label="Navegación de páginas">
+            <!-- Botón Anterior -->
+            {% if pagina > 1 %}
+              <a 
+                class="btn-paginacion" 
+                href="{{ url_for('admin.admin_pedidos_lista', estado=estado_filtro, pagina=pagina - 1) }}"
+                title="Página anterior"
+              >
+                <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+                <span>Anterior</span>
+              </a>
+            {% else %}
+              <span class="btn-paginacion deshabilitado" aria-disabled="true">
+                <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+                <span>Anterior</span>
+              </span>
+            {% endif %}
+
+            <!-- Números de Página -->
+            <div class="paginacion-numeros">
+              {% for p in range(1, total_paginas + 1) %}
+                {% if p == pagina %}
+                  <span class="btn-num-pag activo" aria-current="page">{{ p }}</span>
+                {% else %}
+                  <a 
+                    class="btn-num-pag" 
+                    href="{{ url_for('admin.admin_pedidos_lista', estado=estado_filtro, pagina=p) }}"
+                  >{{ p }}</a>
+                {% endif %}
+              {% endfor %}
+            </div>
+
+            <!-- Botón Siguiente -->
+            {% if pagina < total_paginas %}
+              <a 
+                class="btn-paginacion" 
+                href="{{ url_for('admin.admin_pedidos_lista', estado=estado_filtro, pagina=pagina + 1) }}"
+                title="Página siguiente"
+              >
+                <span>Siguiente</span>
+                <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+              </a>
+            {% else %}
+              <span class="btn-paginacion deshabilitado" aria-disabled="true">
+                <span>Siguiente</span>
+                <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+              </span>
+            {% endif %}
+          </nav>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</main>
+{% endblock %}

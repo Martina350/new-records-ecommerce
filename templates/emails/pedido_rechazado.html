@@ -1,0 +1,21 @@
+{% extends "emails/base.html" %}
+
+{% block titulo %}Actualización de pedido - New Records{% endblock %}
+{% block preheader %}Hay una actualización sobre tu pedido {{ numero }}.{% endblock %}
+
+{% block contenido %}
+  <p class="eyebrow">Pedido actualizado</p>
+  <h1>Tu pedido no pudo ser aprobado</h1>
+  <p>Hola {{ nombre }}, te informamos que la revisión de tu compra ha finalizado.</p>
+
+  <div class="panel">
+    <p class="dato-etiqueta">Pedido</p>
+    <p class="dato-valor">{{ numero }}</p>
+    <div style="margin-top:20px;"><span class="estado estado-rechazado">RECHAZADO</span></div>
+  </div>
+
+  <div class="aviso"><strong style="color:#ffffff;">Motivo:</strong><br>{{ motivo }}</div>
+  {% if url_pedidos %}
+    <p style="margin-top:24px;"><a class="boton" href="{{ url_pedidos }}">Consultar mi pedido</a></p>
+  {% endif %}
+{% endblock %}

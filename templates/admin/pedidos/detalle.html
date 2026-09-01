@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+
+{% block titulo %}Auditoría de Pedido {{ pedido.numero }}{% endblock %}
+
+{% block contenido %}
+<main class="seccion-admin">
+  <div class="contenedor">
+    <div class="admin-cabecera-principal admin-cabecera-auditoria">
+      <!-- Fila Superior Móvil: Volver a Bandeja + Badge Estado -->
+      <div class="admin-auditoria-meta-top-movil">
+        <a class="enlace-volver-auditoria" href="{{ url_for('admin.admin_pedidos_lista') }}">
+          <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+          <span>Bandeja de Pedidos</span>
+        </a>
+        <span class="badge-estado badge-estado-{{ pedido.estado | lower }}">
+          {{ pedido.estado }}
+        </span>
+      </div>
+
+      <div class="admin-cabecera-info admin-auditoria-info-inline">
+        <div class="admin-icono-grande">
+          <span class="material-symbols-outlined" aria-hidden="true">admin_panel_settings</span>
+        </div>
+        <div class="admin-auditoria-titulos">
+          <h1 id="titulo-auditoria" class="titulo-admin titulo-auditoria-inline">
+            <span class="etiqueta-auditoria-texto">Auditoría Pedido:</span>
+            <span class="degradado codigo-pedido-auditoria">{{ pedido.numero }}</span>
+          </h1>
+          <p class="subtitulo-admin subtitulo-auditoria-meta">
+            <span class="material-symbols-outlined icono-mini-meta" aria-hidden="true">calendar_today</span>
+            <span>Registrado el {{ pedido.fecha_creacion.strftime('%d/%m/%Y a las %H:%M') }}</span>
+            <span class="badge-estado badge-estado-{{ pedido.estado | lower }} badge-auditoria-desktop">
+              {{ pedido.estado }}
+            </span>
+          </p>
+        </div>
+      </div>
+
+      <div class="admin-cabecera-acciones admin-acciones-desktop-only">
+        <a class="boton boton-secundario" href="{{ url_for('admin.admin_pedidos_lista') }}">
+          <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+          <span>Bandeja de Pedidos</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Información de Revisión si ya fue procesado -->
+    {% if pedido.estado != "PENDIENTE" %}
+      <div class="admin-seccion-bloque" style="border-color: {% if pedido.estado == 'APROBADO' %}rgba(0, 255, 65, 0.35){% else %}rgba(239, 68, 68, 0.35){% endif %}; background: {% if pedido.estado == 'APROBADO' %}rgba(0, 255, 65, 0.05){% else %}rgba(239, 68, 68, 0.05){% endif %};">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <span class="material-symbols-outlined" style="font-size: 2rem; color: {% if pedido.estado == 'APROBADO' %}var(--accent){% else %}#f87171{% endif %};">
+            {% if pedido.estado == 'APROBADO' %}verified{% else %}cancel{% endif %}
+          </span>
+          <div>
+            <strong style="font-size: 1.1rem; color: var(--text-heading);">
+              Pedido {{ pedido.estado }} el {{ pedido.fecha_revision.strftime('%d/%m/%Y %H:%M') if pedido.fecha_revision else 'N/A' }}
+            </strong>
+            {% if pedido.administrador_revisor %}
+              <p style="margin: 0.25rem 0 0 0; color: var(--text-muted-page);">Revisado por: <strong>{{ pedido.administrador_revisor.nombre }}</strong> ({{ pedido.administrador_revisor.email }})</p>
+            {% endif %}
+            {% if pedido.motivo_rechazo %}
+              <p style="margin: 0.25rem 0 0 0; color: #f87171;"><strong>Motivo del rechazo:</strong> {{ pedido.motivo_rechazo }}</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- Grid de Datos: Cliente y Pago -->
+    <div class="checkout-grid">
+      <div class="checkout-bloque">
+        <h3 class="checkout-subtitulo-bloque">
+          <span class="material-symbols-outlined" aria-hidden="true">person</span>
+          <span>Datos del Cliente</span>
+        </h3>
+        <div class="checkout-datos-usuario">
+          <p><strong>Nombre completo:</strong> {{ pedido.cliente.nombre }}</p>
+          <p><strong>Correo electrónico:</strong> {{ pedido.cliente.email }}</p>
+          <p><strong>Teléfono:</strong> {{ pedido.cliente.telefono or 'No registrado' }}</p>
+          <p><strong>Ciudad:</strong> {{ pedido.cliente.ciudad or 'No registrada' }}</p>
+          <p><strong>Dirección:</strong> {{ pedido.cliente.direccion or 'No registrada' }}</p>
+        </div>
+      </div>
+
+      <div class="checkout-bloque">
+        <h3 class="checkout-subtitulo-bloque">
+          <span class="material-symbols-outlined" aria-hidden="true">credit_card</span>
+          <span>Transacción y Cobro</span>
+        </h3>
+        <div class="checkout-datos-usuario">
+          <p><strong>Tarjeta de pago:</strong> {{ pedido.metodo_pago.marca }} **** {{ pedido.metodo_pago.ultimos4 }}</p>
+          <p><strong>Nombre del titular:</strong> {{ pedido.metodo_pago.titular }}</p>
+          <p><strong>Vencimiento:</strong> {{ "%02d"|format(pedido.metodo_pago.mes_vencimiento) }}/{{ pedido.metodo_pago.anio_vencimiento }}</p>
+          {% if pedido.transaccion_pago %}
+            <p><strong>Referencia:</strong> <code class="texto-codigo">{{ pedido.transaccion_pago.referencia }}</code></p>
+            <p><strong>Estado del cobro:</strong> <span class="badge-estado badge-estado-{{ pedido.transaccion_pago.estado | lower }}">{{ pedido.transaccion_pago.estado }}</span></p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla de Artículos con Comprobación de Stock en Tiempo Real -->
+    <div class="admin-seccion-bloque">
+      <h3 class="admin-subtitulo-bloque admin-subtitulo-inventario-flex">
+        <span class="material-symbols-outlined icono-subtitulo-verde" aria-hidden="true">inventory_2</span>
+        <span>Comprobación de Inventario Físico en Tiempo Real</span>
+      </h3>
+
+      <!-- Vista Desktop: Tabla panorámica completa -->
+      <div class="tabla-carrito-contenedor vista-desktop-admin-pedidos">
+        <table class="tabla-carrito">
+          <thead>
+            <tr>
+              <th>Disco / Álbum</th>
+              <th>Formato</th>
+              <th>Cant. Solicitada</th>
+              <th>Stock Físico Actual</th>
+              <th>Precio Unit.</th>
+              <th>Subtotal</th>
+              <th>Disponibilidad</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for detalle in pedido.detalles %}
+              <tr>
+                <td>
+                  <strong>{{ detalle.album }}</strong><br/>
+                  <small class="artista-disco-carrito">{{ detalle.artista }}</small>
+                </td>
+                <td>
+                  <span class="badge-formato-tarjeta badge-formato-{{ detalle.formato | lower }}">
+                    {{ detalle.formato }}
+                  </span>
+                </td>
+                <td><strong>{{ detalle.cantidad }} unid.</strong></td>
+                <td>
+                  {% if detalle.disco %}
+                    <span>{{ detalle.disco.stock }} unidades</span>
+                  {% else %}
+                    <span class="badge-stock-agotado">Eliminado</span>
+                  {% endif %}
+                </td>
+                <td>${{ "%.2f"|format(detalle.precio_unitario) }}</td>
+                <td><strong>${{ "%.2f"|format(detalle.subtotal) }}</strong></td>
+                <td>
+                  {% if detalle.disco and detalle.disco.stock >= detalle.cantidad %}
+                    <span class="badge-estado badge-estado-aprobado">
+                      <span class="material-symbols-outlined icono-estado-chico" aria-hidden="true">check</span>
+                      Suficiente
+                    </span>
+                  {% else %}
+                    <span class="badge-estado badge-estado-rechazado">
+                      <span class="material-symbols-outlined icono-estado-chico" aria-hidden="true">warning</span>
+                      Insuficiente
+                    </span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Vista Móvil: Tarjetas estructuradas de inventario -->
+      <div class="admin-stock-cards-movil-grid vista-movil-admin-pedidos">
+        {% for detalle in pedido.detalles %}
+          <div class="admin-stock-card-movil">
+            <div class="admin-stock-card-cabecera">
+              <div class="admin-stock-album-info">
+                <h4 class="nombre-album-stock-card">{{ detalle.album }}</h4>
+                <span class="artista-stock-card">{{ detalle.artista }}</span>
+              </div>
+              <span class="badge-formato-tarjeta badge-formato-{{ detalle.formato | lower }}">
+                {{ detalle.formato }}
+              </span>
+            </div>
+
+            <div class="admin-stock-card-filas">
+              <div class="stock-card-fila">
+                <span class="stock-card-etiqueta">Cant. Solicitada:</span>
+                <strong class="stock-card-valor">{{ detalle.cantidad }} unid.</strong>
+              </div>
+
+              <div class="stock-card-fila">
+                <span class="stock-card-etiqueta">Stock en Almacén:</span>
+                <span class="stock-card-valor">
+                  {% if detalle.disco %}
+                    {{ detalle.disco.stock }} unidades
+                  {% else %}
+                    <span class="badge-stock-agotado">Eliminado</span>
+                  {% endif %}
+                </span>
+              </div>
+
+              <div class="stock-card-fila">
+                <span class="stock-card-etiqueta">Precio Unitario:</span>
+                <span class="stock-card-valor">${{ "%.2f"|format(detalle.precio_unitario) }}</span>
+              </div>
+
+              <div class="stock-card-fila stock-card-fila-subtotal">
+                <span class="stock-card-etiqueta">Subtotal:</span>
+                <strong class="stock-card-valor valor-subtotal-neon">${{ "%.2f"|format(detalle.subtotal) }}</strong>
+              </div>
+            </div>
+
+            <div class="admin-stock-card-pie">
+              <span class="stock-card-etiqueta-pie">Disponibilidad:</span>
+              {% if detalle.disco and detalle.disco.stock >= detalle.cantidad %}
+                <span class="badge-estado badge-estado-aprobado">
+                  <span class="material-symbols-outlined icono-estado-chico" aria-hidden="true">check</span>
+                  <span>Suficiente</span>
+                </span>
+              {% else %}
+                <span class="badge-estado badge-estado-rechazado">
+                  <span class="material-symbols-outlined icono-estado-chico" aria-hidden="true">warning</span>
+                  <span>Insuficiente</span>
+                </span>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="pedido-total-resumen">
+        <div class="pedido-total-fila">
+          <span style="font-size: 1.1rem; color: var(--text-muted-page); font-weight: 600;">Total de la Orden:</span>
+          <span class="checkout-monto-total">${{ "%.2f"|format(pedido.total) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Acciones de Aprobación y Rechazo para Pedidos Pendientes -->
+    {% if pedido.estado == "PENDIENTE" %}
+      <div class="admin-seccion-bloque">
+        <h3 class="admin-subtitulo-bloque">
+          <span class="material-symbols-outlined" aria-hidden="true">gavel</span>
+          <span>Resolución Administrativa</span>
+        </h3>
+        <p style="color: var(--text-muted-page); margin: 0 0 1.5rem 0; font-size: 0.95rem;">
+          Al aprobar, se actualizarán las existencias, se confirmará el pago y se generará la factura oficial.
+        </p>
+
+        <div class="admin-grid-decisiones">
+          <!-- Formulario de Aprobación -->
+          <div style="background: rgba(0, 255, 65, 0.04); border: 1px solid rgba(0, 255, 65, 0.25); border-radius: 1rem; padding: 1.75rem; display: flex; flex-direction: column; justify-content: space-between; gap: 1.5rem;">
+            <div>
+              <h4 style="margin: 0 0 0.5rem 0; font-size: 1.1rem; color: var(--accent);">Aprobar Pedido</h4>
+              <p style="margin: 0; font-size: 0.875rem; color: var(--text-muted-page);">Confirma el stock y autoriza la entrega del pedido al cliente.</p>
+            </div>
+            <form action="{{ url_for('admin.admin_pedido_aprobar', numero=pedido.numero) }}" method="post" onsubmit="return confirm('¿Aprobar este pedido y descontar el stock del inventario?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="boton boton-principal resplandor-neon" type="submit" id="btn-aprobar-pedido" style="width: 100%;">
+                <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+                <span>Aprobar Pedido y Descontar Stock</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- Formulario de Rechazo -->
+          <div style="background: rgba(239, 68, 68, 0.04); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 1rem; padding: 1.75rem; display: flex; flex-direction: column; justify-content: space-between; gap: 1.5rem;">
+            <div>
+              <h4 style="margin: 0 0 0.5rem 0; font-size: 1.1rem; color: #f87171;">Rechazar Pedido</h4>
+              <p style="margin: 0; font-size: 0.875rem; color: var(--text-muted-page);">Especifica la razón técnica o comercial del rechazo.</p>
+            </div>
+            <form action="{{ url_for('admin.admin_pedido_rechazar', numero=pedido.numero) }}" method="post" onsubmit="return confirm('¿Rechazar este pedido?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <div style="margin-bottom: 1rem;">
+                <input
+                  class="entrada-formulario entrada-tarjeta"
+                  type="text"
+                  id="motivo"
+                  name="motivo"
+                  placeholder="Ej. Stock agotado en almacén, dirección no válida..."
+                  required
+                />
+              </div>
+              <button class="boton boton-peligro" type="submit" id="btn-rechazar-pedido" style="width: 100%;">
+                <span class="material-symbols-outlined" aria-hidden="true">cancel</span>
+                <span>Rechazar Pedido</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <!-- Documentos Generados -->
+      <div class="admin-seccion-bloque">
+        <h3 class="admin-subtitulo-bloque">
+          <span class="material-symbols-outlined" aria-hidden="true">picture_as_pdf</span>
+          <span>Comprobantes y Facturas Emitidas</span>
+        </h3>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <a class="boton boton-pdf" href="{{ url_for('pedidos.descargar_comprobante', numero=pedido.numero) }}" target="_blank">
+            <span class="material-symbols-outlined icono-pdf" aria-hidden="true">download</span>
+            <span>Ver Comprobante Preliminar</span>
+          </a>
+          {% if pedido.estado == "APROBADO" %}
+            <a class="boton boton-destacado boton-pdf resplandor-neon" href="{{ url_for('pedidos.descargar_factura', numero=pedido.numero) }}" target="_blank">
+              <span class="material-symbols-outlined icono-pdf" aria-hidden="true">receipt</span>
+              <span>Ver Factura Oficial Emitida</span>
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</main>
+{% endblock %}
