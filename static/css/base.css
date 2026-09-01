@@ -36,12 +36,16 @@
 }
 
 /* ===== Base ===== */
-* { box-sizing: border-box; }
+*, *::before, *::after {
+  box-sizing: border-box;
+}
 
 html {
   scroll-behavior: smooth;
   background-color: var(--bg-dark);
   color-scheme: dark;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 body {
@@ -52,6 +56,14 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  max-width: 100%;
+  overflow-x: hidden;
+  position: relative;
+}
+
+input, textarea, select, button {
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 /* Mantiene una superficie oscura durante navegaciones parciales o clásicas. */
