@@ -285,25 +285,31 @@
 
 .form-filtros-grid {
   display: flex;
-  align-items: center;
-  gap: 1.75rem;
+  align-items: flex-start;
+  gap: 1.25rem;
   flex-wrap: wrap;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .campo-filtro-item {
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 0.75rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.45rem;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .etiqueta-filtro-mini {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  font-size: 0.85rem;
-  color: var(--text-light, #f8fafc);
-  font-weight: 600;
+  font-size: 0.8rem;
+  color: var(--accent, #00FF41);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   white-space: nowrap;
 }
 
@@ -315,7 +321,9 @@
 /* --- Custom Select Component Dark Cyberpunk --- */
 .custom-select-contenedor {
   position: relative;
-  min-width: 195px;
+  min-width: 200px;
+  width: 100%;
+  box-sizing: border-box;
   z-index: 10;
 }
 
@@ -1693,7 +1701,7 @@
 
 .form-filtros-grid {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 1.25rem;
   flex-wrap: wrap;
   width: 100%;
@@ -1702,10 +1710,12 @@
 
 .campo-filtro-item {
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 0.65rem;
-  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.45rem;
+  flex: 1 1 200px;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .etiqueta-filtro-mini {
@@ -2062,11 +2072,94 @@
   }
 
   .admin-barra-filtros-avanzados {
-    padding: 1rem;
+    background: rgba(18, 18, 26, 0.9) !important;
+    border: 1px solid rgba(138, 44, 226, 0.28) !important;
+    border-radius: 0.85rem !important;
+    padding: 1rem 0.9rem !important;
+    margin-bottom: 1.25rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .form-filtros-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 1rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .campo-filtro-item {
-    min-width: 100%;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.45rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    flex: 1 1 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .etiqueta-filtro-mini {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.4rem !important;
+    font-size: 0.78rem !important;
+    font-weight: 700 !important;
+    color: var(--accent, #00FF41) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .custom-select-contenedor {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .custom-select-boton {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    padding: 0.75rem 1rem !important;
+    min-height: 46px !important;
+    font-size: 0.92rem !important;
+    border-radius: 0.6rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+  }
+
+  .custom-select-label {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    font-size: 0.92rem !important;
+  }
+
+  .custom-select-opciones {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .custom-select-opcion {
+    padding: 0.7rem 0.85rem !important;
+    font-size: 0.875rem !important;
+    min-height: 42px !important;
+    box-sizing: border-box !important;
   }
 
   .admin-disco-card-item {
@@ -2871,21 +2964,23 @@
   padding: 0 0 1.25rem 0 !important;
   margin-bottom: 1.25rem;
   width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 .contenedor-admin-fluido {
-  width: 100% !important;
-  max-width: 100% !important;
-  margin: 0 !important;
-  padding-left: 1.75rem !important;
-  padding-right: 1.75rem !important;
-  box-sizing: border-box !important;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  padding-left: 1.75rem;
+  padding-right: 1.75rem;
+  box-sizing: border-box;
 }
 
 @media (min-width: 1400px) {
   .contenedor-admin-fluido {
-    padding-left: 2.25rem !important;
-    padding-right: 2.25rem !important;
+    padding-left: 2.25rem;
+    padding-right: 2.25rem;
   }
 }
 
@@ -2893,40 +2988,42 @@
   background: rgba(18, 18, 26, 0.88);
   border: 1px solid rgba(138, 44, 226, 0.28);
   border-radius: 1.25rem;
-  padding: 1.75rem 2.25rem !important;
+  padding: 1.75rem 2.25rem;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(16px);
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
+  -webkit-backdrop-filter: blur(16px);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .formulario-admin-split {
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .layout-formulario-split {
   display: grid;
   grid-template-columns: 1fr;
   gap: 2rem;
-  width: 100% !important;
-  box-sizing: border-box !important;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   align-items: start;
 }
 
 @media (min-width: 1024px) {
   .layout-formulario-split {
-    grid-template-columns: 1fr 340px !important;
-    gap: 2.5rem !important;
+    grid-template-columns: 1fr 340px;
+    gap: 2.5rem;
   }
 }
 
 @media (min-width: 1500px) {
   .layout-formulario-split {
-    grid-template-columns: 1fr 380px !important;
-    gap: 3rem !important;
+    grid-template-columns: 1fr 380px;
+    gap: 3rem;
   }
 }
 
@@ -2934,9 +3031,10 @@
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  width: 100% !important;
-  min-width: 0 !important;
-  box-sizing: border-box !important;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .form-bloque-seccion {
@@ -2949,6 +3047,8 @@
   gap: 1.15rem;
   box-sizing: border-box;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .form-bloque-cabecera {
@@ -2957,6 +3057,9 @@
   gap: 0.65rem;
   padding-bottom: 0.65rem;
   border-bottom: 1px dashed rgba(138, 44, 226, 0.22);
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
 }
 
 .icono-bloque {
@@ -2979,6 +3082,8 @@
   grid-template-columns: 1fr;
   gap: 1rem;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   box-sizing: border-box;
 }
 
@@ -2997,8 +3102,8 @@
 
   .grid-form-admin-compacto .campo-admin.col-span-full,
   .col-span-full {
-    grid-column: 1 / -1 !important;
-    width: 100% !important;
+    grid-column: 1 / -1;
+    width: 100%;
   }
 }
 
@@ -3008,6 +3113,8 @@
   grid-template-columns: 1fr;
   gap: 1rem;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   box-sizing: border-box;
 }
 
@@ -3024,8 +3131,8 @@
 
   .grid-form-admin-metricas .campo-admin.col-span-full,
   .grid-form-admin-metricas .col-span-full {
-    grid-column: 1 / -1 !important;
-    width: 100% !important;
+    grid-column: 1 / -1;
+    width: 100%;
   }
 }
 
@@ -3034,6 +3141,8 @@
   flex-direction: column;
   gap: 0.4rem;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   box-sizing: border-box;
 }
 
@@ -3047,7 +3156,8 @@
 .nota-campo {
   font-size: 0.75rem;
   color: var(--text-muted-page);
-  line-height: 1.3;
+  line-height: 1.35;
+  word-break: break-word;
 }
 
 /* Columna de Previsualización y Carga de Imagen (Estática y Compacta) */
@@ -3055,8 +3165,10 @@
   display: flex;
   flex-direction: column;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   box-sizing: border-box;
-  position: static !important;
+  position: static;
 }
 
 .panel-carga-imagen {
@@ -3069,11 +3181,15 @@
   gap: 1rem;
   box-sizing: border-box;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .marco-preview-arte {
   position: relative;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   aspect-ratio: 1 / 1;
   max-height: 280px;
   margin: 0 auto;
@@ -3084,13 +3200,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
 }
 
 /* El arte de género usa una pieza vertical de mayor tamaño que la portada 1:1. */
 .marco-preview-arte.marco-preview-categoria {
   aspect-ratio: 4 / 5;
-  min-height: 360px;
-  max-height: 520px;
+  min-height: 320px;
+  max-height: 480px;
 }
 
 .imagen-preview-elemento {
@@ -3113,6 +3230,8 @@
   gap: 0.4rem;
   padding: 1.5rem;
   text-align: center;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .icono-placeholder-disco {
@@ -3184,6 +3303,9 @@
   align-items: center;
   gap: 0.3rem;
   transition: all 0.2s ease;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .zona-drop-archivos:hover,
@@ -3200,7 +3322,6 @@
   height: 100%;
   opacity: 0;
   cursor: pointer;
-  z-index: 5;
 }
 
 .icono-drop {
@@ -3238,6 +3359,9 @@
   padding-top: 1.25rem;
   border-top: 1px solid rgba(138, 44, 226, 0.2);
   flex-wrap: wrap;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .boton-guardar-admin,
@@ -3248,26 +3372,196 @@
   font-weight: 700;
   padding: 0.75rem 1.4rem;
   border-radius: 0.65rem;
+  box-sizing: border-box;
 }
 
+/* ==========================================================================
+   Adaptación Móvil y Solución de Desbordamientos / Anidamiento Excesivo
+   ========================================================================== */
 @media (max-width: 768px) {
-  .contenedor-admin-fluido {
-    padding-left: 1rem;
-    padding-right: 1rem;
+  .seccion-admin {
+    padding: 1rem 0.65rem 2.5rem 0.65rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
   }
 
+  .contenedor-admin-fluido {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .admin-cabecera-principal {
+    padding: 0 0 1rem 0 !important;
+    margin-bottom: 1rem !important;
+  }
+
+  /* Simplificación de la jerarquía visual: el contenedor exterior pasa a ser transparente
+     sin paddings ni bordes pesados, dejando que las tarjetas internas actúen limpiamente */
   .caja-formulario-admin-amplia {
-    padding: 1.15rem;
-    border-radius: 1rem;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-radius: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .layout-formulario-split {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .columna-datos-formulario,
+  .columna-preview-imagen {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+  }
+
+  .form-bloque-seccion,
+  .panel-carga-imagen {
+    background: rgba(18, 18, 26, 0.9) !important;
+    border: 1px solid rgba(138, 44, 226, 0.28) !important;
+    border-radius: 0.85rem !important;
+    padding: 1.1rem 0.95rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    margin: 0 0 1rem 0 !important;
+  }
+
+  .form-bloque-cabecera {
+    padding-bottom: 0.5rem !important;
+    margin-bottom: 0.25rem !important;
+    gap: 0.5rem !important;
+  }
+
+  .form-bloque-titulo {
+    font-size: 0.95rem !important;
+  }
+
+  .grid-form-admin-compacto,
+  .grid-form-admin-metricas,
+  .grid-form-admin-2col {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.85rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .campo-admin,
+  .campo-admin.col-span-2,
+  .campo-admin.col-span-2-lg,
+  .campo-admin.col-span-full,
+  .col-span-2,
+  .col-span-full {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Entradas de formulario: width 100%, sin desbordes, texto completo visible */
+  .entrada-formulario,
+  .entrada-tarjeta,
+  .select-custom,
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="password"],
+  textarea,
+  select {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    font-size: 0.875rem !important;
+    padding: 0.65rem 0.75rem !important;
+    border-radius: 0.55rem !important;
+  }
+
+  textarea.entrada-formulario,
+  textarea.entrada-tarjeta {
+    resize: vertical !important;
+    min-height: 80px !important;
+  }
+
+  .etiqueta-tarjeta,
+  .campo-admin label {
+    font-size: 0.8rem !important;
+    word-break: break-word;
+  }
+
+  .nota-campo {
+    font-size: 0.725rem !important;
+    line-height: 1.35 !important;
+    word-break: break-word;
+  }
+
+  .marco-preview-arte {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    aspect-ratio: 1 / 1;
+    max-height: 240px;
+  }
+
+  .marco-preview-arte.marco-preview-categoria {
+    aspect-ratio: 4 / 5;
+    min-height: 220px !important;
+    max-height: 300px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .placeholder-preview-arte {
+    padding: 1rem 0.5rem !important;
+  }
+
+  .zona-drop-archivos {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    padding: 0.85rem 0.65rem !important;
+  }
+
+  .info-drop-formatos {
+    font-size: 0.68rem !important;
+    line-height: 1.3 !important;
   }
 
   .form-admin-acciones-pie {
     flex-direction: column;
-    width: 100%;
+    width: 100% !important;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    gap: 0.65rem;
   }
 
   .boton-guardar-admin,
   .boton-cancelar-admin {
-    width: 100%;
+    width: 100% !important;
+    min-width: 0 !important;
   }
 }
+
