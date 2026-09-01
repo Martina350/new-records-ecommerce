@@ -146,6 +146,13 @@
                 </span>
               </div>
 
+              {% if pedido.estado == "RECHAZADO" and pedido.motivo_rechazo %}
+                <div class="alerta-rechazo-card-movil">
+                  <span class="material-symbols-outlined icono-rechazo-mini" aria-hidden="true">error</span>
+                  <span>Motivo: {{ pedido.motivo_rechazo }}</span>
+                </div>
+              {% endif %}
+
               <!-- Fila 3: Total y Botón de Abrir Modal -->
               <div class="fila-movil-pedido-pie">
                 <div class="bloque-total-movil">
@@ -205,6 +212,33 @@
                     {{ pedido.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}
                   </span>
                 </div>
+
+                <!-- Mensaje Informativo según Estado en Modal Móvil -->
+                {% if pedido.estado == "PENDIENTE" %}
+                  <div class="aviso-estado-detalle aviso-estado-detalle-pendiente">
+                    <span class="material-symbols-outlined icono-aviso-detalle" aria-hidden="true">info</span>
+                    <div>
+                      <strong class="aviso-detalle-titulo">Tu pedido se encuentra en revisión administrativa</strong>
+                      <p class="aviso-detalle-texto">Nuestro equipo verificará las existencias y confirmará el cobro antes de emitir tu factura final.</p>
+                    </div>
+                  </div>
+                {% elif pedido.estado == "APROBADO" %}
+                  <div class="aviso-estado-detalle aviso-estado-detalle-aprobado">
+                    <span class="material-symbols-outlined icono-aviso-detalle" aria-hidden="true">verified</span>
+                    <div>
+                      <strong class="aviso-detalle-titulo">¡Pedido Aprobado y Procesado con Éxito!</strong>
+                      <p class="aviso-detalle-texto">El stock ha sido descontado satisfactoriamente y tu comprobante oficial está listo para descarga.</p>
+                    </div>
+                  </div>
+                {% elif pedido.estado == "RECHAZADO" %}
+                  <div class="aviso-estado-detalle aviso-estado-detalle-rechazado">
+                    <span class="material-symbols-outlined icono-aviso-detalle" aria-hidden="true">error</span>
+                    <div>
+                      <strong class="aviso-detalle-titulo">Pedido No Aprobado</strong>
+                      <p class="aviso-detalle-texto">Motivo: {{ pedido.motivo_rechazo or 'Sin motivo especificado por el administrador.' }}</p>
+                    </div>
+                  </div>
+                {% endif %}
 
                 <div class="modal-hero-total-box">
                   <span class="modal-hero-total-lbl">Total Pagado</span>
