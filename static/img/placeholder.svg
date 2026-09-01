@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-labelledby="title desc">
+  <title id="title">Portada no disponible</title>
+  <desc id="desc">Marcador visual de New Records para un disco sin portada.</desc>
+  <rect width="600" height="600" fill="#17131f"/>
+  <rect x="32" y="32" width="536" height="536" rx="28" fill="none" stroke="#8a2ce2" stroke-opacity=".45" stroke-width="4"/>
+  <circle cx="300" cy="268" r="118" fill="#21172d" stroke="#00ff41" stroke-opacity=".75" stroke-width="8"/>
+  <circle cx="300" cy="268" r="42" fill="#8a2ce2"/>
+  <circle cx="300" cy="268" r="12" fill="#121212"/>
+  <text x="300" y="430" fill="#f8fafc" font-family="Arial, sans-serif" font-size="34" font-weight="700" text-anchor="middle">NEW RECORDS</text>
+  <text x="300" y="472" fill="#94a3b8" font-family="Arial, sans-serif" font-size="22" text-anchor="middle">Portada no disponible</text>
+</svg>

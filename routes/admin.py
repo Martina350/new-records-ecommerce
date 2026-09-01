@@ -27,6 +27,7 @@ from services import (
     obtener_resumen_metricas_ventas,
     rechazar_pedido,
 )
+from uploads import eliminar_imagen_gestionada, guardar_imagen_subida
 from validators import (
     convertir_valores_disco,
     prefijo_categoria_valido,
@@ -149,7 +150,6 @@ def admin_discos_nuevo():
         peso_kg = request.form.get("peso_kg", "0")
         costo_envio = request.form.get("costo_envio_por_kg", "0")
         costo_embalaje = request.form.get("costo_embalaje", "0")
-        imagen = request.form.get("imagen", "").strip()
 
         errores = validar_textos_disco(
             formato=formato,
@@ -193,10 +193,14 @@ def admin_discos_nuevo():
                 peso_kg=peso_kg,
                 costo_envio_por_kg=costo_envio,
                 costo_embalaje=costo_embalaje,
-                imagen=imagen,
+                imagen=None,
             )
 
+        imagen_nueva = None
         try:
+            imagen_nueva = guardar_imagen_subida(
+                request.files.get("imagen_archivo"), "productos"
+            )
             precio_val = valores.precio_base
             stock_val = valores.stock
             peso_val = valores.peso_kg
@@ -214,7 +218,7 @@ def admin_discos_nuevo():
                 "stock": stock_val,
                 "peso_kg": peso_val,
                 "costo_envio_por_kg": envio_val,
-                "imagen": imagen or None,
+                "imagen": imagen_nueva,
                 "activo": True,
             }
 
@@ -238,8 +242,29 @@ def admin_discos_nuevo():
                 "success",
             )
             return redirect(url_for("admin.admin_discos_lista"))
+        except ValueError as error:
+            db.session.rollback()
+            eliminar_imagen_gestionada(imagen_nueva)
+            flash(str(error), "error")
+            return render_template(
+                "admin/discos/formulario.html",
+                categorias=categorias,
+                disco=None,
+                formato=formato,
+                album=album,
+                artista=artista,
+                descripcion=descripcion,
+                categoria_id=categoria_id,
+                precio_base=precio_base,
+                stock=stock,
+                peso_kg=peso_kg,
+                costo_envio_por_kg=costo_envio,
+                costo_embalaje=costo_embalaje,
+                imagen=None,
+            )
         except Exception:
             db.session.rollback()
+            eliminar_imagen_gestionada(imagen_nueva)
             flash("No se pudo guardar el disco. Inténtalo nuevamente.", "error")
 
     return render_template(
@@ -264,7 +289,9 @@ def admin_discos_editar(id):
         peso_kg = request.form.get("peso_kg", "0")
         costo_envio = request.form.get("costo_envio_por_kg", "0")
         costo_embalaje = request.form.get("costo_embalaje", "0")
-        imagen = request.form.get("imagen", disco.imagen or "").strip()
+        conservar_imagen = (
+            request.form.get("conservar_imagen", "1" if disco.imagen else "0") == "1"
+        )
 
         errores = validar_textos_disco(
             formato=disco.formato,
@@ -295,10 +322,18 @@ def admin_discos_editar(id):
             for e in errores:
                 flash(e, "error")
             return render_template(
-                "admin/discos/formulario.html", categorias=categorias, disco=disco
+                "admin/discos/formulario.html",
+                categorias=categorias,
+                disco=disco,
+                imagen=disco.imagen if conservar_imagen else None,
             )
 
+        imagen_anterior = disco.imagen
+        imagen_nueva = None
         try:
+            imagen_nueva = guardar_imagen_subida(
+                request.files.get("imagen_archivo"), "productos"
+            )
             precio_val = valores.precio_base
             stock_val = valores.stock
             peso_val = valores.peso_kg
@@ -315,13 +350,28 @@ def admin_discos_editar(id):
             disco.costo_envio_por_kg = envio_val
             if disco.formato == "VINILO":
                 disco.costo_embalaje = embalaje_val
-            disco.imagen = imagen or None
+            disco.imagen = imagen_nueva or (
+                imagen_anterior if conservar_imagen else None
+            )
 
             db.session.commit()
+            if imagen_anterior != disco.imagen:
+                eliminar_imagen_gestionada(imagen_anterior)
             flash(f"Disco '{album}' actualizado correctamente.", "success")
             return redirect(url_for("admin.admin_discos_lista"))
+        except ValueError as error:
+            db.session.rollback()
+            eliminar_imagen_gestionada(imagen_nueva)
+            flash(str(error), "error")
+            return render_template(
+                "admin/discos/formulario.html",
+                categorias=categorias,
+                disco=disco,
+                imagen=imagen_anterior if conservar_imagen else None,
+            )
         except Exception:
             db.session.rollback()
+            eliminar_imagen_gestionada(imagen_nueva)
             flash("Error al actualizar el disco.", "error")
 
     return render_template(
@@ -401,7 +451,6 @@ def admin_categorias_nueva():
         slug = request.form.get("slug", "").strip().lower()
         prefijo_codigo = request.form.get("prefijo_codigo", "").strip().upper()
         descripcion = request.form.get("descripcion", "").strip()
-        imagen = request.form.get("imagen", "").strip()
 
         if not slug and nombre:
             slug = slugificar(nombre)
@@ -433,24 +482,42 @@ def admin_categorias_nueva():
                 slug=slug,
                 prefijo_codigo=prefijo_codigo,
                 descripcion=descripcion,
-                imagen=imagen,
+                imagen=None,
             )
 
+        imagen_nueva = None
         try:
+            imagen_nueva = guardar_imagen_subida(
+                request.files.get("imagen_archivo"), "categorias"
+            )
             nueva_cat = Categoria(
                 nombre=nombre,
                 slug=slug,
                 prefijo_codigo=prefijo_codigo,
                 descripcion=descripcion or None,
-                imagen=imagen or None,
+                imagen=imagen_nueva,
                 activo=True,
             )
             db.session.add(nueva_cat)
             db.session.commit()
             flash(f"Categoría '{nombre}' creada exitosamente.", "success")
             return redirect(url_for("admin.admin_categorias_lista"))
+        except ValueError as error:
+            db.session.rollback()
+            eliminar_imagen_gestionada(imagen_nueva)
+            flash(str(error), "error")
+            return render_template(
+                "admin/categorias/formulario.html",
+                categoria=None,
+                nombre=nombre,
+                slug=slug,
+                prefijo_codigo=prefijo_codigo,
+                descripcion=descripcion,
+                imagen=None,
+            )
         except Exception:
             db.session.rollback()
+            eliminar_imagen_gestionada(imagen_nueva)
             flash("Error al crear la categoría.", "error")
 
     return render_template("admin/categorias/formulario.html", categoria=None)
@@ -469,7 +536,10 @@ def admin_categorias_editar(id):
             request.form.get("prefijo_codigo", categoria.prefijo_codigo).strip().upper()
         )
         descripcion = request.form.get("descripcion", "").strip()
-        imagen = request.form.get("imagen", categoria.imagen or "").strip()
+        conservar_imagen = (
+            request.form.get("conservar_imagen", "1" if categoria.imagen else "0")
+            == "1"
+        )
 
         errores = []
         error_nombre = validar_nombre_categoria(nombre)
@@ -508,19 +578,40 @@ def admin_categorias_editar(id):
                 "admin/categorias/formulario.html",
                 categoria=categoria,
                 prefijo_codigo=prefijo_codigo,
+                imagen=categoria.imagen if conservar_imagen else None,
             )
 
+        imagen_anterior = categoria.imagen
+        imagen_nueva = None
         try:
+            imagen_nueva = guardar_imagen_subida(
+                request.files.get("imagen_archivo"), "categorias"
+            )
             categoria.nombre = nombre
             categoria.slug = slug
             categoria.prefijo_codigo = prefijo_codigo
             categoria.descripcion = descripcion or None
-            categoria.imagen = imagen or None
+            categoria.imagen = imagen_nueva or (
+                imagen_anterior if conservar_imagen else None
+            )
             db.session.commit()
+            if imagen_anterior != categoria.imagen:
+                eliminar_imagen_gestionada(imagen_anterior)
             flash(f"Categoría '{nombre}' actualizada correctamente.", "success")
             return redirect(url_for("admin.admin_categorias_lista"))
+        except ValueError as error:
+            db.session.rollback()
+            eliminar_imagen_gestionada(imagen_nueva)
+            flash(str(error), "error")
+            return render_template(
+                "admin/categorias/formulario.html",
+                categoria=categoria,
+                prefijo_codigo=prefijo_codigo,
+                imagen=imagen_anterior if conservar_imagen else None,
+            )
         except Exception:
             db.session.rollback()
+            eliminar_imagen_gestionada(imagen_nueva)
             flash("Error al actualizar la categoría.", "error")
 
     return render_template("admin/categorias/formulario.html", categoria=categoria)

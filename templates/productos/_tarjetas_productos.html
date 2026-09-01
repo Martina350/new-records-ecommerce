@@ -4,7 +4,7 @@
       <div class="tarjeta-producto-imagen">
         <div 
           class="tarjeta-producto-imagen-fondo" 
-          style="background-image: url('{{ url_for('static', filename=disco.imagen if disco.imagen else 'img/placeholder.jpg') }}');" 
+          style="background-image: url('{{ url_for('static', filename=disco.imagen if disco.imagen else 'img/placeholder.svg') }}');"
           role="img" 
           aria-label="Portada {{ disco.album }}"
         ></div>

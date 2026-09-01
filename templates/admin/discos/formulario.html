@@ -3,6 +3,7 @@
 {% block titulo %}{% if disco %}Editar Disco: {{ disco.album }}{% else %}Nuevo Disco{% endif %}{% endblock %}
 
 {% block contenido %}
+{% set ruta_imagen = imagen if imagen is defined else (disco.imagen if disco else none) %}
 <main class="seccion-admin">
   <div class="contenedor-admin-fluido">
     <!-- Cabecera Superior Fuera de la Tarjeta del Formulario -->
@@ -39,9 +40,9 @@
 
     <!-- Caja del Formulario Panorámica de Pantalla Completa -->
     <div class="caja-formulario-admin-amplia">
-      <form class="formulario-admin-split" method="post" id="formAdminDisco">
+      <form class="formulario-admin-split" method="post" enctype="multipart/form-data" id="formAdminDisco">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <input type="hidden" id="inputImagenValor" value="{{ disco.imagen if disco else imagen | default('') }}">
+        <input type="hidden" id="inputImagenValor" name="conservar_imagen" value="{{ '1' if ruta_imagen else '0' }}">
 
         <div class="layout-formulario-split">
           <!-- Columna Izquierda: Datos del Formulario con Jerarquía Visual en Bloques -->
@@ -236,13 +237,13 @@
                 <!-- Imagen Activa -->
                 <img 
                   id="imagenPrevisualizada" 
-                  class="imagen-preview-elemento {% if not (disco and disco.imagen) and not imagen %}oculto{% endif %}" 
-                  src="{{ (disco.imagen if disco else imagen) or '' }}" 
+                  class="imagen-preview-elemento {% if not ruta_imagen %}oculto{% endif %}"
+                  src="{{ url_for('static', filename=ruta_imagen) if ruta_imagen else '' }}"
                   alt="Vista previa del álbum" 
                 />
 
                 <!-- Placeholder cuando no hay imagen -->
-                <div id="placeholderPreviewArte" class="placeholder-preview-arte {% if (disco and disco.imagen) or imagen %}oculto{% endif %}">
+                <div id="placeholderPreviewArte" class="placeholder-preview-arte {% if ruta_imagen %}oculto{% endif %}">
                   <div class="icono-placeholder-disco">
                     <span class="material-symbols-outlined">album</span>
                   </div>
@@ -254,7 +255,7 @@
                 <button 
                   type="button" 
                   id="btnEliminarImagen" 
-                  class="btn-eliminar-preview {% if not (disco and disco.imagen) and not imagen %}oculto{% endif %}"
+                  class="btn-eliminar-preview {% if not ruta_imagen %}oculto{% endif %}"
                   title="Eliminar imagen actual"
                   aria-label="Eliminar imagen cargada"
                 >
@@ -268,14 +269,16 @@
                 <input 
                   type="file" 
                   id="inputArchivoImagen" 
+                  name="imagen_archivo"
                   class="input-archivo-oculto" 
                   accept="image/png, image/jpeg, image/webp, image/gif"
+                  aria-label="Seleccionar portada del disco"
                 />
                 <span class="material-symbols-outlined icono-drop">cloud_upload</span>
                 <p class="texto-drop-instruccion">
                   <strong>Haz clic para examinar</strong> o arrastra una imagen aquí
                 </p>
-                <span class="info-drop-formatos">PNG, JPG, WEBP (Proporción 1:1 recomendada)</span>
+                <span class="info-drop-formatos">PNG, JPG, WEBP o GIF · 1000 × 1000 px (relación 1:1 recomendada)</span>
               </div>
             </div>
           </div>

@@ -15,6 +15,7 @@ htmlcov/
 instance/
 facturas/
 *.pdf
+static/img/uploads/*
 
 # PostgreSQL y respaldos
 backups/*
@@ -35,5 +36,4 @@ desktop.ini
 *.tmp
 *.temp
 ~$*
-
 

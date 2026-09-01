@@ -13,6 +13,10 @@ def test_categorias_dinamicas_responden(client):
     assert b"Rock" in respuesta.data
     assert b"Pop" in respuesta.data
     assert b"Reggaeton" in respuesta.data
+    assert b"data-carrusel-categorias" in respuesta.data
+    assert b"data-carrusel-anterior" in respuesta.data
+    assert b"data-carrusel-siguiente" in respuesta.data
+    assert b'aria-roledescription="carrusel"' in respuesta.data
 
 
 def test_menu_global_lista_generos_desde_postgresql(client):
@@ -26,15 +30,30 @@ def test_menu_global_lista_generos_desde_postgresql(client):
 
 def test_catalogo_todos_los_productos(client):
     """Verifica la paginación del catálogo con 8 álbumes por página."""
+    with app.app_context():
+        discos = Disco.query.filter_by(activo=True).order_by(Disco.album).all()
+        codigos_pagina_1 = [disco.codigo for disco in discos[:8]]
+        codigos_pagina_2 = [disco.codigo for disco in discos[8:16]]
+
     resp_pag1 = client.get("/productos")
     assert resp_pag1.status_code == 200
-    assert b"Deb\xc3\xad Tirar M\xc3\xa1s Fotos" in resp_pag1.data
-    assert b"Future Nostalgia" in resp_pag1.data
+    contenido_pagina_1 = resp_pag1.get_data(as_text=True)
+    assert contenido_pagina_1.count('<article class="tarjeta-producto">') == min(
+        8, len(discos)
+    )
+    assert all(
+        f"/productos/{codigo}" in contenido_pagina_1 for codigo in codigos_pagina_1
+    )
 
     resp_pag2 = client.get("/productos?pagina=2")
     assert resp_pag2.status_code == 200
-    assert b"The Dark Side of the Moon" in resp_pag2.data
-    assert b"Hit Me Hard and Soft" in resp_pag2.data
+    contenido_pagina_2 = resp_pag2.get_data(as_text=True)
+    assert contenido_pagina_2.count('<article class="tarjeta-producto">') == len(
+        codigos_pagina_2
+    )
+    assert all(
+        f"/productos/{codigo}" in contenido_pagina_2 for codigo in codigos_pagina_2
+    )
 
 
 def test_catalogo_carga_mas_ajax(client):
