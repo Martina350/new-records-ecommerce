@@ -15,6 +15,7 @@ function inicializarAplicacion() {
   inicializarGraficosReportes();
   inicializarCargarMasDiscosAdmin();
   inicializarCargarMasProductosCatalogo();
+  inicializarCarruselCategorias();
 }
 
 function sincronizarClaseBody(evento) {
@@ -1108,6 +1109,92 @@ function inicializarDropdownAdmin() {
 }
 
 /**
+ * Carrusel accesible y responsive de géneros musicales.
+ */
+function inicializarCarruselCategorias() {
+  const carrusel = document.querySelector('[data-carrusel-categorias]');
+  if (!carrusel || carrusel.dataset.inicializado === 'true') return;
+
+  const lista = carrusel.querySelector('.grid-categorias');
+  const tarjetas = Array.from(carrusel.querySelectorAll('.tarjeta-categoria'));
+  const botonAnterior = carrusel.querySelector('[data-carrusel-anterior]');
+  const botonSiguiente = carrusel.querySelector('[data-carrusel-siguiente]');
+  const controles = carrusel.querySelector('[data-controles-carrusel]');
+  const estado = carrusel.querySelector('.carrusel-categorias-estado');
+
+  if (!lista || !tarjetas.length || !botonAnterior || !botonSiguiente) return;
+  carrusel.dataset.inicializado = 'true';
+
+  const obtenerMedidas = () => {
+    const estilos = window.getComputedStyle(lista);
+    const separacion = parseFloat(estilos.columnGap || estilos.gap) || 0;
+    const anchoTarjeta = tarjetas[0].getBoundingClientRect().width;
+    const paso = anchoTarjeta + separacion;
+    const visibles = Math.max(
+      1,
+      Math.floor((lista.clientWidth + separacion + 1) / paso)
+    );
+    return { paso, visibles };
+  };
+
+  const actualizarEstado = () => {
+    const { paso, visibles } = obtenerMedidas();
+    const maximoScroll = Math.max(0, lista.scrollWidth - lista.clientWidth);
+    const hayDesbordamiento = maximoScroll > 2;
+    const indiceInicial = Math.min(
+      tarjetas.length - 1,
+      Math.max(0, Math.round(lista.scrollLeft / paso))
+    );
+    const indiceFinal = Math.min(tarjetas.length, indiceInicial + visibles);
+
+    botonAnterior.disabled = !hayDesbordamiento || lista.scrollLeft <= 2;
+    botonSiguiente.disabled =
+      !hayDesbordamiento || lista.scrollLeft >= maximoScroll - 2;
+    if (controles) controles.hidden = !hayDesbordamiento;
+
+    if (estado) {
+      estado.textContent = hayDesbordamiento
+        ? `Mostrando categorías ${indiceInicial + 1} a ${indiceFinal} de ${tarjetas.length}`
+        : `${tarjetas.length} géneros disponibles`;
+    }
+  };
+
+  const mover = (direccion) => {
+    const { paso } = obtenerMedidas();
+    lista.scrollBy({ left: direccion * paso, behavior: 'smooth' });
+  };
+
+  botonAnterior.addEventListener('click', () => mover(-1));
+  botonSiguiente.addEventListener('click', () => mover(1));
+  lista.addEventListener('keydown', (evento) => {
+    if (evento.key === 'ArrowLeft' || evento.key === 'ArrowRight') {
+      evento.preventDefault();
+      mover(evento.key === 'ArrowLeft' ? -1 : 1);
+    }
+  });
+
+  let actualizacionPendiente = false;
+  lista.addEventListener(
+    'scroll',
+    () => {
+      if (actualizacionPendiente) return;
+      actualizacionPendiente = true;
+      window.requestAnimationFrame(() => {
+        actualizarEstado();
+        actualizacionPendiente = false;
+      });
+    },
+    { passive: true }
+  );
+
+  if ('ResizeObserver' in window) {
+    const observador = new ResizeObserver(actualizarEstado);
+    observador.observe(lista);
+  }
+  window.requestAnimationFrame(actualizarEstado);
+}
+
+/**
  * Controlador de Vista Previa de Imagen con Soporte Drag & Drop y Remoción
  */
 function inicializarUploaderPreviewAdmin() {
@@ -1134,7 +1221,7 @@ function inicializarUploaderPreviewAdmin() {
     imgElemento.classList.remove('oculto');
     placeholder.classList.add('oculto');
     btnEliminar.classList.remove('oculto');
-    inputValor.value = urlOData;
+    inputValor.value = '1';
   };
 
   const limpiarImagen = () => {
@@ -1142,7 +1229,7 @@ function inicializarUploaderPreviewAdmin() {
     imgElemento.classList.add('oculto');
     placeholder.classList.remove('oculto');
     btnEliminar.classList.add('oculto');
-    inputValor.value = '';
+    inputValor.value = '0';
     inputArchivo.value = '';
   };
 
@@ -1186,7 +1273,8 @@ function inicializarUploaderPreviewAdmin() {
   zonaDrop.addEventListener('drop', (e) => {
     const archivos = e.dataTransfer.files;
     if (archivos && archivos.length > 0) {
-      procesarArchivo(archivos[0]);
+      inputArchivo.files = archivos;
+      procesarArchivo(inputArchivo.files[0]);
     }
   });
 

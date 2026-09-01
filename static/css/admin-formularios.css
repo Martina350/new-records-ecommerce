@@ -3086,6 +3086,13 @@
   justify-content: center;
 }
 
+/* El arte de género usa una pieza vertical de mayor tamaño que la portada 1:1. */
+.marco-preview-arte.marco-preview-categoria {
+  aspect-ratio: 4 / 5;
+  min-height: 360px;
+  max-height: 520px;
+}
+
 .imagen-preview-elemento {
   width: 100%;
   height: 100%;

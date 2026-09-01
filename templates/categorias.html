@@ -20,32 +20,67 @@
       <h2 id="grid-categorias-titulo" class="oculto-visual">Categorías disponibles</h2>
       
       {% if categorias %}
-        <div class="grid-categorias">
-          {% for categoria in categorias %}
-            <article class="tarjeta-categoria">
-              <div 
-                class="tarjeta-categoria-fondo" 
-                style="background-image: url('{{ url_for('static', filename=categoria.imagen if categoria.imagen else 'img/placeholder.jpg') }}');" 
-                role="img" 
-                aria-label="{{ categoria.nombre }}"
-              ></div>
-              <div class="tarjeta-categoria-superposicion"></div>
-              <div class="tarjeta-categoria-contenido">
-                <div class="tarjeta-categoria-etiqueta">
-                  <span class="tarjeta-categoria-etiqueta-linea"></span>
-                  <span class="tarjeta-categoria-etiqueta-texto">Género</span>
+        <div class="carrusel-categorias" data-carrusel-categorias>
+          <div class="carrusel-categorias-cabecera">
+            <p class="carrusel-categorias-estado" id="estadoCarruselCategorias" aria-live="polite">
+              {{ categorias | length }} géneros disponibles
+            </p>
+            <div class="carrusel-categorias-controles" data-controles-carrusel>
+              <button
+                class="boton-carrusel-categoria"
+                type="button"
+                data-carrusel-anterior
+                aria-controls="listaCarruselCategorias"
+                aria-label="Ver categorías anteriores"
+              >
+                <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+              </button>
+              <button
+                class="boton-carrusel-categoria"
+                type="button"
+                data-carrusel-siguiente
+                aria-controls="listaCarruselCategorias"
+                aria-label="Ver categorías siguientes"
+              >
+                <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+              </button>
+            </div>
+          </div>
+
+          <div
+            class="grid-categorias"
+            id="listaCarruselCategorias"
+            tabindex="0"
+            role="region"
+            aria-roledescription="carrusel"
+            aria-label="Géneros musicales disponibles"
+          >
+            {% for categoria in categorias %}
+              <article class="tarjeta-categoria" aria-label="{{ categoria.nombre }}, {{ loop.index }} de {{ categorias | length }}">
+                <div
+                  class="tarjeta-categoria-fondo"
+                  style="background-image: url('{{ url_for('static', filename=categoria.imagen if categoria.imagen else 'img/placeholder.svg') }}');"
+                  role="img"
+                  aria-label="Arte representativo del género {{ categoria.nombre }}"
+                ></div>
+                <div class="tarjeta-categoria-superposicion"></div>
+                <div class="tarjeta-categoria-contenido">
+                  <div class="tarjeta-categoria-etiqueta">
+                    <span class="tarjeta-categoria-etiqueta-linea"></span>
+                    <span class="tarjeta-categoria-etiqueta-texto">Género</span>
+                  </div>
+                  <h3 class="tarjeta-categoria-titulo">{{ categoria.nombre }}</h3>
+                  <p class="tarjeta-categoria-descripcion">
+                    {{ categoria.descripcion }}
+                  </p>
+                  <a class="boton boton-principal resplandor-neon" href="{{ url_for('catalogo.productos', categoria=categoria.slug) }}">
+                    Ver discos
+                    <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+                  </a>
                 </div>
-                <h3 class="tarjeta-categoria-titulo">{{ categoria.nombre }}</h3>
-                <p class="tarjeta-categoria-descripcion">
-                  {{ categoria.descripcion }}
-                </p>
-                <a class="boton boton-principal resplandor-neon" href="{{ url_for('catalogo.productos', categoria=categoria.slug) }}">
-                  Ver discos
-                  <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
-                </a>
-              </div>
-            </article>
-          {% endfor %}
+              </article>
+            {% endfor %}
+          </div>
         </div>
       {% else %}
         <div class="estado-vacio">
