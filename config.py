@@ -2,6 +2,7 @@
 
 import os
 from datetime import timedelta
+from pathlib import Path
 from urllib.parse import quote_plus
 
 from dotenv import load_dotenv
@@ -33,6 +34,10 @@ class Config:
     SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "0") == "1"
     PERMANENT_SESSION_LIFETIME = timedelta(hours=8)
     WTF_CSRF_TIME_LIMIT = 3600
+
+    # Portadas administradas desde los formularios del catálogo
+    UPLOAD_FOLDER = str(Path(__file__).resolve().parent / "static" / "img" / "uploads")
+    MAX_IMAGE_UPLOAD_BYTES = 5 * 1024 * 1024
 
     # Roles técnicos de PostgreSQL y herramientas de respaldo/restauración
     DB_ADMIN_USER = os.getenv("DB_ADMIN_USER", "new_records_admin")

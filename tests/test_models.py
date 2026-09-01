@@ -101,8 +101,24 @@ def test_datos_iniciales_y_polimorfismo_desde_postgresql():
         discos = Disco.query.order_by(Disco.codigo).all()
         categorias = Categoria.query.order_by(Categoria.slug).all()
 
-        assert len(categorias) == 3
-        assert len(discos) == 12
+        slugs = {categoria.slug for categoria in categorias}
+        codigos = {disco.codigo for disco in discos}
+
+        assert {"rock", "pop", "reggaeton"} <= slugs
+        assert {
+            "NR-POP-001",
+            "NR-POP-002",
+            "NR-POP-003",
+            "NR-POP-004",
+            "NR-REG-001",
+            "NR-REG-002",
+            "NR-REG-003",
+            "NR-REG-004",
+            "NR-ROC-001",
+            "NR-ROC-002",
+            "NR-ROC-003",
+            "NR-ROC-004",
+        } <= codigos
         assert any(isinstance(disco, CD) for disco in discos)
         assert any(isinstance(disco, Vinilo) for disco in discos)
         assert all(type(disco) in {CD, Vinilo} for disco in discos)

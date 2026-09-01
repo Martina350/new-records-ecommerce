@@ -34,28 +34,109 @@
   padding-bottom: 4rem;
 }
 
-.grid-categorias {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 2rem;
+.carrusel-categorias {
+  position: relative;
 }
 
-@media (min-width: 768px) {
-  .grid-categorias { grid-template-columns: repeat(3, 1fr); }
+.carrusel-categorias-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.carrusel-categorias-estado {
+  margin: 0;
+  color: var(--text-muted-page);
+  font-size: 0.9rem;
+}
+
+.carrusel-categorias-controles {
+  display: flex;
+  gap: 0.65rem;
+}
+
+.carrusel-categorias-controles[hidden] {
+  display: none;
+}
+
+.boton-carrusel-categoria {
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid rgba(138, 44, 226, 0.45);
+  border-radius: 50%;
+  background: rgba(138, 44, 226, 0.12);
+  color: var(--text-heading);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease,
+    box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.boton-carrusel-categoria:hover:not(:disabled) {
+  background: var(--primary);
+  border-color: var(--primary);
+  box-shadow: 0 0 18px rgba(138, 44, 226, 0.4);
+  transform: translateY(-1px);
+}
+
+.boton-carrusel-categoria:focus-visible,
+.grid-categorias:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.boton-carrusel-categoria:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.grid-categorias {
+  display: flex;
+  gap: 1.25rem;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-behavior: smooth;
+  scroll-snap-type: inline mandatory;
+  scrollbar-width: none;
+  padding: 0.25rem 0 1rem;
+}
+
+.grid-categorias::-webkit-scrollbar {
+  display: none;
 }
 
 .tarjeta-categoria {
+  flex: 0 0 min(85%, 22rem);
   position: relative;
   overflow: hidden;
   border-radius: 0.75rem;
-  aspect-ratio: 3 / 4;
+  aspect-ratio: 4 / 5;
   background: #334155;
   border: 1px solid var(--border-light);
-  transition: border-color 0.3s;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+@media (min-width: 640px) {
+  .tarjeta-categoria {
+    flex-basis: calc((100% - 1.25rem) / 2);
+  }
+}
+
+@media (min-width: 1024px) {
+  .tarjeta-categoria {
+    flex-basis: calc((100% - 2.5rem) / 3);
+  }
 }
 
 .tarjeta-categoria:hover {
   border-color: rgba(138, 44, 226, 0.5);
+  box-shadow: 0 16px 35px rgba(0, 0, 0, 0.28);
 }
 
 .tarjeta-categoria-fondo {
@@ -120,16 +201,24 @@
   color: #cbd5e1;
   margin: 0 0 1rem 0;
   line-height: 1.4;
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.tarjeta-categoria:hover .tarjeta-categoria-descripcion {
   opacity: 1;
+  transition: opacity 0.3s;
 }
 
 .tarjeta-categoria .boton {
   padding: 0.75rem 1.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grid-categorias {
+    scroll-behavior: auto;
+  }
+
+  .tarjeta-categoria,
+  .tarjeta-categoria-fondo,
+  .boton-carrusel-categoria {
+    transition: none;
+  }
 }
 
 /* ===== Página productos ===== */
